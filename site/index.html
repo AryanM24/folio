@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Folio: edit every file in one native Mac app</title>
+  <meta name="description" content="Folio is a free, open-source Mac app that edits PDFs, documents, spreadsheets, images, code and media. Everything runs on your Mac: no account, no network requests.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F5F5F5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060607" media="(prefers-color-scheme: dark)">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Folio">
+  <meta property="og:title" content="Folio: edit every file in one native Mac app">
+  <meta property="og:description" content="PDFs, documents, spreadsheets, images, code and media, edited entirely on your Mac. Free and open source.">
+  <!-- Crawlers need an absolute URL here: prefix with the production domain once it is known. -->
+  <meta property="og:image" content="/assets/hero.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Apply a saved theme before first paint so the page never flashes the wrong one. -->
+  <script>
+    try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <!-- Icon sprite: 24 px line icons drawn in currentColor. -->
+  <svg width="0" height="0" class="sprite" aria-hidden="true">
+    <defs>
+      <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h2"/></symbol>
+      <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5.5l-3 13"/></symbol>
+      <symbol id="i-media" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7"/></symbol>
+      <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
+      <symbol id="i-wand" viewBox="0 0 24 24"><path d="m3 21 10-10M15 3v3M15 12v3M9 9h3M18 9h3M17.5 6.5l1.5-1.5M17.5 11.5l1.5 1.5M12.5 6.5 11 5"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h2l1.5-2h5L16 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.5"/></symbol>
+      <symbol id="i-tabs" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M10 5v5"/></symbol>
+      <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 19a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5a4.75 4.75 0 0 1-.5 9.5z"/></symbol>
+      <symbol id="i-user-off" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 12-6M3 3l18 18"/></symbol>
+      <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M2 8.8A15 15 0 0 1 6 6.2M10.7 5.1A15 15 0 0 1 22 8.8M5 12.9a10 10 0 0 1 4.6-2.7M16.9 11.4A10 10 0 0 1 19 12.9M8.5 16.4a5 5 0 0 1 7 0M12 20h.01M3 3l18 18"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></symbol>
+    </defs>
+  </svg>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="Folio home">
+        <img src="favicon.svg" width="28" height="28" alt="">
+        <span>Folio</span>
+      </a>
+      <nav class="site-nav" aria-label="Sections">
+        <a href="#editors">Editors</a>
+        <a href="#mac">Mac features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#source">Open source</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm btn-icon" id="theme-toggle" type="button" aria-label="Switch to dark theme">
+          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        </button>
+        <a class="btn btn-ghost btn-sm btn-icon" href="https://github.com/AryanM24/folio" aria-label="Folio on GitHub">
+          <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- 1. Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-copy">
+        <h1 id="hero-title">Every file you edit,<br class="br-wide"> in one native Mac app.</h1>
+        <p class="lede">Folio opens and edits PDFs, documents, spreadsheets, images, code and media. It runs entirely on your Mac, and its source is open for anyone to read.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="https://github.com/AryanM24/folio/releases/latest">
+            <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+            Download for Mac
+          </a>
+          <a class="btn btn-secondary btn-lg" href="https://github.com/AryanM24/folio">
+            <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+            View on GitHub
+          </a>
+        </div>
+        <p class="fine-print">Free · macOS 15 or later · MIT license</p>
+      </div>
+
+      <div class="container">
+        <!-- Product visual. main.js swaps in assets/hero.png when it exists; until then this mock of the Welcome window stands in. -->
+        <figure class="hero-visual" id="hero-visual">
+          <div class="mock" role="img" aria-label="The Folio Welcome window: a sidebar for creating a new document, spreadsheet, text file or blank PDF, and a grid of recent files.">
+            <div class="mock-window" aria-hidden="true">
+              <div class="mock-sidebar">
+                <div class="mock-lights"><i></i><i></i><i></i></div>
+                <img class="mock-appicon" src="favicon.svg" alt="">
+                <div class="mock-title">Folio</div>
+                <div class="mock-version">Version 0.1.0</div>
+                <div class="mock-group-label">New</div>
+                <div class="mock-row"><svg><use href="#i-doc"/></svg><span>Document</span><kbd>⌘N</kbd></div>
+                <div class="mock-row is-hover"><svg><use href="#i-sheet"/></svg><span>Spreadsheet</span></div>
+                <div class="mock-row"><svg><use href="#i-code"/></svg><span>Text file</span></div>
+                <div class="mock-row"><svg><use href="#i-pdf"/></svg><span>Blank PDF</span></div>
+                <div class="mock-spacer"></div>
+                <div class="mock-open"><svg><use href="#i-folder"/></svg>Open…</div>
+                <div class="mock-hint">Or drop any file on this window</div>
+              </div>
+              <div class="mock-content">
+                <div class="mock-tabs">
+                  <span class="is-selected"><svg><use href="#i-clock"/></svg>Recent</span>
+                  <span><svg><use href="#i-wrench"/></svg>Tools</span>
+                </div>
+                <div class="mock-search"><svg><use href="#i-search"/></svg>Search recent files</div>
+                <div class="mock-grid">
+                  <div class="mock-tile">
+                    <div class="thumb thumb-pdf"><div class="page"><b></b><i></i><i></i><i class="short"></i><u></u><i></i><i class="short"></i></div></div>
+                    <div class="name">Lease agreement</div><div class="folder">Documents</div>
+                  </div>
+                  <div class="mock-tile">
+                    <div class="thumb thumb-sheet"><div class="cells"></div></div>
+                    <div class="name">Q3 budget</div><div class="folder">Finance</div>
+                  </div>
+                  <div class="mock-tile is-hover">
+                    <div class="thumb thumb-image"><div class="photo"><span class="sky"></span><span class="hill"></span><span class="sun"></span></div></div>
+                    <div class="name">Studio portrait</div><div class="folder">Pictures</div>
+                  </div>
+                  <div class="mock-tile">
+                    <div class="thumb thumb-doc"><div class="page"><b></b><i></i><i></i><i></i><i class="short"></i><i></i><i class="short"></i></div></div>
+                    <div class="name">Chapter two</div><div class="folder">Writing</div>
+                  </div>
+                  <div class="mock-tile">
+                    <div class="thumb thumb-code"><div class="lines"><i class="k w3"></i><i class="w6 in"></i><i class="s w5 in"></i><i class="w4 in"></i><i class="k w2"></i><i class="w5"></i></div></div>
+                    <div class="name">README</div><div class="folder">folio</div>
+                  </div>
+                  <div class="mock-tile">
+                    <div class="thumb thumb-media"><div class="wave"><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i><i style="--h:95%"></i><i style="--h:60%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:50%"></i><i style="--h:25%"></i><i style="--h:40%"></i></div></div>
+                    <div class="name">Interview take 3</div><div class="folder">Podcast</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 2. Editors -->
+    <section class="section" id="editors" aria-labelledby="editors-title">
+      <div class="container">
+        <header class="section-head">
+          <h2 id="editors-title">Six editors, one app</h2>
+          <p>Each kind of file gets an editor built on the engine macOS already uses for it, so files open the way you expect and save back to the format they came in.</p>
+        </header>
+        <ul class="card-grid editors" role="list">
+          <li class="card">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-pdf"/></svg>
+            <h3>PDF</h3>
+            <p>Annotate, sign and fill in forms. Redaction removes the text underneath instead of drawing a box over it. Recognise text in scans with OCR, and rotate, reorder, split or merge pages.</p>
+            <p class="formats">PDF</p>
+          </li>
+          <li class="card">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-doc"/></svg>
+            <h3>Documents</h3>
+            <p>Write and format Word, RTF and OpenDocument files with the Cocoa text system, including Writing Tools on Macs that support them.</p>
+            <p class="formats">DOCX · DOC · RTF · ODT · HTML</p>
+          </li>
+          <li class="card">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-sheet"/></svg>
+            <h3>Spreadsheets</h3>
+            <p>Edit cells and formulas, then save back to Excel, CSV or OpenDocument without converting through another app.</p>
+            <p class="formats">XLSX · CSV · TSV · ODS</p>
+          </li>
+          <li class="card">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-image"/></svg>
+            <h3>Images</h3>
+            <p>Adjust light and color, crop and rotate, remove a background in one step, and select text inside a photo with Live Text.</p>
+            <p class="formats">PNG · JPEG · HEIC · TIFF · GIF · WebP</p>
+          </li>
+          <li class="card">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-code"/></svg>
+            <h3>Text and code</h3>
+            <p>Syntax highlighting for source files, and a side-by-side preview for Markdown that updates as you write.</p>
+            <p class="formats">TXT · MD · JSON · YAML · source files</p>
+          </li>
+          <li class="card">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-media"/></svg>
+            <h3>Audio and video</h3>
+            <p>Play and trim without re-encoding, so cuts are lossless, then export to another format when you need one.</p>
+            <p class="formats">MP4 · MOV · MP3 · M4A · WAV</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. Native -->
+    <section class="section" id="mac" aria-labelledby="mac-title">
+      <div class="container">
+        <header class="section-head">
+          <h2 id="mac-title">Feels like a Mac app, because it is one</h2>
+          <p>Folio is written in Swift with SwiftUI and AppKit. Menus, shortcuts, Undo and Find work the way they do everywhere else on your Mac.</p>
+        </header>
+        <ul class="feature-grid" role="list">
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-history"/></svg>
+            <h3>Autosave and Versions</h3>
+            <p>Changes save about a second after you stop. Earlier versions are in File › Revert To.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-bolt"/></svg>
+            <h3>Opens in under a second</h3>
+            <p>A design goal, measured on every change with <code>make launch-time</code>.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-wand"/></svg>
+            <h3>Finder Quick Actions</h3>
+            <p>Combine PDFs or convert images from the Finder without opening a window.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-menu"/></svg>
+            <h3>Services</h3>
+            <p>Folio’s tools appear in the Services menu of the apps you already use.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-camera"/></svg>
+            <h3>Continuity Camera</h3>
+            <p>Insert a photo or a document scan straight from your iPhone.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-moon"/></svg>
+            <h3>Dark mode</h3>
+            <p>Every screen is designed and checked in both light and dark appearance.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-tabs"/></svg>
+            <h3>Tabs</h3>
+            <p>Merge documents into one window with tabs, or pull them apart again.</p>
+          </li>
+          <li class="feature">
+            <svg class="feature-icon" aria-hidden="true"><use href="#i-cloud"/></svg>
+            <h3>iCloud Drive</h3>
+            <p>Open and save files in iCloud Drive like any other folder.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. Privacy -->
+    <section class="section" id="privacy" aria-labelledby="privacy-title">
+      <div class="container">
+        <div class="card privacy">
+          <header class="section-head">
+            <h2 id="privacy-title">Private by design</h2>
+            <p>Folio has no servers to send your files to. OCR, background removal and Live Text use frameworks built into macOS and run on your Mac.</p>
+          </header>
+          <ul class="privacy-list" role="list">
+            <li>
+              <svg class="feature-icon" aria-hidden="true"><use href="#i-user-off"/></svg>
+              <h3>No account</h3>
+              <p>There is nothing to sign up for or sign in to.</p>
+            </li>
+            <li>
+              <svg class="feature-icon" aria-hidden="true"><use href="#i-wifi-off"/></svg>
+              <h3>No network requests</h3>
+              <p>No analytics, no telemetry, no cloud processing.</p>
+            </li>
+            <li>
+              <svg class="feature-icon" aria-hidden="true"><use href="#i-lock"/></svg>
+              <h3>Files stay on your Mac</h3>
+              <p>Your documents are read and written locally, and nowhere else.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Open source -->
+    <section class="section" id="source" aria-labelledby="source-title">
+      <div class="container source">
+        <div class="source-copy">
+          <h2 id="source-title">Open source, MIT licensed</h2>
+          <p>Read every line, build it yourself, or send a fix. The whole app builds with the Swift toolchain alone.</p>
+          <dl class="requirements">
+            <div><dt>macOS</dt><dd>15 or later</dd></div>
+            <div><dt>Toolchain</dt><dd>Swift 6.2, from Xcode or the Command Line Tools</dd></div>
+          </dl>
+          <a class="btn btn-secondary btn-md" href="https://github.com/AryanM24/folio/blob/main/CONTRIBUTING.md">Read the contributing guide</a>
+        </div>
+        <div class="card code-card">
+          <div class="code-head">
+            <span>Build from source</span>
+            <button class="btn btn-ghost btn-sm" type="button" data-copy="git clone https://github.com/AryanM24/folio &amp;&amp; cd folio &amp;&amp; make run">
+              <svg class="icon icon-copy" aria-hidden="true"><use href="#i-copy"/></svg>
+              <svg class="icon icon-check" aria-hidden="true"><use href="#i-check"/></svg>
+              <span class="copy-label">Copy</span>
+            </button>
+          </div>
+          <pre><code><span class="prompt" aria-hidden="true">$ </span>git clone https://github.com/AryanM24/folio
+<span class="prompt" aria-hidden="true">$ </span>cd folio
+<span class="prompt" aria-hidden="true">$ </span>make run</code></pre>
+          <p class="code-note"><code>make run</code> builds <code>build/Folio.app</code> and opens it. <code>make test</code> runs every test suite.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <a class="brand" href="/">
+        <img src="favicon.svg" width="24" height="24" alt="">
+        <span>Folio</span>
+      </a>
+      <nav aria-label="Project">
+        <a href="https://github.com/AryanM24/folio">GitHub</a>
+        <a href="https://github.com/AryanM24/folio/blob/main/LICENSE">License</a>
+        <a href="https://github.com/AryanM24/folio/blob/main/CONTRIBUTING.md">Contributing</a>
+      </nav>
+      <p>Made for macOS. Released under the MIT license.</p>
+    </div>
+  </footer>
+</body>
+</html>
