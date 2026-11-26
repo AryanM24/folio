@@ -1,0 +1,15 @@
+name: Feature request
+description: Suggest something Folio should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task, not the solution, so we can find the best fit for a Mac app.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How do you imagine it working?

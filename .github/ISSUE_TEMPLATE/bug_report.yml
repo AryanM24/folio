@@ -1,0 +1,30 @@
+name: Bug report
+description: Something doesn't work the way it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: dropdown
+    id: editor
+    attributes:
+      label: Which editor?
+      options: [PDF, Documents, Spreadsheets, Images, Text and code, Audio and video, Welcome window or tools, Other]
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Folio and macOS versions
+      placeholder: Folio 0.1.0, macOS 26.1
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: Sample file
+      description: If a specific file triggers it, attach it or a copy with private content removed.
