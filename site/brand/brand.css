@@ -1,0 +1,133 @@
+/* Folio brand board: a 3×3 guidelines deck on a charcoal canvas.
+   Tokens match docs/DESIGN.md and brand/README.md. */
+:root {
+  --canvas: #0E0E10;
+  --panel: #18181B;
+  --panel-2: #1F1F23;
+  --snow: #FCFCFC;
+  --muted: #8B8B94;
+  --blue: #0485F7;
+  --paper: #F2EFE8;
+  --eclipse: #18181B;
+  --gutter: 12px;
+  --radius: 20px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--canvas); color: var(--snow); }
+body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.muted { color: var(--muted); }
+
+.deck-head {
+  display: flex; align-items: center; gap: 16px;
+  max-width: 1440px; margin: 0 auto; padding: 24px 24px 16px;
+  font-size: 13px; letter-spacing: .01em;
+}
+.deck-head .head-mark { width: 22px; height: 22px; }
+.deck-head a { margin-left: auto; text-decoration: none; }
+
+.board {
+  display: grid; gap: var(--gutter);
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 1440px; margin: 0 auto; padding: 0 24px;
+}
+.panel {
+  position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+  background: var(--panel); border-radius: var(--radius);
+  display: grid; place-items: center; padding: 32px;
+}
+.label {
+  position: absolute; left: 20px; bottom: 16px;
+  font: 500 11px/1 "SF Mono", ui-monospace, monospace; letter-spacing: .04em; color: var(--muted);
+}
+.note { position: absolute; right: 20px; bottom: 12px; max-width: 46%; margin: 0; font-size: 11px; line-height: 1.4; color: var(--muted); text-align: right; }
+
+/* 01 cover */
+.cover { background: #0B0B0D; }
+.lockup { display: flex; align-items: center; gap: 20px; }
+.cover-mark { width: 76px; height: 76px; filter: drop-shadow(0 12px 24px rgba(0,0,0,.5)); }
+/* Wordmark cap height matches ~60% of the tile, the lockup ratio in brand/README.md. */
+.cover-word { width: 118px; height: auto; }
+
+/* 02 construction */
+.construct { background: var(--panel-2); }
+.grid-mark { width: 78%; height: 78%; }
+.grid-mark .dim { font: 500 2.1px "SF Mono", ui-monospace, monospace; fill: #FCFCFC; fill-opacity: .5; }
+.grid-mark .blue { fill: var(--blue); fill-opacity: 1; }
+
+/* 03 icons */
+.icons { align-content: center; gap: 22px; }
+.icon-row { display: flex; align-items: flex-end; gap: 18px; }
+.icon-row svg { filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)); }
+.i1024 { width: 112px; } .i256 { width: 72px; } .i64 { width: 48px; } .i32 { width: 32px; } .i16 { width: 16px; filter: none !important; }
+.icon-row.light svg { filter: drop-shadow(0 6px 12px rgba(0,0,0,.35)); }
+
+/* 04 essence */
+.essence { background: var(--paper); color: var(--eclipse); place-items: center start; padding: 40px 44px; }
+.essence h1 { margin: 0; font: 650 clamp(32px, 3.6vw, 54px)/1.02 -apple-system, "SF Pro Display", sans-serif; letter-spacing: -.035em; }
+.essence h1 span { color: #8A8780; }
+.essence .label { color: #8A8780; }
+
+/* 05 color */
+.colors { grid-template-columns: 1.6fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; padding: 18px 18px 40px; place-items: stretch; }
+.swatch { border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 12px; }
+.swatch b { font-weight: 600; }
+.swatch code { font: 11px "SF Mono", ui-monospace, monospace; opacity: .7; }
+.swatch.eclipse { grid-row: span 2; background: var(--eclipse); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.swatch.snow { background: var(--snow); color: var(--eclipse); }
+.swatch.blue { background: var(--blue); }
+.swatch.paper { background: var(--paper); color: var(--eclipse); }
+.swatch.graphite { background: #71717A; }
+
+/* 06 type */
+.type { grid-template-columns: auto 1fr; gap: 28px; place-items: center start; padding-left: 40px; }
+.specimen { font: 600 140px/1 -apple-system, "SF Pro Display", sans-serif; letter-spacing: -.05em; }
+.type-meta p { margin: 0 0 8px; font-size: 13px; }
+.type-meta .mono b { font-family: "SF Mono", ui-monospace, monospace; }
+.type-meta .alpha { margin-top: 14px; font-size: 13px; line-height: 1.5; color: var(--muted); letter-spacing: .02em; }
+
+/* 07 document icons */
+.docs { background: var(--panel-2); }
+.doc-row { display: flex; gap: 20px; }
+.doc-row figure { margin: 0; width: 72px; }
+.doc-row svg { width: 100%; filter: drop-shadow(0 8px 14px rgba(0,0,0,.45)); }
+.doc-label { font: 700 5.2px "SF Pro Text", -apple-system, sans-serif; fill: #FCFCFC; text-anchor: middle; letter-spacing: .02em; }
+
+/* 08 pattern */
+.pattern { padding: 0; }
+.folds { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; padding: 14px 14px 36px; }
+.folds svg { width: 100%; height: 100%; }
+
+/* 09 ui */
+.ui { align-content: center; gap: 18px; }
+.chrome {
+  display: flex; align-items: center; gap: 10px; width: 300px; height: 44px; padding: 0 14px;
+  background: #FCFCFC; color: #18181B; border-radius: 14px; font-size: 13px; font-weight: 600;
+  box-shadow: 0 14px 28px rgba(0,0,0,.35);
+}
+.dots { display: flex; gap: 6px; } .dots i { width: 10px; height: 10px; border-radius: 50%; background: #FF5F57; } .dots i:nth-child(2) { background: #FEBC2E; } .dots i:nth-child(3) { background: #28C840; }
+.chrome-mark { width: 18px; height: 18px; margin-left: 4px; }
+.saved { margin-left: auto; display: flex; align-items: center; gap: 6px; font-weight: 500; color: #71717A; font-size: 12px; }
+.saved i { width: 6px; height: 6px; border-radius: 50%; background: #17C964; }
+.chips { display: flex; align-items: center; gap: 8px; }
+.btn { height: 36px; padding: 0 16px; border: 0; border-radius: 999px; font: 500 13px -apple-system, sans-serif; }
+.btn.primary { background: var(--blue); color: #FCFCFC; }
+.btn.secondary { background: #27272A; color: #61A8FB; }
+kbd { height: 24px; padding: 0 8px; display: inline-grid; place-items: center; border-radius: 8px; background: #27272A; color: #9F9FA9; font: 500 12px -apple-system, sans-serif; }
+
+/* rules */
+.rules { max-width: 1440px; margin: 0 auto; padding: 40px 24px 64px; display: grid; grid-template-columns: 240px 1fr; gap: 8px 40px; }
+.rules h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.rules ul { margin: 0; padding-left: 18px; color: #C9C9D0; line-height: 1.7; }
+.rules p { grid-column: 2; margin: 12px 0 0; font-size: 13px; }
+.rules code { font: 12px "SF Mono", ui-monospace, monospace; }
+
+@media (max-width: 1100px) { .board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) {
+  .board { grid-template-columns: 1fr; }
+  .rules { grid-template-columns: 1fr; }
+  .rules p { grid-column: 1; }
+  .specimen { font-size: 96px; }
+}

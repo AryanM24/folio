@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 100 824 824">
-  <!-- Same geometry as scripts/make-icon.swift, with the y axis flipped. -->
-  <rect x="100" y="100" width="824" height="824" rx="185" fill="#18181B"/>
-  <path d="M330 774V250h252l112 112v412z" fill="#FCFCFC"/>
-  <path d="M582 250v112h112z" fill="#0485F7"/>
-  <g fill="#18181B" fill-opacity=".85">
-    <rect x="386" y="436" width="250" height="28" rx="14"/>
-    <rect x="386" y="506" width="300" height="28" rx="14"/>
-    <rect x="386" y="576" width="200" height="28" rx="14"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="1024" height="1024"><title>Folio</title><rect width="64" height="64" rx="14.4" fill="#18181B"/><g transform="translate(32 32) scale(1.1) translate(-33 -32)"><path d="M20 16H40L46 22V24H28V30H40V38H28V48H20Z" fill="#FCFCFC"/><path d="M40 16V22H46Z" fill="#0485F7"/></g></svg>

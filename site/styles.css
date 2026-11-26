@@ -824,3 +824,7 @@ pre code { font-size: inherit; }
 
 /* Break the headline after the comma only where both halves fit on a line. */
 @media (max-width: 719px) { .br-wide { display: none; } }
+
+/* The wordmark from brand/logo, drawn inline so it takes the text colour in both themes. */
+.brand .wordmark { width: 52px; height: auto; color: var(--foreground, currentColor); display: block; }
+.site-footer .brand .wordmark { width: 44px; }

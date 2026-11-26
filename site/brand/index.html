@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Folio brand</title>
+  <meta name="description" content="The Folio identity: the folded F, the wordmark, color, type and how they're used.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="brand.css">
+</head>
+<body>
+  <!-- Shared geometry. Every mark on this page uses these two symbols, so they can't drift. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="glyph" viewBox="0 0 64 64">
+        <g transform="translate(32 32) scale(1.1) translate(-33 -32)">
+          <path d="M20 16H40L46 22V24H28V30H40V38H28V48H20Z" fill="var(--paper, #FCFCFC)"/>
+          <path d="M40 16V22H46Z" fill="var(--fold, #0485F7)"/>
+        </g>
+      </symbol>
+      <symbol id="wordmark" viewBox="0 0 84 33">
+        <g fill="none" stroke="var(--ink, #18181B)" stroke-width="5">
+          <path d="M5.5 32V10.5A8 8 0 0 1 13.5 2.5H16"/>
+          <path d="M1 14.5H14"/>
+          <circle cx="29" cy="22" r="7.5"/>
+          <path d="M45.5 0V32"/>
+          <path d="M56.5 12V32"/>
+          <circle cx="74" cy="22" r="7.5"/>
+        </g>
+        <rect x="54" y="0" width="5" height="5" fill="var(--fold, #0485F7)"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="deck-head">
+    <svg class="head-mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+    <span>Folio brand guidelines</span>
+    <span class="muted">v1.0 · 2026</span>
+    <a class="muted" href="/">folio-kappa-lac.vercel.app</a>
+  </header>
+
+  <main class="board">
+    <!-- 01 Cover -->
+    <section class="panel cover">
+      <div class="lockup">
+        <svg class="cover-mark" viewBox="0 0 64 64" role="img" aria-label="Folio mark"><rect width="64" height="64" rx="14.4" fill="#18181B"/><rect x=".5" y=".5" width="63" height="63" rx="13.9" fill="none" stroke="#FCFCFC" stroke-opacity=".08"/><use href="#glyph"/></svg>
+        <svg class="cover-word" viewBox="0 0 84 33" role="img" aria-label="folio" style="--ink:#FCFCFC"><use href="#wordmark"/></svg>
+      </div>
+      <span class="label">01 · Identity</span>
+    </section>
+
+    <!-- 02 Construction -->
+    <section class="panel construct">
+      <svg viewBox="0 0 64 64" class="grid-mark" aria-label="Construction of the mark on an 8-unit grid">
+        <defs>
+          <pattern id="g8" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V4" fill="none" stroke="#FCFCFC" stroke-opacity=".08" stroke-width=".15"/></pattern>
+        </defs>
+        <rect width="64" height="64" fill="url(#g8)"/>
+        <g transform="translate(32 32) scale(1.1) translate(-33 -32)">
+          <path d="M20 16H40L46 22V24H28V30H40V38H28V48H20Z" fill="none" stroke="#FCFCFC" stroke-width=".35"/>
+          <path d="M40 16V22H46Z" fill="#0485F7"/>
+          <path d="M40 10V40" stroke="#0485F7" stroke-width=".25" stroke-dasharray="1 1"/>
+          <path d="M14 16H52M14 24H52M14 30H52M14 38H52" stroke="#FCFCFC" stroke-opacity=".25" stroke-width=".2" stroke-dasharray=".8 .8"/>
+          <text x="17" y="21" class="dim">8</text>
+          <text x="17" y="28" class="dim">6</text>
+          <text x="17" y="35" class="dim">8</text>
+          <text x="41.2" y="12" class="dim blue">fold = arm end</text>
+        </g>
+      </svg>
+      <span class="label">02 · Construction</span>
+      <p class="note">One sheet on an 8-unit grid. The fold begins exactly where the middle arm ends.</p>
+    </section>
+
+    <!-- 03 App icon -->
+    <section class="panel icons">
+      <div class="icon-row">
+        <svg viewBox="0 0 64 64" class="i1024"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+        <svg viewBox="0 0 64 64" class="i256"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+        <svg viewBox="0 0 64 64" class="i64"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+        <svg viewBox="0 0 64 64" class="i32"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+        <svg viewBox="0 0 64 64" class="i16"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+      </div>
+      <div class="icon-row light">
+        <svg viewBox="0 0 64 64" class="i64"><rect width="64" height="64" rx="14.4" fill="#FCFCFC"/><use href="#glyph" style="--paper:#18181B"/></svg>
+        <svg viewBox="0 0 64 64" class="i64"><rect width="64" height="64" rx="14.4" fill="#0485F7"/><use href="#glyph" style="--paper:#FCFCFC;--fold:#18181B"/></svg>
+        <svg viewBox="0 0 64 64" class="i64"><rect width="64" height="64" rx="14.4" fill="#F2EFE8"/><use href="#glyph" style="--paper:#18181B"/></svg>
+      </div>
+      <span class="label">03 · App icon · 1024 to 16 px</span>
+    </section>
+
+    <!-- 04 Brand line -->
+    <section class="panel essence">
+      <h1>One fold.<br><span>Every file.</span></h1>
+      <span class="label">04 · Brand line</span>
+    </section>
+
+    <!-- 05 Color -->
+    <section class="panel colors">
+      <div class="swatch eclipse"><b>Eclipse</b><code>#18181B</code></div>
+      <div class="swatch snow"><b>Snow</b><code>#FCFCFC</code></div>
+      <div class="swatch blue"><b>Folio Blue</b><code>#0485F7</code></div>
+      <div class="swatch paper"><b>Paper</b><code>#F2EFE8</code></div>
+      <div class="swatch graphite"><b>Graphite</b><code>#71717A</code></div>
+      <span class="label">05 · Color · blue is the fold, never a fill</span>
+    </section>
+
+    <!-- 06 Type -->
+    <section class="panel type">
+      <div class="specimen">Aa</div>
+      <div class="type-meta">
+        <p><b>SF Pro</b> <span class="muted">Interface · Display 600 / Text 400</span></p>
+        <p class="mono"><b>SF Mono</b> <span class="muted">Code · figures</span></p>
+        <p class="alpha">ABCDEFGHIJKLM<br>abcdefghijklm 0123456789</p>
+      </div>
+      <span class="label">06 · Typography</span>
+    </section>
+
+    <!-- 07 Document icons -->
+    <section class="panel docs">
+      <div class="doc-row">
+        <figure><svg viewBox="0 0 48 60"><path d="M4 2H34L46 14V56a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#FCFCFC"/><path d="M34 2V14H46Z" fill="#0485F7"/><rect x="8" y="40" width="22" height="9" rx="2" fill="#18181B"/><text x="19" y="46.8" class="doc-label">PDF</text></svg></figure>
+        <figure><svg viewBox="0 0 48 60"><path d="M4 2H34L46 14V56a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#FCFCFC"/><path d="M34 2V14H46Z" fill="#0485F7"/><rect x="8" y="40" width="26" height="9" rx="2" fill="#18181B"/><text x="21" y="46.8" class="doc-label">DOCX</text></svg></figure>
+        <figure><svg viewBox="0 0 48 60"><path d="M4 2H34L46 14V56a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#FCFCFC"/><path d="M34 2V14H46Z" fill="#0485F7"/><rect x="8" y="40" width="24" height="9" rx="2" fill="#18181B"/><text x="20" y="46.8" class="doc-label">XLSX</text></svg></figure>
+        <figure><svg viewBox="0 0 48 60"><path d="M4 2H34L46 14V56a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#FCFCFC"/><path d="M34 2V14H46Z" fill="#0485F7"/><rect x="8" y="40" width="16" height="9" rx="2" fill="#18181B"/><text x="16" y="46.8" class="doc-label">MD</text></svg></figure>
+        <figure><svg viewBox="0 0 48 60"><path d="M4 2H34L46 14V56a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="#FCFCFC"/><path d="M34 2V14H46Z" fill="#0485F7"/><rect x="8" y="40" width="22" height="9" rx="2" fill="#18181B"/><text x="19" y="46.8" class="doc-label">MOV</text></svg></figure>
+      </div>
+      <span class="label">07 · Document icons · same fold, every format</span>
+    </section>
+
+    <!-- 08 Pattern -->
+    <section class="panel pattern" aria-label="A pattern of folded sheets">
+      <div class="folds" id="folds"></div>
+      <span class="label">08 · Pattern · the fold, repeated</span>
+    </section>
+
+    <!-- 09 UI detail -->
+    <section class="panel ui">
+      <div class="chrome">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <svg viewBox="0 0 64 64" class="chrome-mark"><rect width="64" height="64" rx="14.4" fill="#18181B"/><use href="#glyph"/></svg>
+        <span class="chrome-title">Proposal.docx</span>
+        <span class="saved"><i></i>Saved</span>
+      </div>
+      <div class="chips">
+        <button class="btn primary">Export</button>
+        <button class="btn secondary">Share</button>
+        <kbd>⌘K</kbd>
+      </div>
+      <span class="label">09 · Interface</span>
+    </section>
+  </main>
+
+  <section class="rules">
+    <h2>Using the mark</h2>
+    <ul>
+      <li><b>Clear space</b> around the mark is one arm (⅛ of the tile) on every side.</li>
+      <li><b>Minimum size</b> is 16 px for the icon and 48 px wide for the wordmark.</li>
+      <li><b>Blue is only ever the fold</b>: the folded corner, the dot on the i, a primary action. Never a background wash, never a gradient.</li>
+      <li><b>Don't</b> rotate, outline, add shadows to, recolor or redraw the F. Use the files in <code>brand/</code>.</li>
+    </ul>
+    <p class="muted">Downloads: <a href="https://github.com/AryanM24/folio/tree/main/brand">brand/ on GitHub</a> (SVG mark, wordmark, lockups and document icons). Released under the project's MIT license; the name and mark identify the Folio project.</p>
+  </section>
+
+  <script>
+    // The pattern panel: a field of sheets, each corner folded a quarter-turn from its
+    // neighbour, with one in Folio Blue. Deterministic, so the board looks the same every visit.
+    const host = document.getElementById("folds");
+    const turns = [0, 90, 180, 270];
+    for (let i = 0; i < 48; i++) {
+      const r = turns[(i * 7 + Math.floor(i / 8)) % 4];
+      const blue = i === 19;
+      host.insertAdjacentHTML("beforeend",
+        `<svg viewBox="0 0 24 24" style="transform:rotate(${r}deg)"><path d="M2 2H15L22 9V22H2Z" fill="${blue ? "#0485F7" : "#26262B"}"/><path d="M15 2V9H22Z" fill="${blue ? "#FCFCFC" : "#3A3A40"}"/></svg>`);
+    }
+  </script>
+</body>
+</html>
