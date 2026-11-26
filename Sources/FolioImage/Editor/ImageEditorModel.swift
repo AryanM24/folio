@@ -314,7 +314,7 @@ final class ImageEditorModel {
 
     // MARK: Rendering
 
-    private struct RenderRequest: Equatable {
+    private nonisolated struct RenderRequest: Equatable, Sendable {
         var recipe: EditRecipe
         var scale: Double
         var canvas: Bool
@@ -355,9 +355,7 @@ final class ImageEditorModel {
             while let next = pendingRender {
                 pendingRender = nil
                 let source = self.source
-                let result = await Task.detached(priority: .userInitiated) {
-                    Result { try RenderPipeline.render(source, recipe: next.recipe, scale: next.scale, cropped: !next.canvas) }
-                }.value
+                let result = await Self.renderPreview(source: source, request: next)
                 switch result {
                 case .success(let image):
                     preview = image
@@ -393,20 +391,38 @@ final class ImageEditorModel {
         thumbnailTask = Task {
             try? await Task.sleep(for: .milliseconds(120))
             guard !Task.isCancelled else { return }
-            let rendered = await Task.detached(priority: .utility) { () -> (CGImage?, [FilterPreset: CGImage]) in
-                guard let image = try? RenderPipeline.render(source, recipe: base, scale: scale) else { return (nil, [:]) }
-                var out: [FilterPreset: CGImage] = [:]
-                let ci = CIImage(cgImage: image)
-                for preset in FilterPreset.allCases {
-                    let looked = RenderPipeline.apply(preset, strength: 1, to: ci)
-                    out[preset] = RenderPipeline.context.createCGImage(looked, from: ci.extent)
-                }
-                return (image, out)
-            }.value
+            let rendered = await Self.renderFilterThumbnails(source: source, recipe: base, scale: scale)
             guard !Task.isCancelled else { return }
             filterBase = rendered.0
             filterThumbnails = rendered.1
         }
+    }
+
+    /// Renders one preview frame off the main actor (see `renderFilterThumbnails` for why
+    /// this is a `@concurrent` function rather than a detached closure).
+    @concurrent
+    nonisolated private static func renderPreview(source: SourceImage, request: RenderRequest) async -> sending Result<CGImage, any Error> {
+        Result { try RenderPipeline.render(source, recipe: request.recipe, scale: request.scale, cropped: !request.canvas) }
+    }
+
+    /// Renders the filter-picker thumbnails off the main actor.
+    ///
+    /// `@concurrent` makes the work run on the global executor by declaration rather than
+    /// through a detached closure, whose isolation newer compilers infer from the
+    /// surrounding main-actor code. The images are created here and handed back with
+    /// `sending`, so nothing is shared while it runs.
+    @concurrent
+    nonisolated private static func renderFilterThumbnails(
+        source: SourceImage, recipe: EditRecipe, scale: Double
+    ) async -> sending (CGImage?, [FilterPreset: CGImage]) {
+        guard let image = try? RenderPipeline.render(source, recipe: recipe, scale: scale) else { return (nil, [:]) }
+        var out: [FilterPreset: CGImage] = [:]
+        let ci = CIImage(cgImage: image)
+        for preset in FilterPreset.allCases {
+            let looked = RenderPipeline.apply(preset, strength: 1, to: ci)
+            out[preset] = RenderPipeline.context.createCGImage(looked, from: ci.extent)
+        }
+        return (image, out)
     }
 
     /// Decode the full-resolution original in the background after first paint.
