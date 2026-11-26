@@ -1,39 +1,38 @@
 public import SwiftUI
 public import UniformTypeIdentifiers
-public import FolioKit
+import FolioKit
 
-/// Placeholder document for the media editor. Holds the file's bytes unchanged.
+/// An audio or video file, opened as a viewer.
 ///
-/// Replaced by the real implementation; kept minimal so the app target links.
+/// Media files can be gigabytes, so this type deliberately holds **nothing**: it never
+/// touches `configuration.file.regularFileContents`. `MediaEditorView` reads the file URL
+/// from `@Environment(\.documentConfiguration)` and streams it with AVFoundation.
+///
+/// The original is never rewritten. Every edit (trim, rotate, re-encode…) produces a new
+/// file through Export. Mount it with `DocumentGroup(viewing: MediaDocument.self)`.
+/// If it is mounted in an editable group anyway, the document never registers an undo,
+/// so it is never dirty and autosave never runs; `fileWrapper` returns the original
+/// file unchanged when AppKit asks (e.g. "Duplicate"), and throws otherwise.
 public final class MediaDocument: ReferenceFileDocument {
-    public typealias Snapshot = Data
+    /// No state to snapshot: the document is the file on disk.
+    public typealias Snapshot = Void
 
     public nonisolated static var readableContentTypes: [UTType] { FileKind.media.readableTypes }
 
-    @Published var data: Data
+    /// When the document was created, to measure time-to-first-frame of the window.
+    nonisolated let openedAt = ContinuousClock.now
 
-    public nonisolated init() { data = Data() }
+    /// An empty document. Only reachable from an editable `DocumentGroup`'s File > New;
+    /// the view shows a "choose a file" placeholder.
+    public nonisolated init() {}
 
-    public nonisolated init(configuration: ReadConfiguration) throws {
-        guard let bytes = configuration.file.regularFileContents else {
-            throw CocoaError(.fileReadCorruptFile)
-        }
-        data = bytes
-    }
+    /// Opening is O(1): the bytes stay on disk.
+    public nonisolated init(configuration: ReadConfiguration) throws {}
 
-    public func snapshot(contentType: UTType) throws -> Data { data }
+    public func snapshot(contentType: UTType) throws {}
 
-    public nonisolated func fileWrapper(snapshot: Data, configuration: WriteConfiguration) throws -> FileWrapper {
-        FileWrapper(regularFileWithContents: snapshot)
-    }
-}
-
-/// Placeholder editor view.
-public struct MediaEditorView: View {
-    @ObservedObject private var document: MediaDocument
-    public init(document: MediaDocument) { self.document = document }
-
-    public var body: some View {
-        ContentUnavailableView("media editor", systemImage: FileKind.media.symbol, description: Text("\(document.data.count) bytes"))
+    public nonisolated func fileWrapper(snapshot: Void, configuration: WriteConfiguration) throws -> FileWrapper {
+        if let original = configuration.existingFile { return original }
+        throw FolioError("Folio doesn't change media files in place. Use Export to save a new copy.")
     }
 }
