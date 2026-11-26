@@ -41,11 +41,28 @@ nonisolated enum PDFOperations {
 
     // MARK: Building documents
 
+    /// Independent copies of the pages at `indices`, content and annotations included.
+    ///
+    /// `PDFPage.copy()` can't be trusted for this: on some macOS versions (seen on 26.x)
+    /// the copy has no content stream, so a duplicated or extracted page comes out blank.
+    /// Instead, serialize the document once and take the pages from a fresh parse. Those
+    /// pages belong to no live document, so they can be inserted anywhere. Out-of-range
+    /// indices are skipped.
+    static func copies(of indices: [Int], from document: PDFDocument) -> [PDFPage] {
+        guard !indices.isEmpty, let data = document.dataRepresentation(), let fresh = PDFDocument(data: data) else { return [] }
+        let pages = indices.compactMap { fresh.page(at: $0) }
+        // Detach from `fresh` so the pages can join another document.
+        for page in pages.reversed() {
+            let index = fresh.index(for: page)
+            if index != NSNotFound { fresh.removePage(at: index) }
+        }
+        return pages
+    }
+
     /// A new document made of copies of `indices` (in order), with annotations.
     static func extract(_ indices: [Int], from document: PDFDocument) -> PDFDocument {
         let result = PDFDocument()
-        for index in indices {
-            guard let page = document.page(at: index)?.copy() as? PDFPage else { continue }
+        for page in copies(of: indices, from: document) {
             result.insert(page, at: result.pageCount)
         }
         result.documentAttributes = document.documentAttributes
@@ -56,8 +73,7 @@ nonisolated enum PDFOperations {
     static func combine(_ documents: [PDFDocument]) -> PDFDocument {
         let result = PDFDocument()
         for document in documents {
-            for index in 0..<document.pageCount {
-                guard let page = document.page(at: index)?.copy() as? PDFPage else { continue }
+            for page in copies(of: Array(0..<document.pageCount), from: document) {
                 result.insert(page, at: result.pageCount)
             }
         }

@@ -134,7 +134,7 @@ extension PDFEditorModel {
     /// Copies of the target pages, inserted after the last of them.
     func duplicateSelectedPages() {
         let indices = targetPages
-        let copies = indices.compactMap { pdf.page(at: $0)?.copy() as? PDFPage }
+        let copies = document.access.withLock { PDFOperations.copies(of: indices, from: $0) }
         guard let last = indices.last else { return }
         insert(copies, at: last + 1, name: "Duplicate Pages")
     }
