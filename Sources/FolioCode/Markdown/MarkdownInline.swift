@@ -225,16 +225,16 @@ nonisolated extension MarkdownRenderer {
     /// Allows only schemes that can't run code or read local files. Relative URLs and
     /// in-page anchors pass. Returns the URL escaped for an attribute, or `nil` to drop it.
     static func safeURL(_ raw: String, image: Bool) -> String? {
-        let url = raw.trimmingCharacters(in: .whitespaces)
+        // Browsers drop ASCII whitespace and control characters inside URLs before parsing,
+        // so "java\tscript:" runs as "javascript:". Strip them first, then check the result.
+        let url = String(String.UnicodeScalarView(raw.unicodeScalars.filter { $0.value > 0x20 && $0.value != 0x7F }))
         let lower = url.lowercased()
-        if let colon = lower.firstIndex(of: ":") {
+        // Any ':' before the first '/', '?' or '#' starts a scheme, whatever characters precede it.
+        if let colon = lower.firstIndex(of: ":"), !lower[..<colon].contains(where: { "/?#".contains($0) }) {
             let scheme = lower[..<colon]
-            let looksLikeScheme = scheme.allSatisfy { $0.isLetter || $0.isNumber || "+-.".contains($0) } && !scheme.isEmpty
-            if looksLikeScheme {
-                let allowed = ["http", "https", "mailto"].contains(scheme)
-                let dataImage = image && scheme == "data" && ["data:image/png", "data:image/jpeg", "data:image/gif", "data:image/webp"].contains { lower.hasPrefix($0) }
-                guard allowed || dataImage else { return nil }
-            }
+            let allowed = ["http", "https", "mailto"].contains(scheme)
+            let dataImage = image && scheme == "data" && ["data:image/png", "data:image/jpeg", "data:image/gif", "data:image/webp"].contains { lower.hasPrefix($0) }
+            guard allowed || dataImage else { return nil }
         }
         return escape(url)
     }

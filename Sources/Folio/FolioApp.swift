@@ -45,6 +45,7 @@ struct FolioApp: App {
         DocumentGroup(newDocument: { CodeDocument() }) { file in
             CodeEditorView(document: file.document)
         }
+        .commands { CodeCommands() }
         DocumentGroup(newDocument: { RichTextDocument() }) { file in
             RichTextEditorView(document: file.document)
         }
