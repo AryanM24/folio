@@ -47,7 +47,7 @@ public struct XEditorView: View { public init(document: XDocument) }
 public enum XTools { public nonisolated static let all: [FolioTool] }
 ```
 
-The app target registers one `DocumentGroup` per editor (`Sources/Folio/FolioApp.swift`). SwiftUI backs each group with an `NSDocument`, which provides:
+The app target registers one `DocumentGroup` per editor (`Sources/Folio/FolioApp.swift`). **Order matters:** when a file matches more than one group (a CSV is also plain text), SwiftUI uses the group declared last. So the Text & Code catch-all is declared first and the specific editors after it. Check routing with `scripts/snapshot.sh` whenever you add types. SwiftUI backs each group with an `NSDocument`, which provides:
 
 - **Autosave in place.** `AppDelegate` sets `NSDocumentController.autosavingDelay` to 1 s.
 - **Atomic writes.** The file wrapper is written to a temporary file and swapped in, so a crash mid-save never corrupts the original.

@@ -40,6 +40,11 @@ struct FolioApp: App {
         .restorationBehavior(.disabled)
         .commands { FolioCommands() }
 
+        // Order matters: when a file matches several groups (a CSV is also plain text),
+        // SwiftUI uses the group declared last. Text & Code is the catch-all, so it goes first.
+        DocumentGroup(newDocument: { CodeDocument() }) { file in
+            CodeEditorView(document: file.document)
+        }
         DocumentGroup(newDocument: { RichTextDocument() }) { file in
             RichTextEditorView(document: file.document)
         }
@@ -47,9 +52,7 @@ struct FolioApp: App {
         DocumentGroup(newDocument: { SpreadsheetDocument() }) { file in
             SpreadsheetEditorView(document: file.document)
         }
-        DocumentGroup(newDocument: { CodeDocument() }) { file in
-            CodeEditorView(document: file.document)
-        }
+        .commands { SpreadsheetCommands() }
         DocumentGroup(newDocument: { PDFFileDocument() }) { file in
             PDFEditorView(document: file.document)
         }
