@@ -21,6 +21,16 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Folio"
 sed -e "s/\$(VERSION)/$VERSION/" -e "s/\$(BUILD)/$BUILD/" "$ROOT/Resources/Info.plist" > "$APP/Contents/Info.plist"
 
+# Finder Quick Actions / Services, generated from the tool catalog in code.
+"$BIN" --services-json > "$ROOT/build/services.json"
+python3 - "$APP/Contents/Info.plist" "$ROOT/build/services.json" <<'PY'
+import json, plistlib, sys
+plist_path, services_path = sys.argv[1], sys.argv[2]
+with open(plist_path, "rb") as f: info = plistlib.load(f)
+with open(services_path) as f: info["NSServices"] = json.load(f)
+with open(plist_path, "wb") as f: plistlib.dump(info, f)
+PY
+
 # App icon, rendered from code and cached between builds.
 ICONSET="$ROOT/build/AppIcon.iconset"
 if [[ ! -f "$ROOT/build/AppIcon.icns" || "$ROOT/scripts/make-icon.swift" -nt "$ROOT/build/AppIcon.icns" ]]; then

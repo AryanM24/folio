@@ -21,6 +21,15 @@ struct FolioApp: App {
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
     @AppStorage("general.showWelcome") private var showWelcome = true
 
+    init() {
+        // Build-time hook: scripts/bundle.sh runs `Folio --services-json` to generate the
+        // Finder Quick Actions from the tool catalog, so Info.plist can't drift from code.
+        if CommandLine.arguments.contains("--services-json") {
+            print(ToolCatalog.servicesJSON())
+            exit(0)
+        }
+    }
+
     var body: some Scene {
         Window("Welcome to Folio", id: WelcomeWindow.id) {
             WelcomeWindow()

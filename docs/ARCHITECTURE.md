@@ -90,7 +90,7 @@ A `FolioTool` (FolioKit) is a one-shot operation such as combining PDFs or conve
 
 - the Welcome window's Tools tab,
 - *File › Tools*,
-- Finder › Quick Actions and the Services menu, via `NSServices` entries in `Resources/Info.plist`. `NSUserData` is the tool's `id`, and `AppDelegate.runTool` dispatches it.
+- Finder › Quick Actions and the Services menu. `scripts/bundle.sh` runs `Folio --services-json` and writes one `NSServices` entry per tool into the built app's Info.plist, so adding a tool to `XTools.all` is all it takes. `NSUserData` is the tool's `id`, and `AppDelegate.runTool` dispatches it.
 
 Tools never modify their inputs. They write new files next to the first input with `FolioTool.outputURL(nextTo:name:ext:)` and return the URLs. Folio then reveals them in Finder.
 

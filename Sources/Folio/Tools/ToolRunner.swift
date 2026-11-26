@@ -14,6 +14,25 @@ enum ToolCatalog {
         PDFTools.all + ImageTools.all + DocumentTools.all + SpreadsheetTools.all + MediaTools.all + CodeTools.all
 
     static func tool(id: String) -> FolioTool? { all.first { $0.id == id } }
+
+    /// `NSServices` entries for every tool, as JSON for scripts/bundle.sh.
+    ///
+    /// Each tool becomes a Finder Quick Action / Services item titled
+    /// "<Tool title> with Folio" that sends the selected files to `AppDelegate.runTool`.
+    static func servicesJSON() -> String {
+        let entries: [[String: Any]] = all.map { tool in
+            [
+                "NSMenuItem": ["default": "\(tool.title) with Folio"],
+                "NSMessage": "runTool",
+                "NSPortName": "Folio",
+                "NSUserData": tool.id,
+                "NSSendFileTypes": tool.inputTypes.map(\.identifier),
+                "NSRequiredContext": [String: String](),
+            ]
+        }
+        let data = (try? JSONSerialization.data(withJSONObject: entries, options: [.prettyPrinted, .sortedKeys])) ?? Data("[]".utf8)
+        return String(decoding: data, as: UTF8.self)
+    }
 }
 
 /// Runs a tool end to end: pick inputs (unless given), ask for options, run, reveal results.
