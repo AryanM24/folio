@@ -60,9 +60,10 @@ nonisolated enum CodeTheme {
         hex(appearance.isDark ? SyntaxPalette.muted.dark : SyntaxPalette.muted.light).withAlphaComponent(0.55)
     }
 
-    private static let kindColors: [TokenKind: NSColor] = Dictionary(uniqueKeysWithValues: TokenKind.allCases.compactMap { kind in
-        SyntaxPalette.pair(for: kind).map { (kind, color($0)) }
-    })
+    private static let kindColors: [TokenKind: NSColor] = Dictionary(
+        uniqueKeysWithValues: TokenKind.allCases.compactMap { kind in
+            SyntaxPalette.pair(for: kind).map { (kind, color($0)) }
+        })
 
     static func color(for kind: TokenKind) -> NSColor? { kindColors[kind] }
 
@@ -71,7 +72,9 @@ nonisolated enum CodeTheme {
     }
 
     private static func hex(_ value: UInt32) -> NSColor {
-        NSColor(srgbRed: CGFloat((value >> 16) & 0xFF) / 255, green: CGFloat((value >> 8) & 0xFF) / 255, blue: CGFloat(value & 0xFF) / 255, alpha: 1)
+        NSColor(
+            srgbRed: CGFloat((value >> 16) & 0xFF) / 255, green: CGFloat((value >> 8) & 0xFF) / 255, blue: CGFloat(value & 0xFF) / 255,
+            alpha: 1)
     }
 }
 

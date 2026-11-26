@@ -33,8 +33,9 @@ struct MarkupOverlay: View {
             }
             if interactive, let selected = model.selectedMarkup {
                 let box = selected.bounds.applying(transform).insetBy(dx: -4, dy: -4)
-                ctx.stroke(Path(roundedRect: box, cornerRadius: Hero.Radius.sm),
-                           with: .color(Hero.accent), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                ctx.stroke(
+                    Path(roundedRect: box, cornerRadius: Hero.Radius.sm),
+                    with: .color(Hero.accent), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
             }
         }
         .frame(width: size.width, height: size.height)
@@ -58,7 +59,9 @@ struct MarkupOverlay: View {
                 update(to: point, pixelsPerPoint: pixelsPerPoint)
             }
             .onEnded { value in
-                finish(at: value.location.applying(inverse), moved: hypot(value.translation.width, value.translation.height), pixelsPerPoint: pixelsPerPoint)
+                finish(
+                    at: value.location.applying(inverse), moved: hypot(value.translation.width, value.translation.height),
+                    pixelsPerPoint: pixelsPerPoint)
             }
     }
 
@@ -109,8 +112,9 @@ struct MarkupOverlay: View {
             return
         }
         if model.markupTool == .text {
-            let item = MarkupItem(kind: .text, points: [point], color: model.markupColor, lineWidth: 0,
-                                  text: "Text", fontSize: 24 * pixelsPerPoint)
+            let item = MarkupItem(
+                kind: .text, points: [point], color: model.markupColor, lineWidth: 0,
+                text: "Text", fontSize: 24 * pixelsPerPoint)
             model.commit("Add Text") { $0.markup.append(item) }
             model.selectedMarkupID = item.id
             model.focusMarkupText = true

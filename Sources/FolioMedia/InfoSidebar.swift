@@ -1,6 +1,6 @@
 import AVFoundation
-import SwiftUI
 import FolioKit
+import SwiftUI
 
 /// The right-hand inspector: file details, selection, edits and export.
 struct InfoSidebar: View {
@@ -98,12 +98,16 @@ struct InfoSidebar: View {
                         .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
                         .help("Rotate right")
                     HeroToolbarDivider()
-                    Button("Flip horizontal", systemImage: "arrow.left.and.right.righttriangle.left.righttriangle.right") { controller.edits.flipHorizontal.toggle() }
-                        .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: controller.edits.flipHorizontal))
-                        .help("Flip horizontal")
-                    Button("Flip vertical", systemImage: "arrow.up.and.down.righttriangle.up.righttriangle.down") { controller.edits.flipVertical.toggle() }
-                        .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: controller.edits.flipVertical))
-                        .help("Flip vertical")
+                    Button("Flip horizontal", systemImage: "arrow.left.and.right.righttriangle.left.righttriangle.right") {
+                        controller.edits.flipHorizontal.toggle()
+                    }
+                    .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: controller.edits.flipHorizontal))
+                    .help("Flip horizontal")
+                    Button("Flip vertical", systemImage: "arrow.up.and.down.righttriangle.up.righttriangle.down") {
+                        controller.edits.flipVertical.toggle()
+                    }
+                    .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: controller.edits.flipVertical))
+                    .help("Flip vertical")
                     Spacer()
                     if controller.edits.quarterTurns != 0 {
                         HeroChip("\(controller.edits.quarterTurns * 90)°", tone: .accent)

@@ -65,15 +65,17 @@ nonisolated enum Waveform {
         let duration = try await asset.load(.duration)
         let reader = try AVAssetReader(asset: asset)
         // The mixer downmixes every track to mono float at the analysis rate for us.
-        let output = AVAssetReaderAudioMixOutput(audioTracks: tracks, audioSettings: [
-            AVFormatIDKey: kAudioFormatLinearPCM,
-            AVLinearPCMBitDepthKey: 32,
-            AVLinearPCMIsFloatKey: true,
-            AVLinearPCMIsBigEndianKey: false,
-            AVLinearPCMIsNonInterleaved: false,
-            AVNumberOfChannelsKey: 1,
-            AVSampleRateKey: analysisRate,
-        ])
+        let output = AVAssetReaderAudioMixOutput(
+            audioTracks: tracks,
+            audioSettings: [
+                AVFormatIDKey: kAudioFormatLinearPCM,
+                AVLinearPCMBitDepthKey: 32,
+                AVLinearPCMIsFloatKey: true,
+                AVLinearPCMIsBigEndianKey: false,
+                AVLinearPCMIsNonInterleaved: false,
+                AVNumberOfChannelsKey: 1,
+                AVSampleRateKey: analysisRate,
+            ])
         reader.add(output)
         guard reader.startReading() else {
             throw FolioError("Couldn't read the sound: \(reader.error?.localizedDescription ?? "unknown error")")
@@ -84,8 +86,11 @@ nonisolated enum Waveform {
             guard let block = buffer.dataBuffer else { continue }
             var length = 0
             var pointer: UnsafeMutablePointer<CChar>?
-            guard CMBlockBufferGetDataPointer(block, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &length, dataPointerOut: &pointer) == noErr,
-                  let pointer, length >= MemoryLayout<Float>.size else { continue }
+            guard
+                CMBlockBufferGetDataPointer(block, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &length, dataPointerOut: &pointer)
+                    == noErr,
+                let pointer, length >= MemoryLayout<Float>.size
+            else { continue }
             // A contiguous block is the norm for reader output; a fragmented one would only
             // expose its first segment here, so copy it out in that rare case.
             if CMBlockBufferIsRangeContiguous(block, atOffset: 0, length: length) {
@@ -108,9 +113,10 @@ nonisolated enum Waveform {
 
     private static func cacheFile(for url: URL) -> URL? {
         guard let values = try? url.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey]),
-              let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
         else { return nil }
-        let key = "\(url.path(percentEncoded: false))|\(values.fileSize ?? 0)|\(values.contentModificationDate?.timeIntervalSince1970 ?? 0)|\(bins)"
+        let key =
+            "\(url.path(percentEncoded: false))|\(values.fileSize ?? 0)|\(values.contentModificationDate?.timeIntervalSince1970 ?? 0)|\(bins)"
         let name = SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
         return caches.appending(path: "app.folio/Waveforms/\(name).peaks")
     }

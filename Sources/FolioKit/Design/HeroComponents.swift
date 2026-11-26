@@ -133,13 +133,14 @@ public struct HeroChip: View {
         self.tone = tone
     }
     public var body: some View {
-        let (fill, fg): (Color, Color) = switch tone {
-        case .default: (Hero.default, Hero.foreground)
-        case .accent: (Hero.accentSoft, Hero.accentSoftForeground)
-        case .success: (Hero.success.opacity(0.15), Hero.success)
-        case .warning: (Hero.warning.opacity(0.15), Hero.warning)
-        case .danger: (Hero.dangerSoft, Hero.dangerSoftForeground)
-        }
+        let (fill, fg): (Color, Color) =
+            switch tone {
+            case .default: (Hero.default, Hero.foreground)
+            case .accent: (Hero.accentSoft, Hero.accentSoftForeground)
+            case .success: (Hero.success.opacity(0.15), Hero.success)
+            case .warning: (Hero.warning.opacity(0.15), Hero.warning)
+            case .danger: (Hero.dangerSoft, Hero.dangerSoftForeground)
+            }
         Text(text)
             .font(.system(size: 11, weight: .medium))
             .foregroundStyle(fg)
@@ -171,7 +172,9 @@ public struct HeroKbd: View {
 public struct HeroSwitchStyle: ToggleStyle {
     public init() {}
     public func makeBody(configuration: Configuration) -> some View {
-        Button { configuration.isOn.toggle() } label: {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
             HStack(spacing: 12) {
                 ZStack(alignment: configuration.isOn ? .trailing : .leading) {
                     Capsule()

@@ -28,7 +28,7 @@ struct CropOverlay: View {
             thirds(in: box)
 
             Rectangle()
-                .fill(Color.white.opacity(0.001)) // hit area for moving
+                .fill(Color.white.opacity(0.001))  // hit area for moving
                 .frame(width: box.width, height: box.height)
                 .overlay(Rectangle().strokeBorder(.white, lineWidth: 1))
                 .offset(x: box.minX, y: box.minY)
@@ -73,7 +73,8 @@ struct CropOverlay: View {
                 let start = dragStart ?? model.recipe.crop
                 dragStart = start
                 dragging = true
-                let delta = CGSize(width: value.translation.width / max(1, size.width), height: value.translation.height / max(1, size.height))
+                let delta = CGSize(
+                    width: value.translation.width / max(1, size.width), height: value.translation.height / max(1, size.height))
                 let ratio = model.cropAspect.ratio(original: model.geometry.canvasSize)
                 let canvas = model.geometry.canvasSize
                 model.live {

@@ -43,42 +43,42 @@ nonisolated enum HTMLPage {
         }
         let dark = appearance == .automatic ? "@media (prefers-color-scheme: dark) { :root { \(vars(\.dark)) } }" : ""
         return """
-        :root { color-scheme: \(appearance == .automatic ? "light dark" : "light"); \(vars(\.light)) }
-        \(dark)
-        * { box-sizing: border-box; }
-        html { background: var(--bg); }
-        body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
-        main { max-width: 760px; margin: 0 auto; padding: 28px 32px 64px; overflow-wrap: break-word; }
-        h1, h2, h3, h4, h5, h6 { font-weight: 600; line-height: 1.25; margin: 1.6em 0 0.6em; }
-        main > :first-child { margin-top: 0; }
-        h1 { font-size: 1.9em; } h2 { font-size: 1.45em; } h3 { font-size: 1.2em; } h4 { font-size: 1.05em; }
-        h5, h6 { font-size: 0.95em; color: var(--muted); }
-        p, ul, ol, blockquote, pre, table { margin: 0 0 1em; }
-        a { color: var(--link); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        strong { font-weight: 600; }
-        hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
-        blockquote { padding: 0 0 0 16px; border-left: 3px solid var(--border); color: var(--muted); }
-        ul, ol { padding-left: 1.6em; }
-        li + li { margin-top: 0.25em; }
-        li > ul, li > ol { margin: 0.25em 0 0; }
-        .task-list-item { list-style: none; }
-        .task-list-item input { margin: 0 0.5em 0 -1.35em; vertical-align: -1px; accent-color: var(--accent); }
-        code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.86em; }
-        code { background: var(--code-bg); border-radius: 6px; padding: 0.15em 0.4em; }
-        pre { background: var(--code-bg); border-radius: 12px; padding: 14px 16px; overflow-x: auto; line-height: 1.5; }
-        pre code { background: none; padding: 0; font-size: 1em; }
-        table { border-collapse: collapse; display: block; overflow-x: auto; }
-        th, td { border: 1px solid var(--border); padding: 6px 12px; }
-        th { font-weight: 600; background: var(--code-bg); }
-        img { max-width: 100%; border-radius: 8px; }
-        del { color: var(--muted); }
-        .tok-keyword, .tok-tag, .tok-heading, .tok-property, .tok-link { color: var(--k); }
-        .tok-type, .tok-variable { color: var(--t); }
-        .tok-string, .tok-code { color: var(--s); }
-        .tok-number, .tok-literal, .tok-attribute { color: var(--n); }
-        .tok-comment, .tok-punctuation { color: var(--muted); }
-        @media print { main { max-width: none; padding: 0; } pre { white-space: pre-wrap; } }
-        """
+            :root { color-scheme: \(appearance == .automatic ? "light dark" : "light"); \(vars(\.light)) }
+            \(dark)
+            * { box-sizing: border-box; }
+            html { background: var(--bg); }
+            body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+            main { max-width: 760px; margin: 0 auto; padding: 28px 32px 64px; overflow-wrap: break-word; }
+            h1, h2, h3, h4, h5, h6 { font-weight: 600; line-height: 1.25; margin: 1.6em 0 0.6em; }
+            main > :first-child { margin-top: 0; }
+            h1 { font-size: 1.9em; } h2 { font-size: 1.45em; } h3 { font-size: 1.2em; } h4 { font-size: 1.05em; }
+            h5, h6 { font-size: 0.95em; color: var(--muted); }
+            p, ul, ol, blockquote, pre, table { margin: 0 0 1em; }
+            a { color: var(--link); text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            strong { font-weight: 600; }
+            hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+            blockquote { padding: 0 0 0 16px; border-left: 3px solid var(--border); color: var(--muted); }
+            ul, ol { padding-left: 1.6em; }
+            li + li { margin-top: 0.25em; }
+            li > ul, li > ol { margin: 0.25em 0 0; }
+            .task-list-item { list-style: none; }
+            .task-list-item input { margin: 0 0.5em 0 -1.35em; vertical-align: -1px; accent-color: var(--accent); }
+            code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.86em; }
+            code { background: var(--code-bg); border-radius: 6px; padding: 0.15em 0.4em; }
+            pre { background: var(--code-bg); border-radius: 12px; padding: 14px 16px; overflow-x: auto; line-height: 1.5; }
+            pre code { background: none; padding: 0; font-size: 1em; }
+            table { border-collapse: collapse; display: block; overflow-x: auto; }
+            th, td { border: 1px solid var(--border); padding: 6px 12px; }
+            th { font-weight: 600; background: var(--code-bg); }
+            img { max-width: 100%; border-radius: 8px; }
+            del { color: var(--muted); }
+            .tok-keyword, .tok-tag, .tok-heading, .tok-property, .tok-link { color: var(--k); }
+            .tok-type, .tok-variable { color: var(--t); }
+            .tok-string, .tok-code { color: var(--s); }
+            .tok-number, .tok-literal, .tok-attribute { color: var(--n); }
+            .tok-comment, .tok-punctuation { color: var(--muted); }
+            @media print { main { max-width: none; padding: 0; } pre { white-space: pre-wrap; } }
+            """
     }
 }

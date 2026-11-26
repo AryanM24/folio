@@ -54,7 +54,9 @@ public struct ColorSwatches: View {
     public var body: some View {
         HStack(spacing: 6) {
             ForEach(Array(colors.enumerated()), id: \.offset) { _, color in
-                Button { selection = color } label: {
+                Button {
+                    selection = color
+                } label: {
                     Circle()
                         .fill(color)
                         .overlay(Circle().strokeBorder(Hero.border))

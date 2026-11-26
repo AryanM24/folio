@@ -1,4 +1,5 @@
 import Testing
+
 @testable import FolioCode
 
 /// The text of every token of `kind`, in order.
@@ -163,10 +164,12 @@ struct TokenizerTests {
         #expect(Language.plain.lexer.tokenize("let x = 1").isEmpty)
     }
 
-    @Test("Detects language from names and extensions", arguments: [
-        ("main.swift", Language.swift), ("App.tsx", .typescript), ("Makefile", .shell), ("README.md", .markdown),
-        ("data.JSON", .json), ("ci.yml", .yaml), ("Cargo.toml", .toml), ("x.unknown", .plain), ("icon.svg", .svg),
-    ])
+    @Test(
+        "Detects language from names and extensions",
+        arguments: [
+            ("main.swift", Language.swift), ("App.tsx", .typescript), ("Makefile", .shell), ("README.md", .markdown),
+            ("data.JSON", .json), ("ci.yml", .yaml), ("Cargo.toml", .toml), ("x.unknown", .plain), ("icon.svg", .svg),
+        ])
     func detectsLanguage(name: String, expected: Language) {
         #expect(Language.detect(fileName: name) == expected)
     }

@@ -65,7 +65,8 @@ nonisolated struct MediaInfo: Sendable {
         }
         if info.creationDate == nil { info.creationDate = try? await asset.load(.creationDate)?.load(.dateValue) }
         if let item = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierLocation).first,
-           let text = try? await item.load(.stringValue) {
+            let text = try? await item.load(.stringValue)
+        {
             info.location = formatLocation(iso6709: text)
         }
         return info
@@ -109,7 +110,8 @@ nonisolated struct MediaInfo: Sendable {
     static func formatLocation(iso6709 text: String) -> String? {
         let scanner = Scanner(string: text)
         guard let lat = scanner.scanDouble(), let lon = scanner.scanDouble(),
-              abs(lat) <= 90, abs(lon) <= 180 else { return nil }
+            abs(lat) <= 90, abs(lon) <= 180
+        else { return nil }
         let ns = lat >= 0 ? "N" : "S", ew = lon >= 0 ? "E" : "W"
         return String(format: "%.4f° %@, %.4f° %@", abs(lat), ns, abs(lon), ew)
     }

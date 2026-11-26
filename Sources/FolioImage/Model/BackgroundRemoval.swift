@@ -29,12 +29,16 @@ nonisolated enum BackgroundRemoval {
     /// to the image's extent, so a proxy-resolution mask works for any scale.
     static func apply(mask: CIImage, to image: CIImage) -> CIImage {
         let extent = image.extent
-        let scaled = mask.transformed(by: CGAffineTransform(
-            scaleX: extent.width / mask.extent.width, y: extent.height / mask.extent.height
-        )).transformed(by: CGAffineTransform(translationX: extent.minX, y: extent.minY))
-        return image.applyingFilter("CIBlendWithMask", parameters: [
-            kCIInputBackgroundImageKey: CIImage.empty(),
-            kCIInputMaskImageKey: scaled,
-        ])
+        let scaled = mask.transformed(
+            by: CGAffineTransform(
+                scaleX: extent.width / mask.extent.width, y: extent.height / mask.extent.height
+            )
+        ).transformed(by: CGAffineTransform(translationX: extent.minX, y: extent.minY))
+        return image.applyingFilter(
+            "CIBlendWithMask",
+            parameters: [
+                kCIInputBackgroundImageKey: CIImage.empty(),
+                kCIInputMaskImageKey: scaled,
+            ])
     }
 }

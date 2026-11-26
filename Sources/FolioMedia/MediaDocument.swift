@@ -1,6 +1,6 @@
+import FolioKit
 public import SwiftUI
 public import UniformTypeIdentifiers
-import FolioKit
 
 /// An audio or video file, opened as a viewer.
 ///

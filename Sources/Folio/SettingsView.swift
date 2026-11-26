@@ -1,5 +1,5 @@
-import SwiftUI
 import FolioKit
+import SwiftUI
 
 /// Folio > Settings (⌘,). Each editor stores its preferences under `<module>.<key>`
 /// in `UserDefaults` via `@AppStorage`, and gets one tab here.

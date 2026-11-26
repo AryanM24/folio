@@ -1,5 +1,5 @@
-public import FolioKit
 import AVFoundation
+public import FolioKit
 import UniformTypeIdentifiers
 
 /// Media tools for the Welcome window, File › Tools and Finder Quick Actions.
@@ -13,7 +13,9 @@ public enum MediaTools {
         subtitle: "Save a video's sound as M4A or WAV",
         symbol: "waveform",
         inputTypes: [.audiovisualContent],
-        options: [.init(id: "format", label: "Format", choices: [("m4a", "M4A (AAC)"), ("wav", "WAV (uncompressed)")], defaultValue: "m4a")]
+        options: [
+            .init(id: "format", label: "Format", choices: [("m4a", "M4A (AAC)"), ("wav", "WAV (uncompressed)")], defaultValue: "m4a")
+        ]
     ) { inputs, options in
         let format: ExportFormat = options["format"] == "wav" ? .wav : .m4a
         return try await each(inputs) { url in
@@ -40,11 +42,15 @@ public enum MediaTools {
         subtitle: "Make a smaller copy for sharing",
         symbol: "arrow.down.right.and.arrow.up.left",
         inputTypes: [.movie],
-        options: [.init(id: "preset", label: "Size", choices: [
-            (ExportFormat.hevc1080p.rawValue, "1080p HEVC (best quality per MB)"),
-            (ExportFormat.h264_720p.rawValue, "720p H.264"),
-            (ExportFormat.h264_480p.rawValue, "480p H.264 (smallest)"),
-        ], defaultValue: ExportFormat.hevc1080p.rawValue)]
+        options: [
+            .init(
+                id: "preset", label: "Size",
+                choices: [
+                    (ExportFormat.hevc1080p.rawValue, "1080p HEVC (best quality per MB)"),
+                    (ExportFormat.h264_720p.rawValue, "720p H.264"),
+                    (ExportFormat.h264_480p.rawValue, "480p H.264 (smallest)"),
+                ], defaultValue: ExportFormat.hevc1080p.rawValue)
+        ]
     ) { inputs, options in
         let format = options["preset"].flatMap(ExportFormat.init(rawValue:)) ?? .hevc1080p
         return try await each(inputs) { url in

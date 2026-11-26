@@ -1,5 +1,5 @@
-public import SwiftUI
 import FolioKit
+public import SwiftUI
 
 /// The editor window for text, code and Markdown files.
 public struct CodeEditorView: View {
@@ -36,7 +36,8 @@ struct CodeEditorScreen: View {
     }
 
     private var settings: EditorSettings {
-        EditorSettings(fontSize: fontSize, wrapLines: wrapLines, showLineNumbers: showLineNumbers, tabWidth: tabWidth, showInvisibles: showInvisibles)
+        EditorSettings(
+            fontSize: fontSize, wrapLines: wrapLines, showLineNumbers: showLineNumbers, tabWidth: tabWidth, showInvisibles: showInvisibles)
     }
 
     private var effectiveMode: PreviewMode { document.language.hasPreview ? mode : .editor }
@@ -49,10 +50,12 @@ struct CodeEditorScreen: View {
             }
             HStack(spacing: 0) {
                 if effectiveMode != .preview {
-                    CodeTextEditor(document: document, controller: controller, settings: settings,
-                                   language: document.language, undoManager: undoManager,
-                                   isEditable: configuration?.isEditable ?? true)
-                        .frame(minWidth: 240, maxWidth: .infinity)
+                    CodeTextEditor(
+                        document: document, controller: controller, settings: settings,
+                        language: document.language, undoManager: undoManager,
+                        isEditable: configuration?.isEditable ?? true
+                    )
+                    .frame(minWidth: 240, maxWidth: .infinity)
                 }
                 if effectiveMode == .split {
                     Rectangle().fill(Hero.separator).frame(width: 1)
@@ -85,25 +88,29 @@ struct CodeEditorScreen: View {
     }
 
     @ViewBuilder private var preview: some View {
-        let kind: PreviewPane.Kind = switch document.language {
-        case .html: .html
-        case .svg: .svg
-        default: .markdown
-        }
-        PreviewPane(kind: kind, content: controller.previewHTML,
-                    title: configuration?.fileURL?.deletingPathExtension().lastPathComponent ?? "Preview",
-                    baseURL: configuration?.fileURL?.deletingLastPathComponent(),
-                    topLine: controller.topLine)
+        let kind: PreviewPane.Kind =
+            switch document.language {
+            case .html: .html
+            case .svg: .svg
+            default: .markdown
+            }
+        PreviewPane(
+            kind: kind, content: controller.previewHTML,
+            title: configuration?.fileURL?.deletingPathExtension().lastPathComponent ?? "Preview",
+            baseURL: configuration?.fileURL?.deletingLastPathComponent(),
+            topLine: controller.topLine)
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
         if document.language.hasPreview {
             ToolbarItem(placement: .principal) {
-                HeroTabs([
-                    (PreviewMode.editor, "Editor", "text.alignleft"),
-                    (PreviewMode.split, "Split", "rectangle.split.2x1"),
-                    (PreviewMode.preview, "Preview", "eye"),
-                ], selection: $mode)
+                HeroTabs(
+                    [
+                        (PreviewMode.editor, "Editor", "text.alignleft"),
+                        (PreviewMode.split, "Split", "rectangle.split.2x1"),
+                        (PreviewMode.preview, "Preview", "eye"),
+                    ], selection: $mode
+                )
                 .accessibilityLabel("View mode")
             }
         }
@@ -123,10 +130,18 @@ struct CodeEditorScreen: View {
         }
         if document.language == .json {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button { controller.formatJSON() } label: { Label("Format JSON", systemImage: "text.alignleft") }
-                    .help("Format JSON ⌥⇧⌘F")
-                Button { controller.minifyJSON() } label: { Label("Minify JSON", systemImage: "arrow.down.right.and.arrow.up.left") }
-                    .help("Minify JSON")
+                Button {
+                    controller.formatJSON()
+                } label: {
+                    Label("Format JSON", systemImage: "text.alignleft")
+                }
+                .help("Format JSON ⌥⇧⌘F")
+                Button {
+                    controller.minifyJSON()
+                } label: {
+                    Label("Minify JSON", systemImage: "arrow.down.right.and.arrow.up.left")
+                }
+                .help("Minify JSON")
             }
         }
     }

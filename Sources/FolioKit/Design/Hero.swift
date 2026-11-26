@@ -1,5 +1,5 @@
-public import SwiftUI
 import AppKit
+public import SwiftUI
 
 /// Folio's design system: a SwiftUI port of HeroUI v3's default theme.
 ///
@@ -82,10 +82,11 @@ public enum Hero {
     // MARK: Helpers
 
     static func dynamic(light: UInt32, dark: UInt32, lightAlpha: Double = 1, darkAlpha: Double = 1) -> Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-            return NSColor(hex: isDark ? dark : light, alpha: isDark ? darkAlpha : lightAlpha)
-        })
+        Color(
+            nsColor: NSColor(name: nil) { appearance in
+                let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+                return NSColor(hex: isDark ? dark : light, alpha: isDark ? darkAlpha : lightAlpha)
+            })
     }
 }
 

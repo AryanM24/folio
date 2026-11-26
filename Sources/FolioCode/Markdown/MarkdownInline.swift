@@ -90,7 +90,7 @@ nonisolated extension MarkdownRenderer {
                 i += 1
 
             case "h" where i == 0 || !(c[i - 1].isLetter || c[i - 1].isNumber),
-                 "w" where i == 0 || !(c[i - 1].isLetter || c[i - 1].isNumber):
+                "w" where i == 0 || !(c[i - 1].isLetter || c[i - 1].isNumber):
                 if let (html, end) = Self.bareURL(c, at: i) {
                     out += html
                     i = end
@@ -233,7 +233,9 @@ nonisolated extension MarkdownRenderer {
         if let colon = lower.firstIndex(of: ":"), !lower[..<colon].contains(where: { "/?#".contains($0) }) {
             let scheme = lower[..<colon]
             let allowed = ["http", "https", "mailto"].contains(scheme)
-            let dataImage = image && scheme == "data" && ["data:image/png", "data:image/jpeg", "data:image/gif", "data:image/webp"].contains { lower.hasPrefix($0) }
+            let dataImage =
+                image && scheme == "data"
+                && ["data:image/png", "data:image/jpeg", "data:image/gif", "data:image/webp"].contains { lower.hasPrefix($0) }
             guard allowed || dataImage else { return nil }
         }
         return escape(url)

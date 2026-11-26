@@ -31,7 +31,7 @@ enum WindowSnapshots {
     private static func write(_ window: NSWindow, to folder: URL) {
         // The theme frame (contentView's superview) includes the title bar and toolbar.
         guard let view = window.contentView?.superview ?? window.contentView,
-              let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds)
+            let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds)
         else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
         let name = window.title.isEmpty ? "window-\(window.windowNumber)" : window.title

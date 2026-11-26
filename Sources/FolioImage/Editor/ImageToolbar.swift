@@ -33,17 +33,27 @@ struct ImageToolbar: View {
             .help("Zoom")
             .accessibilityLabel("Zoom \(Int((model.zoomScale * 100).rounded())) percent")
             tool("Zoom In", "plus.magnifyingglass", help: "Zoom in ⌘+") { model.zoomIn() }
-            tool("Zoom to Fit", "arrow.up.left.and.down.right.magnifyingglass", help: "Zoom to fit ⌘9", selected: model.zoom == nil) { model.zoomToFit() }
+            tool("Zoom to Fit", "arrow.up.left.and.down.right.magnifyingglass", help: "Zoom to fit ⌘9", selected: model.zoom == nil) {
+                model.zoomToFit()
+            }
 
             HeroToolbarDivider()
             tool("Rotate Left", "rotate.left", help: "Rotate left ⌘L") { model.rotateLeft() }
             tool("Rotate Right", "rotate.right", help: "Rotate right ⌘R") { model.rotateRight() }
-            tool("Flip Horizontal", "arrow.left.and.right.righttriangle.left.righttriangle.right", help: "Flip horizontal") { model.flipHorizontal() }
+            tool("Flip Horizontal", "arrow.left.and.right.righttriangle.left.righttriangle.right", help: "Flip horizontal") {
+                model.flipHorizontal()
+            }
 
             HeroToolbarDivider()
-            tool("Auto-Enhance", "wand.and.stars", help: "Auto-enhance ⌥⌘E", selected: model.recipe.autoEnhance != nil) { model.toggleAutoEnhance() }
-            tool("Remove Background", "person.and.background.dotted", help: "Remove background ⇧⌘K", selected: model.recipe.removeBackground) { model.toggleRemoveBackground() }
-            tool("Live Text", "text.viewfinder", help: "Select text in the image ⌥⌘T", selected: model.liveTextEnabled) { model.liveTextEnabled.toggle() }
+            tool("Auto-Enhance", "wand.and.stars", help: "Auto-enhance ⌥⌘E", selected: model.recipe.autoEnhance != nil) {
+                model.toggleAutoEnhance()
+            }
+            tool(
+                "Remove Background", "person.and.background.dotted", help: "Remove background ⇧⌘K", selected: model.recipe.removeBackground
+            ) { model.toggleRemoveBackground() }
+            tool("Live Text", "text.viewfinder", help: "Select text in the image ⌥⌘T", selected: model.liveTextEnabled) {
+                model.liveTextEnabled.toggle()
+            }
             tool("Pick Color", "eyedropper", help: "Pick a color and copy its hex value ⌥⌘C") { model.pickColor() }
             CompareButton(model: model)
 
@@ -76,14 +86,17 @@ private struct CompareButton: View {
     let model: ImageEditorModel
 
     var body: some View {
-        Button {} label: { Label("Compare with Original", systemImage: "square.split.2x1") }
-            .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: model.comparing))
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in if !model.comparing { model.comparing = true } }
-                    .onEnded { _ in model.comparing = false }
-            )
-            .help("Hold to compare with the original (or hold M)")
-            .accessibilityAction(named: "Toggle original") { model.comparing.toggle() }
+        Button {
+        } label: {
+            Label("Compare with Original", systemImage: "square.split.2x1")
+        }
+        .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: model.comparing))
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in if !model.comparing { model.comparing = true } }
+                .onEnded { _ in model.comparing = false }
+        )
+        .help("Hold to compare with the original (or hold M)")
+        .accessibilityAction(named: "Toggle original") { model.comparing.toggle() }
     }
 }

@@ -1,10 +1,10 @@
-import SwiftUI
-import UniformTypeIdentifiers
+import FolioCode
+import FolioDocs
 import FolioKit
 import FolioPDF
-import FolioDocs
 import FolioSheets
-import FolioCode
+import SwiftUI
+import UniformTypeIdentifiers
 
 /// The launch window: start something new, reopen something recent, or run a tool.
 ///
@@ -67,7 +67,9 @@ struct WelcomeWindow: View {
         .dropDestination(for: URL.self) { urls, _ in
             urls.forEach(open)
             return !urls.isEmpty
-        } isTargeted: { dropTargeted = $0 }
+        } isTargeted: {
+            dropTargeted = $0
+        }
     }
 
     private var sidebar: some View {

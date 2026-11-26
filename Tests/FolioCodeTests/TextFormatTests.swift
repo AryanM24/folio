@@ -1,15 +1,18 @@
 import AppKit  // Not Foundation: the Command Line Tools lack its Testing overlay.
 import Testing
+
 @testable import FolioCode
 
 @Suite("Encodings and line endings")
 struct TextFormatTests {
-    @Test("Round-trips bytes exactly", arguments: [
-        TextFormat(encoding: .utf8, lineEnding: .lf), TextFormat(encoding: .utf8, lineEnding: .crlf),
-        TextFormat(encoding: .utf8BOM, lineEnding: .lf), TextFormat(encoding: .utf16LE, lineEnding: .crlf),
-        TextFormat(encoding: .utf16BE, lineEnding: .lf), TextFormat(encoding: .windowsLatin1, lineEnding: .crlf),
-        TextFormat(encoding: .utf8, lineEnding: .cr),
-    ])
+    @Test(
+        "Round-trips bytes exactly",
+        arguments: [
+            TextFormat(encoding: .utf8, lineEnding: .lf), TextFormat(encoding: .utf8, lineEnding: .crlf),
+            TextFormat(encoding: .utf8BOM, lineEnding: .lf), TextFormat(encoding: .utf16LE, lineEnding: .crlf),
+            TextFormat(encoding: .utf16BE, lineEnding: .lf), TextFormat(encoding: .windowsLatin1, lineEnding: .crlf),
+            TextFormat(encoding: .utf8, lineEnding: .cr),
+        ])
     func roundTrip(format: TextFormat) throws {
         let original = "Café — naïve\nsecond line\n\nlast without newline"
         let text = format.encoding == .windowsLatin1 ? original.replacingOccurrences(of: "—", with: "-") : original
@@ -75,9 +78,11 @@ struct LineIndexTests {
         #expect(index.contentRange(ofLine: 1, length: 9) == NSRange(location: 3, length: 2))
     }
 
-    @Test("Incremental edits match a full rescan", arguments: [
-        (2, 0, "\n"), (0, 3, ""), (3, 4, "X\nY\nZ"), (9, 0, "\n\n"), (1, 1, "q"),
-    ])
+    @Test(
+        "Incremental edits match a full rescan",
+        arguments: [
+            (2, 0, "\n"), (0, 3, ""), (3, 4, "X\nY\nZ"), (9, 0, "\n\n"), (1, 1, "q"),
+        ])
     func incrementalMatchesRescan(location: Int, length: Int, replacement: String) {
         let text = NSMutableString(string: "ab\ncd\n\nef")
         var index = LineIndex(text)

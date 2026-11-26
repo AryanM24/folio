@@ -13,18 +13,22 @@ nonisolated enum TestMedia {
     static func video(in folder: URL, seconds: Double = 2, fps: Int32 = 30, width: Int = 128, height: Int = 64) async throws -> URL {
         let url = folder.appending(path: "video.mov")
         let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
-        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
-            AVVideoCodecKey: AVVideoCodecType.h264,
-            AVVideoWidthKey: width,
-            AVVideoHeightKey: height,
-            AVVideoCompressionPropertiesKey: [AVVideoMaxKeyFrameIntervalKey: 1],
-        ])
+        let input = AVAssetWriterInput(
+            mediaType: .video,
+            outputSettings: [
+                AVVideoCodecKey: AVVideoCodecType.h264,
+                AVVideoWidthKey: width,
+                AVVideoHeightKey: height,
+                AVVideoCompressionPropertiesKey: [AVVideoMaxKeyFrameIntervalKey: 1],
+            ])
         input.expectsMediaDataInRealTime = false
-        let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-            kCVPixelBufferWidthKey as String: width,
-            kCVPixelBufferHeightKey as String: height,
-        ])
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: input,
+            sourcePixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+            ])
         writer.add(input)
         guard writer.startWriting() else { throw writer.error ?? CocoaError(.fileWriteUnknown) }
         writer.startSession(atSourceTime: .zero)
@@ -53,17 +57,19 @@ nonisolated enum TestMedia {
         let url = folder.appending(path: "tone.wav")
         let rate = 44_100.0
         guard let format = AVAudioFormat(standardFormatWithSampleRate: rate, channels: 1),
-              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(seconds * rate)),
-              let samples = buffer.floatChannelData?[0]
+            let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(seconds * rate)),
+            let samples = buffer.floatChannelData?[0]
         else { throw CocoaError(.fileWriteUnknown) }
         buffer.frameLength = buffer.frameCapacity
         for i in 0..<Int(buffer.frameLength) {
             samples[i] = amplitude * sin(2 * .pi * 440 * Float(i) / Float(rate))
         }
-        let file = try AVAudioFile(forWriting: url, settings: [
-            AVFormatIDKey: kAudioFormatLinearPCM, AVSampleRateKey: rate, AVNumberOfChannelsKey: 1,
-            AVLinearPCMBitDepthKey: 16, AVLinearPCMIsFloatKey: false,
-        ])
+        let file = try AVAudioFile(
+            forWriting: url,
+            settings: [
+                AVFormatIDKey: kAudioFormatLinearPCM, AVSampleRateKey: rate, AVNumberOfChannelsKey: 1,
+                AVLinearPCMBitDepthKey: 16, AVLinearPCMIsFloatKey: false,
+            ])
         try file.write(from: buffer)
         return url
     }

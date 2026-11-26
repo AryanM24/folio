@@ -51,10 +51,12 @@ struct RecipeSlider: View {
         HeroSlider(title, value: model.binding(keyPath, action: title), in: range, step: step, format: format) { editing in
             model.sliderEditing(editing, action: title)
         }
-        .simultaneousGesture(TapGesture(count: 2).onEnded {
-            // After the slider's own drag ends, so the reset is the last word.
-            DispatchQueue.main.async { model.commit("Reset \(title)") { $0[keyPath: keyPath] = defaultValue } }
-        })
+        .simultaneousGesture(
+            TapGesture(count: 2).onEnded {
+                // After the slider's own drag ends, so the reset is the last word.
+                DispatchQueue.main.async { model.commit("Reset \(title)") { $0[keyPath: keyPath] = defaultValue } }
+            }
+        )
         .help("Double-click to reset")
         .accessibilityAction(named: "Reset") { model.commit("Reset \(title)") { $0[keyPath: keyPath] = defaultValue } }
     }

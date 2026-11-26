@@ -1,6 +1,7 @@
 import CoreGraphics
-import UniformTypeIdentifiers
 import Testing
+import UniformTypeIdentifiers
+
 @testable import FolioImage
 
 private func close(_ a: CGPoint, _ b: CGPoint, _ tolerance: Double = 0.001) -> Bool {
@@ -8,7 +9,8 @@ private func close(_ a: CGPoint, _ b: CGPoint, _ tolerance: Double = 0.001) -> B
 }
 
 private func close(_ a: CGRect, _ b: CGRect, _ tolerance: Double = 0.0001) -> Bool {
-    abs(a.minX - b.minX) < tolerance && abs(a.minY - b.minY) < tolerance && abs(a.width - b.width) < tolerance && abs(a.height - b.height) < tolerance
+    abs(a.minX - b.minX) < tolerance && abs(a.minY - b.minY) < tolerance && abs(a.width - b.width) < tolerance
+        && abs(a.height - b.height) < tolerance
 }
 
 @Suite struct RecipeTests {

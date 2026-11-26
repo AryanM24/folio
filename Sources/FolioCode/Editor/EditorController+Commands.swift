@@ -1,6 +1,6 @@
 import AppKit
-import UniformTypeIdentifiers
 import FolioKit
+import UniformTypeIdentifiers
 
 /// Menu, toolbar and shortcut commands. Each is one undoable step.
 extension EditorController {
@@ -13,7 +13,9 @@ extension EditorController {
     // MARK: Lines
 
     func toggleComment() {
-        run("Toggle Comment") { TextEditing.toggleComment($0, selection: $1, lineComment: language.lineComment, blockComment: language.blockComment) }
+        run("Toggle Comment") {
+            TextEditing.toggleComment($0, selection: $1, lineComment: language.lineComment, blockComment: language.blockComment)
+        }
     }
     func indent() { run("Indent") { TextEditing.indent($0, selection: $1, unit: textView?.indentStyle.unit ?? "    ") } }
     func outdent() { run("Outdent") { TextEditing.outdent($0, selection: $1, width: textView?.indentStyle.width ?? 4) } }
@@ -65,8 +67,11 @@ extension EditorController {
         guard let document, let textView else { return }
         let text = textView.textStorage?.string ?? ""
         guard text.canBeConverted(to: encoding.stringEncoding) else {
-            Alert.show(FolioError("Some characters in this file can’t be represented in \(encoding.title), so it stays \(document.format.encoding.title)."),
-                       title: "Can’t use \(encoding.title)", window: textView.window)
+            Alert.show(
+                FolioError(
+                    "Some characters in this file can’t be represented in \(encoding.title), so it stays \(document.format.encoding.title)."
+                ),
+                title: "Can’t use \(encoding.title)", window: textView.window)
             return
         }
         document.setFormat(TextFormat(encoding: encoding, lineEnding: document.format.lineEnding), undoManager: undoManager)
@@ -86,7 +91,9 @@ extension EditorController {
         let unit = textView?.indentStyle.unit ?? "  "
         rewriteJSON(name: "Format JSON") { (text: String) throws(JSONTools.Issue) -> String in try JSONTools.format(text, indent: unit) }
     }
-    func minifyJSON() { rewriteJSON(name: "Minify JSON") { (text: String) throws(JSONTools.Issue) -> String in try JSONTools.minify(text) } }
+    func minifyJSON() {
+        rewriteJSON(name: "Minify JSON") { (text: String) throws(JSONTools.Issue) -> String in try JSONTools.minify(text) }
+    }
 
     func validateJSON() {
         guard let text = textView?.textStorage?.string else { return }
@@ -100,8 +107,10 @@ extension EditorController {
         do throws(JSONTools.Issue) {
             let result = try transform(text)
             guard result != text else { return }
-            textView.apply(TextEdit(range: NSRange(location: 0, length: textView.text.length), replacement: result,
-                                    selection: NSRange(location: 0, length: 0)), actionName: name)
+            textView.apply(
+                TextEdit(
+                    range: NSRange(location: 0, length: textView.text.length), replacement: result,
+                    selection: NSRange(location: 0, length: 0)), actionName: name)
             jsonIssue = nil
             jsonChecked = true
         } catch {
@@ -160,7 +169,8 @@ extension EditorController {
             match = before.last ?? regex.matches(in: text, range: NSRange(location: 0, length: length)).last
         } else {
             let start = min(length, selection.upperBound)
-            match = regex.firstMatch(in: text, range: NSRange(location: start, length: length - start))
+            match =
+                regex.firstMatch(in: text, range: NSRange(location: start, length: length - start))
                 ?? regex.firstMatch(in: text, range: NSRange(location: 0, length: length))
         }
         guard let match, match.range.length > 0 || match.range.location != NSNotFound else {
@@ -183,8 +193,10 @@ extension EditorController {
         let selection = textView.selectedRange()
         if selection.length > 0, let match = regex.firstMatch(in: text, options: .anchored, range: selection), match.range == selection {
             let replacement = regex.replacementString(for: match, in: text, offset: 0, template: template)
-            textView.apply(TextEdit(range: selection, replacement: replacement,
-                                    selection: NSRange(location: selection.location + (replacement as NSString).length, length: 0)), actionName: "Replace")
+            textView.apply(
+                TextEdit(
+                    range: selection, replacement: replacement,
+                    selection: NSRange(location: selection.location + (replacement as NSString).length, length: 0)), actionName: "Replace")
         }
         findNext()
     }
@@ -208,7 +220,8 @@ extension EditorController {
             cursor = match.range.upperBound
         }
         let span = NSRange(location: first.range.location, length: last.range.upperBound - first.range.location)
-        textView.apply(TextEdit(range: span, replacement: result, selection: NSRange(location: span.location, length: 0)), actionName: "Replace All")
+        textView.apply(
+            TextEdit(range: span, replacement: result, selection: NSRange(location: span.location, length: 0)), actionName: "Replace All")
         find.status = "Replaced \(matches.count)"
     }
 
@@ -246,7 +259,8 @@ extension EditorController {
     func printDocument() {
         guard let textView, let text = textView.textStorage?.string else { return }
         do {
-            let attributed = language == .markdown
+            let attributed =
+                language == .markdown
                 ? try MarkdownExport.attributedString(markdown: text, title: exportTitle)
                 : PrintSupport.coloredSource(text, language: language, fontSize: 10)
             PrintSupport.print(attributed, title: exportTitle, window: textView.window)

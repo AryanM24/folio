@@ -1,6 +1,6 @@
-import SwiftUI
-import QuickLookThumbnailing
 import FolioKit
+import QuickLookThumbnailing
+import SwiftUI
 
 /// Recent documents from the system list (File › Open Recent), with Quick Look thumbnails.
 ///

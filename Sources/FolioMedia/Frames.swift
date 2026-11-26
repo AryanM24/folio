@@ -1,7 +1,7 @@
 import AVFoundation
+import FolioKit
 import ImageIO
 import UniformTypeIdentifiers
-import FolioKit
 
 /// Still frames: "Save current frame", the filmstrip, and GIFs.
 nonisolated enum Frames {
@@ -35,14 +35,15 @@ nonisolated enum Frames {
         guard let duration = try? await asset.load(.duration), duration.seconds > 0, count > 0 else { return }
         let generator = AVAssetImageGenerator(asset: asset)
         generator.appliesPreferredTrackTransform = true
-        generator.maximumSize = CGSize(width: height * 4, height: height * 2) // Retina, any aspect
+        generator.maximumSize = CGSize(width: height * 4, height: height * 2)  // Retina, any aspect
         let times = (0..<count).map { i in
             CMTime(seconds: duration.seconds * (Double(i) + 0.5) / Double(count), preferredTimescale: 600)
         }
         for await result in generator.images(for: times) {
             if Task.isCancelled { return }
             guard let image = try? result.image,
-                  let index = times.firstIndex(of: result.requestedTime) else { continue }
+                let index = times.firstIndex(of: result.requestedTime)
+            else { continue }
             await deliver(index, image)
         }
     }
@@ -61,7 +62,7 @@ nonisolated enum GIFTiming {
         let step = duration / Double(count)
         return (0..<count).map { i in
             let start = (Double(i) * step * 100).rounded(), end = (Double(i + 1) * step * 100).rounded()
-            return (Double(i) * step, max(2, end - start) / 100) // < 2 cs is treated as 10 cs by browsers
+            return (Double(i) * step, max(2, end - start) / 100)  // < 2 cs is treated as 10 cs by browsers
         }
     }
 }
@@ -77,13 +78,17 @@ nonisolated enum GIFMaker {
         CMTimeRange(start: .zero, duration: CMTime(seconds: Double(maxFrames) / fps, preferredTimescale: 600))
     }
 
-    static func make(from url: URL, range: CMTimeRange?, fps: Double, width: CGFloat, to destination: URL, progress: @escaping @Sendable (Double) -> Void) async throws {
+    static func make(
+        from url: URL, range: CMTimeRange?, fps: Double, width: CGFloat, to destination: URL, progress: @escaping @Sendable (Double) -> Void
+    ) async throws {
         try await MediaExport.writeAtomically(to: destination) { output in
             try await write(from: url, range: range, fps: fps, width: width, to: output, progress: progress)
         }
     }
 
-    private static func write(from url: URL, range: CMTimeRange?, fps: Double, width: CGFloat, to output: URL, progress: @escaping @Sendable (Double) -> Void) async throws {
+    private static func write(
+        from url: URL, range: CMTimeRange?, fps: Double, width: CGFloat, to output: URL, progress: @escaping @Sendable (Double) -> Void
+    ) async throws {
         let asset = AVURLAsset(url: url)
         guard try await !asset.loadTracks(withMediaType: .video).isEmpty else {
             throw FolioError("This file has no video to turn into a GIF.")
@@ -116,9 +121,13 @@ nonisolated enum GIFMaker {
             pending[index] = try result.image
             while let image = pending.removeValue(forKey: next) {
                 let delay = plan[next].delay
-                CGImageDestinationAddImage(destination, image, [kCGImagePropertyGIFDictionary: [
-                    kCGImagePropertyGIFDelayTime: delay, kCGImagePropertyGIFUnclampedDelayTime: delay,
-                ]] as CFDictionary)
+                CGImageDestinationAddImage(
+                    destination, image,
+                    [
+                        kCGImagePropertyGIFDictionary: [
+                            kCGImagePropertyGIFDelayTime: delay, kCGImagePropertyGIFUnclampedDelayTime: delay,
+                        ]
+                    ] as CFDictionary)
                 next += 1
                 progress(Double(next) / Double(plan.count))
             }

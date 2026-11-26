@@ -84,11 +84,12 @@ nonisolated enum CropMath {
         // Keep the ratio: the dragged dimension drives, the other follows. The edge
         // opposite the handle stays put; edge handles grow symmetrically across.
         let unitRatio = ratio * canvas.height / canvas.width
-        let horizontalDrives: Bool = switch handle {
-        case .left, .right: true
-        case .top, .bottom: false
-        default: abs(delta.width) * unitRatio >= abs(delta.height) // dominant motion
-        }
+        let horizontalDrives: Bool =
+            switch handle {
+            case .left, .right: true
+            case .top, .bottom: false
+            default: abs(delta.width) * unitRatio >= abs(delta.height)  // dominant motion
+            }
         var w = rect.width, h = rect.height
         if horizontalDrives { h = w / unitRatio } else { w = h * unitRatio }
 

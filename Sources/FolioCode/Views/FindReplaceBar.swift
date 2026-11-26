@@ -1,5 +1,5 @@
-import SwiftUI
 import FolioKit
+import SwiftUI
 
 /// Find & Replace with regular expressions (⌥⌘F). The native find bar (⌘F) stays available
 /// for plain searches; this one adds regex, `$1` templates and replace-all as one undo step.
@@ -24,14 +24,18 @@ struct FindReplaceBar: View {
                 .frame(minWidth: 120, maxWidth: 220)
                 .accessibilityLabel("Replace with")
 
-            Button { controller.find.isRegex.toggle() } label: {
+            Button {
+                controller.find.isRegex.toggle()
+            } label: {
                 Label("Regular expression", systemImage: "asterisk")
             }
             .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: controller.find.isRegex))
             .help("Regular expression")
             .accessibilityValue(controller.find.isRegex ? "On" : "Off")
 
-            Button { controller.find.matchCase.toggle() } label: {
+            Button {
+                controller.find.matchCase.toggle()
+            } label: {
                 Label("Match case", systemImage: "textformat")
             }
             .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: controller.find.matchCase))
@@ -40,12 +44,20 @@ struct FindReplaceBar: View {
 
             HeroToolbarDivider()
 
-            Button { controller.findNext(backwards: true) } label: { Label("Previous match", systemImage: "chevron.up") }
-                .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
-                .help("Previous match")
-            Button { controller.findNext() } label: { Label("Next match", systemImage: "chevron.down") }
-                .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
-                .help("Next match ↩")
+            Button {
+                controller.findNext(backwards: true)
+            } label: {
+                Label("Previous match", systemImage: "chevron.up")
+            }
+            .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
+            .help("Previous match")
+            Button {
+                controller.findNext()
+            } label: {
+                Label("Next match", systemImage: "chevron.down")
+            }
+            .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
+            .help("Next match ↩")
             Button("Replace") { controller.replaceCurrent() }
                 .buttonStyle(.hero(.tertiary, size: .sm))
             Button("Replace All") { controller.replaceAll() }
@@ -57,10 +69,14 @@ struct FindReplaceBar: View {
                 .foregroundStyle(controller.find.isError ? Hero.danger : Hero.muted)
                 .lineLimit(1)
             Spacer(minLength: 0)
-            Button { controller.hideFindReplace() } label: { Label("Close", systemImage: "xmark") }
-                .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
-                .keyboardShortcut(.cancelAction)
-                .help("Close (Esc)")
+            Button {
+                controller.hideFindReplace()
+            } label: {
+                Label("Close", systemImage: "xmark")
+            }
+            .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true))
+            .keyboardShortcut(.cancelAction)
+            .help("Close (Esc)")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

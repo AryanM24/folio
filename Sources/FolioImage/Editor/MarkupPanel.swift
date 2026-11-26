@@ -19,10 +19,14 @@ struct MarkupPanel: View {
             InspectorSection("Tool") {
                 LazyVGrid(columns: columns, spacing: 6) {
                     ForEach(MarkupTool.allCases) { tool in
-                        Button { model.markupTool = tool } label: { Label(tool.title, systemImage: tool.symbol) }
-                            .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, fullWidth: true, isSelected: model.markupTool == tool))
-                            .help(tool.title)
-                            .accessibilityAddTraits(model.markupTool == tool ? .isSelected : [])
+                        Button {
+                            model.markupTool = tool
+                        } label: {
+                            Label(tool.title, systemImage: tool.symbol)
+                        }
+                        .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, fullWidth: true, isSelected: model.markupTool == tool))
+                        .help(tool.title)
+                        .accessibilityAddTraits(model.markupTool == tool ? .isSelected : [])
                     }
                 }
             }
@@ -35,10 +39,14 @@ struct MarkupPanel: View {
             if let item = model.selectedMarkup {
                 selection(item)
             } else {
-                Text(model.markupTool == .select ? "Click a shape to select it, then drag to move." : "Drag on the image to draw. Choose Select to move or delete shapes.")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Hero.muted)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text(
+                    model.markupTool == .select
+                        ? "Click a shape to select it, then drag to move."
+                        : "Drag on the image to draw. Choose Select to move or delete shapes."
+                )
+                .font(.system(size: 12))
+                .foregroundStyle(Hero.muted)
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
         .onChange(of: model.focusMarkupText) {
@@ -54,17 +62,23 @@ struct MarkupPanel: View {
     @ViewBuilder private func selection(_ item: MarkupItem) -> some View {
         InspectorSection("Selected \(item.kind.rawValue)") {
             if item.kind == .text {
-                TextField("Text", text: Binding(
-                    get: { model.selectedMarkup?.text ?? "" },
-                    set: { text in model.updateSelectedMarkup("Edit Text", live: true) { $0.text = text } }
-                ), axis: .vertical)
+                TextField(
+                    "Text",
+                    text: Binding(
+                        get: { model.selectedMarkup?.text ?? "" },
+                        set: { text in model.updateSelectedMarkup("Edit Text", live: true) { $0.text = text } }
+                    ), axis: .vertical
+                )
                 .textFieldStyle(.hero)
                 .focused($textFocused)
                 .accessibilityLabel("Text")
-                HeroSlider("Size", value: Binding(
-                    get: { (model.selectedMarkup?.fontSize ?? 24) / pixelsPerPoint },
-                    set: { size in model.updateSelectedMarkup("Text Size", live: true) { $0.fontSize = size * pixelsPerPoint } }
-                ), in: 8...144, format: { "\(Int($0)) pt" }) { editing in
+                HeroSlider(
+                    "Size",
+                    value: Binding(
+                        get: { (model.selectedMarkup?.fontSize ?? 24) / pixelsPerPoint },
+                        set: { size in model.updateSelectedMarkup("Text Size", live: true) { $0.fontSize = size * pixelsPerPoint } }
+                    ), in: 8...144, format: { "\(Int($0)) pt" }
+                ) { editing in
                     if !editing { model.endLive("Text Size") }
                 }
             }

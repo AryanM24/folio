@@ -1,7 +1,7 @@
 import CoreGraphics
 import CoreImage
-import Foundation
 import FolioKit
+import Foundation
 import ImageIO
 import Synchronization
 import UniformTypeIdentifiers
@@ -39,12 +39,12 @@ nonisolated final class SourceImage: @unchecked Sendable {
 
     init(data: Data, typeHint: UTType? = nil) throws {
         guard let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary),
-              CGImageSourceGetCount(source) > 0
+            CGImageSourceGetCount(source) > 0
         else { throw FolioError("This file isn't an image Folio can read, or it's damaged.") }
         let typeID = CGImageSourceGetType(source).map { $0 as String }
         let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any] ?? [:]
         guard let width = props[kCGImagePropertyPixelWidth as String] as? Int,
-              let height = props[kCGImagePropertyPixelHeight as String] as? Int, width > 0, height > 0
+            let height = props[kCGImagePropertyPixelHeight as String] as? Int, width > 0, height > 0
         else { throw FolioError("This image has no pixels Folio can read.") }
         let orientation = CGImagePropertyOrientation(rawValue: props[kCGImagePropertyOrientation as String] as? UInt32 ?? 1) ?? .up
         let swaps = [.left, .leftMirrored, .right, .rightMirrored].contains(orientation)
@@ -65,7 +65,9 @@ nonisolated final class SourceImage: @unchecked Sendable {
         self.properties = props
         self.orientation = orientation
         self.proxy = proxy
-        self.colorSpace = proxy.colorSpace.flatMap { $0.model == .rgb ? $0 : nil } ?? CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()
+        self.colorSpace =
+            proxy.colorSpace.flatMap { $0.model == .rgb ? $0 : nil } ?? CGColorSpace(name: CGColorSpace.sRGB)
+            ?? CGColorSpaceCreateDeviceRGB()
         self.bitsPerComponent = props[kCGImagePropertyDepth as String] as? Int ?? 8
         self.hasAlpha = props[kCGImagePropertyHasAlpha as String] as? Bool ?? false
         self.frameCount = CGImageSourceGetCount(source)
@@ -80,7 +82,7 @@ nonisolated final class SourceImage: @unchecked Sendable {
         let cg: CGImage = try full.withLock { cached in
             if let cached { return cached }
             guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-                  let image = CGImageSourceCreateImageAtIndex(source, 0, [kCGImageSourceShouldCacheImmediately: true] as CFDictionary)
+                let image = CGImageSourceCreateImageAtIndex(source, 0, [kCGImageSourceShouldCacheImmediately: true] as CFDictionary)
             else { throw FolioError("Couldn't decode the full-size image.") }
             cached = image
             return image

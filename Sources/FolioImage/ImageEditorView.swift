@@ -1,5 +1,5 @@
-public import SwiftUI
 import FolioKit
+public import SwiftUI
 
 /// The image editor window: canvas with a floating toolbar, the inspector on the
 /// right, and a status bar.
@@ -47,7 +47,7 @@ public struct ImageEditorView: View {
             model.fileURL = configuration?.fileURL
             model.backingScale = displayScale
             #if DEBUG
-            model.applyDemoStateIfRequested()
+                model.applyDemoStateIfRequested()
             #endif
         }
         .onChange(of: undoManager) { model.undoManager = undoManager }
@@ -88,9 +88,11 @@ private struct ReadOnlyBanner: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "lock").foregroundStyle(Hero.muted)
-            Text("macOS can't save \(model.source.type.preferredFilenameExtension?.uppercased() ?? "this format") files. Export a copy to keep your edits.")
-                .font(.system(size: 13))
-                .foregroundStyle(Hero.foreground)
+            Text(
+                "macOS can't save \(model.source.type.preferredFilenameExtension?.uppercased() ?? "this format") files. Export a copy to keep your edits."
+            )
+            .font(.system(size: 13))
+            .foregroundStyle(Hero.foreground)
             Button("Export as PNG") { model.export(.png, quality: 1) }
                 .buttonStyle(.hero(.primary, size: .sm))
         }

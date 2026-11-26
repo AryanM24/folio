@@ -1,6 +1,6 @@
 import AVFoundation
-import UniformTypeIdentifiers
 import FolioKit
+import UniformTypeIdentifiers
 
 /// One export: which file, which part of it, which changes, which format.
 nonisolated struct ExportRequest: Sendable {
@@ -75,7 +75,9 @@ nonisolated enum MediaExport {
 
         if request.format.isAudioOnly {
             guard !audioTracks.isEmpty else { throw FolioError("This file has no sound to export.") }
-            guard !edits.removeAudio else { throw FolioError("Audio is removed in Edits, so there's nothing to export. Turn “Remove audio” off and try again.") }
+            guard !edits.removeAudio else {
+                throw FolioError("Audio is removed in Edits, so there's nothing to export. Turn “Remove audio” off and try again.")
+            }
         }
         if edits.removeAudio, videoTracks.isEmpty {
             throw FolioError("This file is audio only, so removing the audio would leave nothing.")
@@ -86,13 +88,17 @@ nonisolated enum MediaExport {
         let span = range ?? CMTimeRange(start: .zero, duration: duration)
         for track in videoTracks {
             let (natural, preferred) = try await track.load(.naturalSize, .preferredTransform)
-            guard let out = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) else { continue }
+            guard let out = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                continue
+            }
             try out.insertTimeRange(span, of: track, at: .zero)
             out.preferredTransform = MediaMath.transform(natural: natural, preferred: preferred, edits: edits)
         }
         if !edits.removeAudio {
             for track in audioTracks {
-                guard let out = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) else { continue }
+                guard let out = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                    continue
+                }
                 try out.insertTimeRange(span, of: track, at: .zero)
             }
         }

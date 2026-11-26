@@ -37,7 +37,7 @@ final class FolioPlayerView: AVPlayerView {
 
     override func keyDown(with event: NSEvent) {
         guard let controller, !controller.isTrimming,
-              let action = PlayerKey.action(characters: event.charactersIgnoringModifiers ?? "", modifiers: event.modifierFlags)
+            let action = PlayerKey.action(characters: event.charactersIgnoringModifiers ?? "", modifiers: event.modifierFlags)
         else { return super.keyDown(with: event) }
         switch action {
         case .playPause: controller.togglePlay()
@@ -58,7 +58,9 @@ nonisolated enum PlayerKey: Equatable {
 
     static func action(characters: String, modifiers: NSEvent.ModifierFlags) -> PlayerKey? {
         // Leave anything with ⌘, ⌃ or ⌥ to menus and the system.
-        guard modifiers.intersection([.command, .control, .option]).isEmpty, let scalar = characters.unicodeScalars.first else { return nil }
+        guard modifiers.intersection([.command, .control, .option]).isEmpty, let scalar = characters.unicodeScalars.first else {
+            return nil
+        }
         switch Int(scalar.value) {
         case 0x20: return .playPause
         case NSLeftArrowFunctionKey: return .step(-1)

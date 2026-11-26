@@ -1,5 +1,5 @@
-import SwiftUI
 import FolioKit
+import SwiftUI
 
 /// App-wide menu additions. Editor-specific menus live in each editor module.
 struct FolioCommands: Commands {

@@ -93,7 +93,8 @@ nonisolated struct ImageGeometry: Equatable, Sendable {
         let inHeight = sourceSize.height * scale
         let flipIn = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: inHeight)
         let flipOut = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: outHeight)
-        return flipIn
+        return
+            flipIn
             .concatenating(CGAffineTransform(scaleX: 1 / scale, y: 1 / scale))
             .concatenating(t)
             .concatenating(CGAffineTransform(scaleX: scale, y: scale))

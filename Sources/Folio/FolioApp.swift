@@ -1,11 +1,11 @@
-import SwiftUI
-import FolioKit
-import FolioPDF
-import FolioDocs
-import FolioSheets
-import FolioImage
 import FolioCode
+import FolioDocs
+import FolioImage
+import FolioKit
 import FolioMedia
+import FolioPDF
+import FolioSheets
+import SwiftUI
 
 /// Folio's entry point.
 ///

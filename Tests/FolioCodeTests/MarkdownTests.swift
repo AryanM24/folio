@@ -1,4 +1,5 @@
 import Testing
+
 @testable import FolioCode
 
 /// Renders and strips `data-line` attributes so expectations stay readable.
@@ -17,8 +18,9 @@ struct MarkdownTests {
     }
 
     @Test func inlineFormatting() {
-        #expect(html("**b** _i_ ***bi*** ~~s~~ `c<d>`") ==
-            "<p><strong>b</strong> <em>i</em> <em><strong>bi</strong></em> <del>s</del> <code>c&lt;d&gt;</code></p>")
+        #expect(
+            html("**b** _i_ ***bi*** ~~s~~ `c<d>`")
+                == "<p><strong>b</strong> <em>i</em> <em><strong>bi</strong></em> <del>s</del> <code>c&lt;d&gt;</code></p>")
         #expect(html("snake_case_word and 2 * 3 * 4") == "<p>snake_case_word and 2 * 3 * 4</p>")
         #expect(html("\\*not em\\*") == "<p>*not em*</p>")
     }
@@ -45,7 +47,10 @@ struct MarkdownTests {
 
     @Test func fencedCodeIsHighlightedAndEscaped() {
         let out = html("```swift\nlet a = \"<b>\"\n```")
-        #expect(out == "<pre><code class=\"language-swift\"><span class=\"tok-keyword\">let</span> a = <span class=\"tok-string\">&quot;&lt;b&gt;&quot;</span></code></pre>")
+        #expect(
+            out
+                == "<pre><code class=\"language-swift\"><span class=\"tok-keyword\">let</span> a = <span class=\"tok-string\">&quot;&lt;b&gt;&quot;</span></code></pre>"
+        )
         #expect(html("    indented\n    code") == "<pre><code>indented\ncode</code></pre>")
     }
 
@@ -56,13 +61,18 @@ struct MarkdownTests {
     }
 
     @Test func taskLists() {
-        #expect(html("- [x] done\n- [ ] todo") ==
-            "<ul class=\"contains-task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled checked> done</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled> todo</li>\n</ul>")
+        #expect(
+            html("- [x] done\n- [ ] todo")
+                == "<ul class=\"contains-task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled checked> done</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled> todo</li>\n</ul>"
+        )
     }
 
     @Test func tablesWithAlignment() {
         let out = html("| A | B |\n|:--|--:|\n| 1 | `a|b` |")
-        #expect(out == "<table>\n<thead>\n<tr><th style=\"text-align: left\">A</th><th style=\"text-align: right\">B</th></tr>\n</thead>\n<tbody>\n<tr><td style=\"text-align: left\">1</td><td style=\"text-align: right\"><code>a|b</code></td></tr>\n</tbody>\n</table>")
+        #expect(
+            out
+                == "<table>\n<thead>\n<tr><th style=\"text-align: left\">A</th><th style=\"text-align: right\">B</th></tr>\n</thead>\n<tbody>\n<tr><td style=\"text-align: left\">1</td><td style=\"text-align: right\"><code>a|b</code></td></tr>\n</tbody>\n</table>"
+        )
     }
 
     @Test func blockquotesAndRules() {

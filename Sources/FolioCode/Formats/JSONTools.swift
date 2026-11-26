@@ -96,7 +96,9 @@ nonisolated enum JSONTools {
                 skipWhitespace()
                 if isObject {
                     guard i < bytes.count, bytes[i] == UInt8(ascii: "\"") else {
-                        throw issue(i < bytes.count && bytes[i] == close ? "Trailing comma before \(describe(close))" : "Expected a property name in double quotes")
+                        throw issue(
+                            i < bytes.count && bytes[i] == close
+                                ? "Trailing comma before \(describe(close))" : "Expected a property name in double quotes")
                     }
                     try string()
                     skipWhitespace()

@@ -47,7 +47,8 @@ final class LineNumberRuler: NSRulerView {
 
     override func drawHashMarksAndLabels(in rect: NSRect) {
         guard let textView = clientView as? CodeTextView, let controller,
-              let layoutManager = textView.layoutManager, let container = textView.textContainer else { return }
+            let layoutManager = textView.layoutManager, let container = textView.textContainer
+        else { return }
         let lines = controller.highlighter.lines
         let text = textView.text
         let origin = textView.textContainerOrigin

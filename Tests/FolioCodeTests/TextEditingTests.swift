@@ -1,5 +1,6 @@
 import AppKit  // Not Foundation: the Command Line Tools lack its Testing overlay.
 import Testing
+
 @testable import FolioCode
 
 /// Applies an edit to `text` and returns the result with `|` at the caret (or `[…]` around a selection).
@@ -58,7 +59,8 @@ struct TextEditingTests {
         let commented = apply(TextEditing.toggleComment(s, selection: sel, lineComment: "//", blockComment: nil), to: s as String)
         #expect(commented == "[  // a\n\n  //   b]")
         (s, sel) = parse(commented)
-        #expect(apply(TextEditing.toggleComment(s, selection: sel, lineComment: "//", blockComment: nil), to: s as String) == "[  a\n\n    b]")
+        #expect(
+            apply(TextEditing.toggleComment(s, selection: sel, lineComment: "//", blockComment: nil), to: s as String) == "[  a\n\n    b]")
         (s, sel) = parse("x = 1|")
         #expect(apply(TextEditing.toggleComment(s, selection: sel, lineComment: "#", blockComment: nil), to: s as String) == "# x = 1|")
     }
@@ -68,7 +70,9 @@ struct TextEditingTests {
         let wrapped = apply(TextEditing.toggleComment(s, selection: sel, lineComment: nil, blockComment: ("<!--", "-->")), to: s as String)
         #expect(wrapped == "<!-- <p>hi</p> -->|")
         let (s2, sel2) = parse(wrapped)
-        #expect(apply(TextEditing.toggleComment(s2, selection: sel2, lineComment: nil, blockComment: ("<!--", "-->")), to: s2 as String) == "<p>hi</p>|")
+        #expect(
+            apply(TextEditing.toggleComment(s2, selection: sel2, lineComment: nil, blockComment: ("<!--", "-->")), to: s2 as String)
+                == "<p>hi</p>|")
     }
 
     @Test func moveLinesUpAndDown() {
@@ -108,7 +112,8 @@ struct TextEditingTests {
         (s, sel) = parse("  9. nine|")
         #expect(apply(TextEditing.newline(s, selection: sel, style: spaces4, language: .markdown), to: s as String) == "  9. nine\n  10. |")
         (s, sel) = parse("- [x] done|")
-        #expect(apply(TextEditing.newline(s, selection: sel, style: spaces4, language: .markdown), to: s as String) == "- [x] done\n- [ ] |")
+        #expect(
+            apply(TextEditing.newline(s, selection: sel, style: spaces4, language: .markdown), to: s as String) == "- [x] done\n- [ ] |")
         (s, sel) = parse("a\n- |")
         #expect(apply(TextEditing.newline(s, selection: sel, style: spaces4, language: .markdown), to: s as String) == "a\n|")
     }

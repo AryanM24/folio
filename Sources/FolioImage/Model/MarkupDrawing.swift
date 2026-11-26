@@ -59,16 +59,19 @@ nonisolated enum MarkupDrawing {
             ctx.fillPath()
         case .text:
             guard let origin = item.points.first else { return }
-            let font = CTFontCreateUIFontForLanguage(.system, item.fontSize, nil)
+            let font =
+                CTFontCreateUIFontForLanguage(.system, item.fontSize, nil)
                 ?? CTFontCreateWithName("Helvetica" as CFString, item.fontSize, nil)
             let lineHeight = item.fontSize * 1.2
             // The context is y-down; flip glyphs back upright.
             ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
             for (index, line) in lines(item.text).enumerated() {
-                let attributed = NSAttributedString(string: line, attributes: [
-                    kCTFontAttributeName as NSAttributedString.Key: font,
-                    kCTForegroundColorAttributeName as NSAttributedString.Key: item.color.cgColor,
-                ])
+                let attributed = NSAttributedString(
+                    string: line,
+                    attributes: [
+                        kCTFontAttributeName as NSAttributedString.Key: font,
+                        kCTForegroundColorAttributeName as NSAttributedString.Key: item.color.cgColor,
+                    ])
                 let ctLine = CTLineCreateWithAttributedString(attributed)
                 ctx.textPosition = CGPoint(x: origin.x, y: origin.y + Double(index) * lineHeight + CTFontGetAscent(font))
                 CTLineDraw(ctLine, ctx)
@@ -78,13 +81,15 @@ nonisolated enum MarkupDrawing {
 
     /// Measured size of a text item, for selection and hit testing.
     static func textSize(_ text: String, fontSize: Double) -> CGSize {
-        let font = CTFontCreateUIFontForLanguage(.system, fontSize, nil)
+        let font =
+            CTFontCreateUIFontForLanguage(.system, fontSize, nil)
             ?? CTFontCreateWithName("Helvetica" as CFString, fontSize, nil)
         let all = lines(text)
-        let width = all.map { line in
-            let attributed = NSAttributedString(string: line, attributes: [kCTFontAttributeName as NSAttributedString.Key: font])
-            return CTLineGetTypographicBounds(CTLineCreateWithAttributedString(attributed), nil, nil, nil)
-        }.max() ?? 0
+        let width =
+            all.map { line in
+                let attributed = NSAttributedString(string: line, attributes: [kCTFontAttributeName as NSAttributedString.Key: font])
+                return CTLineGetTypographicBounds(CTLineCreateWithAttributedString(attributed), nil, nil, nil)
+            }.max() ?? 0
         return CGSize(width: max(fontSize / 2, width), height: Double(all.count) * fontSize * 1.2)
     }
 
@@ -98,9 +103,10 @@ nonisolated enum MarkupDrawing {
     static func image(_ items: [MarkupItem], size: CGSize, transform: CGAffineTransform) -> CGImage? {
         let width = Int(size.width.rounded()), height = Int(size.height.rounded())
         guard !items.isEmpty, width > 0, height > 0,
-              let space = CGColorSpace(name: CGColorSpace.sRGB),
-              let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            let space = CGColorSpace(name: CGColorSpace.sRGB),
+            let ctx = CGContext(
+                data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
         ctx.translateBy(x: 0, y: Double(height))
         ctx.scaleBy(x: 1, y: -1)

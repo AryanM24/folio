@@ -1,7 +1,7 @@
 import CoreGraphics
 import CoreImage
-import Foundation
 import FolioKit
+import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
@@ -31,7 +31,7 @@ nonisolated enum ImageCodec {
     /// The content type ImageIO detects from the bytes, falling back to `hint`.
     static func detectedType(of data: Data, hint: UTType?) -> UTType? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let id = CGImageSourceGetType(source) as String?
+            let id = CGImageSourceGetType(source) as String?
         else { return hint }
         return UTType(id) ?? hint
     }
@@ -43,7 +43,8 @@ nonisolated enum ImageCodec {
     ///   - properties: Metadata to embed (see ``propertiesForSaving(_:strip:)``).
     static func encode(_ image: CGImage, as type: UTType, quality: Double? = nil, properties: [String: Any] = [:]) throws -> Data {
         guard canWrite(type) else {
-            throw FolioError("macOS can't save \(type.localizedDescription ?? "this format") files. Use Export As to save a PNG, JPEG or HEIC copy.")
+            throw FolioError(
+                "macOS can't save \(type.localizedDescription ?? "this format") files. Use Export As to save a PNG, JPEG or HEIC copy.")
         }
         let data = NSMutableData()
         guard let destination = CGImageDestinationCreateWithData(data, type.identifier as CFString, 1, nil) else {
@@ -103,8 +104,8 @@ nonisolated enum ImageCodec {
     /// format allows (JPEG, PNG, TIFF, HEIC); otherwise falls back to a re-encode.
     static func strippingMetadata(_ data: Data) throws -> Data {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let typeID = CGImageSourceGetType(source),
-              let type = UTType(typeID as String)
+            let typeID = CGImageSourceGetType(source),
+            let type = UTType(typeID as String)
         else { throw FolioError("This file isn't an image Folio can read.") }
         let output = NSMutableData()
         if let destination = CGImageDestinationCreateWithData(output, typeID, 1, nil) {
@@ -133,7 +134,7 @@ nonisolated enum ImageCodec {
     /// True when the file still carries GPS, EXIF or IPTC.
     static func hasPersonalMetadata(_ data: Data) -> Bool {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any]
+            let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any]
         else { return false }
         if props[kCGImagePropertyGPSDictionary as String] != nil || props[kCGImagePropertyIPTCDictionary as String] != nil {
             return true

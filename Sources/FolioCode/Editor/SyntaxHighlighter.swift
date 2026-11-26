@@ -63,15 +63,17 @@ final class SyntaxHighlighter {
             let lineStart = lines.start(ofLine: line)
             for token in tokens(forLine: line, in: text) {
                 guard let color = CodeTheme.color(for: token.kind) else { continue }
-                layoutManager.addTemporaryAttribute(.foregroundColor, value: color,
-                                                    forCharacterRange: NSRange(location: lineStart + token.start, length: token.end - token.start))
+                layoutManager.addTemporaryAttribute(
+                    .foregroundColor, value: color,
+                    forCharacterRange: NSRange(location: lineStart + token.start, length: token.end - token.start))
             }
         }
     }
 
     private func catchUp(through line: Int, in text: NSString) {
         while valid <= line, valid < lines.count {
-            states[valid] = withLine(valid - 1, in: text) { lexer.lex($0, state: states[valid - 1], tokens: &noTokens) } ?? states[valid - 1]
+            states[valid] =
+                withLine(valid - 1, in: text) { lexer.lex($0, state: states[valid - 1], tokens: &noTokens) } ?? states[valid - 1]
             valid += 1
         }
     }

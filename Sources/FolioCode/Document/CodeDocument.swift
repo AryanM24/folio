@@ -1,7 +1,7 @@
+import AppKit
+import FolioKit
 public import SwiftUI
 public import UniformTypeIdentifiers
-import FolioKit
-import AppKit
 
 /// A plain-text, Markdown or source file.
 ///
@@ -56,8 +56,9 @@ public final class CodeDocument: ReferenceFileDocument, @unchecked Sendable {
         format = decoded.format
         byteCount = data.count
         let firstLine = decoded.text.prefix(200).split(separator: "\n", maxSplits: 1).first.map(String.init)
-        language = Language.detect(fileName: configuration.file.filename ?? configuration.file.preferredFilename,
-                                   contentType: configuration.contentType, firstLine: firstLine)
+        language = Language.detect(
+            fileName: configuration.file.filename ?? configuration.file.preferredFilename,
+            contentType: configuration.contentType, firstLine: firstLine)
         indent = IndentStyle.detect(in: decoded.text) ?? IndentStyle(usesTabs: false, width: Self.defaultTabWidth)
     }
 

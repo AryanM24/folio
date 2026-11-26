@@ -2,6 +2,7 @@ import CoreGraphics
 import ImageIO
 import Testing
 import UniformTypeIdentifiers
+
 @testable import FolioImage
 
 @Suite struct PipelineTests {
@@ -82,13 +83,18 @@ import UniformTypeIdentifiers
 
     @Test func zeroStrengthIsUnfiltered() throws {
         let plain = TestImages.pixel(try render { _ in }, x: 380, y: 280)
-        let faint = TestImages.pixel(try render { $0.filter = .noir; $0.filterStrength = 0 }, x: 380, y: 280)
+        let faint = TestImages.pixel(
+            try render {
+                $0.filter = .noir; $0.filterStrength = 0
+            }, x: 380, y: 280)
         #expect(abs(plain.b - faint.b) < 3 && abs(plain.r - faint.r) < 3)
     }
 
     @Test func everyPresetAndSliderRenders() throws {
         for preset in FilterPreset.allCases {
-            _ = try render { $0.filter = preset; $0.filterStrength = 0.5 }
+            _ = try render {
+                $0.filter = preset; $0.filterStrength = 0.5
+            }
         }
         for adjustment in Adjustment.allCases {
             _ = try render { $0.adjustments[adjustment] = adjustment.range.upperBound }
@@ -103,8 +109,9 @@ import UniformTypeIdentifiers
     }
 
     @Test func markupIsBakedIntoSavesOnly() throws {
-        let item = MarkupItem(kind: .rectangle, points: [CGPoint(x: 250, y: 200), CGPoint(x: 350, y: 280)],
-                              color: RGBA(red: 0, green: 1, blue: 0), lineWidth: 10)
+        let item = MarkupItem(
+            kind: .rectangle, points: [CGPoint(x: 250, y: 200), CGPoint(x: 350, y: 280)],
+            color: RGBA(red: 0, green: 1, blue: 0), lineWidth: 10)
         let saved = try render({ $0.markup = [item] })
         let edge = TestImages.pixel(saved, x: 300, y: 200)
         #expect(edge.g > 200 && edge.r < 80, "green stroke at the top edge")
@@ -115,7 +122,9 @@ import UniformTypeIdentifiers
     @Test func markupFollowsRotation() throws {
         // A dot near the source's top-left lands top-right after a clockwise turn.
         let dot = MarkupItem(kind: .pen, points: [CGPoint(x: 30, y: 30)], color: RGBA(red: 0, green: 1, blue: 0), lineWidth: 20)
-        let out = try render { $0.markup = [dot]; $0.rotateClockwise() }
+        let out = try render {
+            $0.markup = [dot]; $0.rotateClockwise()
+        }
         let p = TestImages.pixel(out, x: 300 - 30, y: 30)
         #expect(p.g > 200 && p.r < 80)
     }

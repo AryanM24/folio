@@ -1,6 +1,6 @@
 import CryptoKit
-import Foundation
 import FolioKit
+import Foundation
 
 /// Lets edits stay non-destructive across closing and reopening a file.
 ///
@@ -25,7 +25,8 @@ import FolioKit
 nonisolated struct EditSessionStore: Sendable {
     let root: URL
 
-    static let shared = EditSessionStore(root: URL.applicationSupportDirectory.appending(path: "Folio/Image Sessions", directoryHint: .isDirectory))
+    static let shared = EditSessionStore(
+        root: URL.applicationSupportDirectory.appending(path: "Folio/Image Sessions", directoryHint: .isDirectory))
 
     struct Session: Codable, Sendable {
         var version = EditRecipe.version
@@ -70,10 +71,10 @@ nonisolated struct EditSessionStore: Sendable {
     func restore(fileData: Data) -> Restored? {
         let key = Self.key(for: fileData)
         guard let json = try? Data(contentsOf: sessions.appending(path: "\(key).json")),
-              let session = try? JSONDecoder().decode(Session.self, from: json),
-              session.version == EditRecipe.version,
-              let original = try? Data(contentsOf: originals.appending(path: session.originalKey)),
-              Self.key(for: original) == session.originalKey
+            let session = try? JSONDecoder().decode(Session.self, from: json),
+            session.version == EditRecipe.version,
+            let original = try? Data(contentsOf: originals.appending(path: session.originalKey)),
+            Self.key(for: original) == session.originalKey
         else { return nil }
         return Restored(original: original, originalTypeIdentifier: session.originalType, recipe: session.recipe, key: key)
     }
@@ -92,8 +93,8 @@ nonisolated struct EditSessionStore: Sendable {
         for url in sessionFiles {
             let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
             guard now.timeIntervalSince(date) < maxAge,
-                  let data = try? Data(contentsOf: url),
-                  let session = try? JSONDecoder().decode(Session.self, from: data)
+                let data = try? Data(contentsOf: url),
+                let session = try? JSONDecoder().decode(Session.self, from: data)
             else { try? fm.removeItem(at: url); continue }
             live.append((url, date, session.originalKey))
         }
@@ -109,7 +110,8 @@ nonisolated struct EditSessionStore: Sendable {
             }
             if isNew { total += size; kept.insert(entry.original) }
         }
-        for url in (try? fm.contentsOfDirectory(at: originals, includingPropertiesForKeys: keys)) ?? [] where !kept.contains(url.lastPathComponent) {
+        for url in (try? fm.contentsOfDirectory(at: originals, includingPropertiesForKeys: keys)) ?? []
+        where !kept.contains(url.lastPathComponent) {
             // A save writes the original before its session; don't race a save in flight.
             let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
             if now.timeIntervalSince(date) > 3600 { try? fm.removeItem(at: url) }

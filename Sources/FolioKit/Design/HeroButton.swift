@@ -28,8 +28,20 @@ public struct HeroButtonStyle: ButtonStyle {
 
     public enum Size: Sendable {
         case sm, md, lg
-        var height: CGFloat { switch self { case .sm: 32; case .md: 36; case .lg: 40 } }
-        var padding: CGFloat { switch self { case .sm: 12; case .md: 16; case .lg: 16 } }
+        var height: CGFloat {
+            switch self {
+            case .sm: 32;
+            case .md: 36;
+            case .lg: 40
+            }
+        }
+        var padding: CGFloat {
+            switch self {
+            case .sm: 12;
+            case .md: 16;
+            case .lg: 16
+            }
+        }
         var font: Font { self == .lg ? .system(size: 14, weight: .medium) : .system(size: 13, weight: .medium) }
     }
 
@@ -41,7 +53,8 @@ public struct HeroButtonStyle: ButtonStyle {
     /// Selected state for toggle buttons in toolbars.
     let isSelected: Bool
 
-    public init(_ variant: Variant = .primary, size: Size = .md, iconOnly: Bool = false, fullWidth: Bool = false, isSelected: Bool = false) {
+    public init(_ variant: Variant = .primary, size: Size = .md, iconOnly: Bool = false, fullWidth: Bool = false, isSelected: Bool = false)
+    {
         self.variant = variant
         self.size = size
         self.iconOnly = iconOnly

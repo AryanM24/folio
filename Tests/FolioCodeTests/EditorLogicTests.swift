@@ -1,5 +1,6 @@
 import AppKit  // Not Foundation: the Command Line Tools lack its Testing overlay.
 import Testing
+
 @testable import FolioCode
 
 @Suite("Incremental highlighting")
@@ -9,9 +10,11 @@ struct HighlighterTests {
         (0..<highlighter.lines.count).map { highlighter.tokens(forLine: $0, in: text) }
     }
 
-    @Test("Edits give the same tokens as lexing from scratch", arguments: [
-        (0, 0, "/* "), (12, 0, "\"open"), (3, 5, ""), (0, 0, "line\n\n"), (20, 4, "*/ x\n"),
-    ])
+    @Test(
+        "Edits give the same tokens as lexing from scratch",
+        arguments: [
+            (0, 0, "/* "), (12, 0, "\"open"), (3, 5, ""), (0, 0, "line\n\n"), (20, 4, "*/ x\n"),
+        ])
     func editsMatchFreshLex(location: Int, length: Int, replacement: String) {
         let text = NSMutableString(string: "let a = 1\nvar b = \"s\"\n/* c */ let d\nfunc e() {}\n")
         let highlighter = SyntaxHighlighter()

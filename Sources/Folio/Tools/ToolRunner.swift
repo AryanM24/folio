@@ -1,12 +1,12 @@
+import FolioCode
+import FolioDocs
+import FolioImage
+import FolioKit
+import FolioMedia
+import FolioPDF
+import FolioSheets
 import SwiftUI
 import UniformTypeIdentifiers
-import FolioKit
-import FolioPDF
-import FolioDocs
-import FolioSheets
-import FolioImage
-import FolioCode
-import FolioMedia
 
 /// Every tool from every module, in menu order.
 enum ToolCatalog {

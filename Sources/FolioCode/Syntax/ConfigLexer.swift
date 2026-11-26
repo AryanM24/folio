@@ -8,7 +8,9 @@ nonisolated struct ConfigLexer: Lexer {
     enum Flavor: Sendable { case yaml, toml, ini }
     let flavor: Flavor
 
-    private static let literals: Set<String> = ["true", "false", "null", "yes", "no", "on", "off", "True", "False", "Null", "NULL", "Yes", "No", "~"]
+    private static let literals: Set<String> = [
+        "true", "false", "null", "yes", "no", "on", "off", "True", "False", "Null", "NULL", "Yes", "No", "~",
+    ]
 
     func lex(_ s: UnsafeBufferPointer<UInt16>, state: LexState, tokens: inout [Token]?) -> LexState {
         let n = s.count
@@ -83,7 +85,9 @@ nonisolated struct ConfigLexer: Lexer {
         }
         while i < n {
             let c = s[i]
-            if Char.isSpace(c) || c == Char.of(",") || c == Char.of("[") || c == Char.of("]") || c == Char.of("{") || c == Char.of("}") { i += 1; continue }
+            if Char.isSpace(c) || c == Char.of(",") || c == Char.of("[") || c == Char.of("]") || c == Char.of("{") || c == Char.of("}") {
+                i += 1; continue
+            }
             if c == Char.of("#") || (flavor == .ini && c == Char.of(";")), i == from || Char.isSpace(s[i - 1]) {
                 emit(.comment, i, n)
                 return .initial

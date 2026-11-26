@@ -7,7 +7,8 @@ import Foundation
 /// often wrap across lines, so all of these carry over.
 nonisolated struct MarkupLexer: Lexer {
     private enum Mode { static let text: UInt8 = 0, tag: UInt8 = 1, comment: UInt8 = 2, value: UInt8 = 3 }
-    private static let commentOpen = "<!--".utf16Array, commentClose = "-->".utf16Array, cdataOpen = "<![CDATA[".utf16Array, cdataClose = "]]>".utf16Array
+    private static let commentOpen = "<!--".utf16Array, commentClose = "-->".utf16Array, cdataOpen = "<![CDATA[".utf16Array,
+        cdataClose = "]]>".utf16Array
 
     func lex(_ s: UnsafeBufferPointer<UInt16>, state: LexState, tokens: inout [Token]?) -> LexState {
         let n = s.count
@@ -37,7 +38,9 @@ nonisolated struct MarkupLexer: Lexer {
             if mode == Mode.tag {
                 if Char.isSpace(c) || c == Char.of("=") { i += 1; continue }
                 if c == Char.of(">") { emit(.tag, i, i + 1); i += 1; mode = Mode.text; continue }
-                if (c == Char.of("/") || c == Char.of("?")), i + 1 < n, s[i + 1] == Char.of(">") { emit(.tag, i, i + 2); i += 2; mode = Mode.text; continue }
+                if (c == Char.of("/") || c == Char.of("?")), i + 1 < n, s[i + 1] == Char.of(">") {
+                    emit(.tag, i, i + 2); i += 2; mode = Mode.text; continue
+                }
                 if c == Char.of("\"") || c == Char.of("'") {
                     var j = i + 1
                     while j < n, s[j] != c { j += 1 }
@@ -54,7 +57,9 @@ nonisolated struct MarkupLexer: Lexer {
             // Text content.
             if c == Char.of("<") {
                 if s.has(Self.commentOpen, at: i) {
-                    guard let end = s.find(Self.commentClose, from: i + 4) else { emit(.comment, i, n); return LexState(mode: Mode.comment) }
+                    guard let end = s.find(Self.commentClose, from: i + 4) else {
+                        emit(.comment, i, n); return LexState(mode: Mode.comment)
+                    }
                     emit(.comment, i, end + 3)
                     i = end + 3
                     continue

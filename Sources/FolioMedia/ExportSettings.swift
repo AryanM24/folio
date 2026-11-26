@@ -149,7 +149,8 @@ nonisolated enum MediaMath {
     static func settingPoint(_ time: CMTime, isIn: Bool, current: CMTimeRange?, duration: CMTime) -> CMTimeRange? {
         let full = CMTimeRange(start: .zero, duration: duration)
         let range = current ?? full
-        let proposed = isIn
+        let proposed =
+            isIn
             ? CMTimeRange(start: time, end: time < range.end ? range.end : duration)
             : CMTimeRange(start: time > range.start ? range.start : .zero, end: time)
         return clamp(proposed, to: duration)

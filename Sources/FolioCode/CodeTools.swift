@@ -5,7 +5,9 @@ import UniformTypeIdentifiers
 /// File tools owned by this module. Surfaced in the Welcome window, File > Tools and
 /// Finder Quick Actions. Each writes new files next to its inputs and never changes them.
 public enum CodeTools {
-    public nonisolated static let all: [FolioTool] = [markdownToPDF, markdownToHTML, markdownToWord, formatJSON, convertLineEndings, convertToUTF8]
+    public nonisolated static let all: [FolioTool] = [
+        markdownToPDF, markdownToHTML, markdownToWord, formatJSON, convertLineEndings, convertToUTF8,
+    ]
 
     private nonisolated static let markdownTypes: [UTType] = [.markdown]
     private nonisolated static let textTypes: [UTType] = FileKind.code.readableTypes
@@ -34,7 +36,10 @@ public enum CodeTools {
     nonisolated static let formatJSON = FolioTool(
         id: "code.formatJSON", title: "Format JSON", subtitle: "Pretty-print JSON files, keeping key order",
         symbol: "curlybraces", inputTypes: [.json],
-        options: [FolioTool.Option(id: "indent", label: "Indent", choices: [("2", "2 spaces"), ("4", "4 spaces"), ("tab", "Tabs")], defaultValue: "2")]
+        options: [
+            FolioTool.Option(
+                id: "indent", label: "Indent", choices: [("2", "2 spaces"), ("4", "4 spaces"), ("tab", "Tabs")], defaultValue: "2")
+        ]
     ) { inputs, options in
         let indent = options["indent"] == "tab" ? "\t" : String(repeating: " ", count: Int(options["indent"] ?? "2") ?? 2)
         return try inputs.map { url in
@@ -50,12 +55,17 @@ public enum CodeTools {
     nonisolated static let convertLineEndings = FolioTool(
         id: "code.convertLineEndings", title: "Convert Line Endings", subtitle: "Save copies with macOS/Linux or Windows line endings",
         symbol: "return", inputTypes: textTypes,
-        options: [FolioTool.Option(id: "ending", label: "Line endings", choices: [("lf", "macOS and Linux (LF)"), ("crlf", "Windows (CRLF)")], defaultValue: "lf")]
+        options: [
+            FolioTool.Option(
+                id: "ending", label: "Line endings", choices: [("lf", "macOS and Linux (LF)"), ("crlf", "Windows (CRLF)")],
+                defaultValue: "lf")
+        ]
     ) { inputs, options in
         let ending = LineEnding(rawValue: options["ending"] ?? "lf") ?? .lf
         return try inputs.map { url in
             let (text, format) = try read(url)
-            return try write(TextCodec.encode(text, as: TextFormat(encoding: format.encoding, lineEnding: ending)), nextTo: url, suffix: ending.title)
+            return try write(
+                TextCodec.encode(text, as: TextFormat(encoding: format.encoding, lineEnding: ending)), nextTo: url, suffix: ending.title)
         }
     }
 
@@ -65,7 +75,8 @@ public enum CodeTools {
     ) { inputs, _ in
         try inputs.map { url in
             let (text, format) = try read(url)
-            return try write(TextCodec.encode(text, as: TextFormat(encoding: .utf8, lineEnding: format.lineEnding)), nextTo: url, suffix: "UTF-8")
+            return try write(
+                TextCodec.encode(text, as: TextFormat(encoding: .utf8, lineEnding: format.lineEnding)), nextTo: url, suffix: "UTF-8")
         }
     }
 
@@ -88,7 +99,9 @@ public enum CodeTools {
         return output
     }
 
-    private nonisolated static func convertMarkdown(_ inputs: [URL], ext: String, _ convert: @Sendable (String, String) async throws -> Data) async throws -> [URL] {
+    private nonisolated static func convertMarkdown(
+        _ inputs: [URL], ext: String, _ convert: @Sendable (String, String) async throws -> Data
+    ) async throws -> [URL] {
         var outputs: [URL] = []
         for url in inputs {
             let (text, _) = try read(url)

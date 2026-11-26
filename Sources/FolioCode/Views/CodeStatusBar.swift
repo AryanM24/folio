@@ -1,5 +1,5 @@
-import SwiftUI
 import FolioKit
+import SwiftUI
 
 /// Ln/Col, selection, counts and JSON status on the left; language, indentation, encoding
 /// and line endings on the right, each a menu that changes it.
@@ -49,7 +49,9 @@ struct CodeStatusBar: View {
     @ViewBuilder private var jsonStatus: some View {
         if document.language == .json {
             if let issue = controller.jsonIssue {
-                Button { controller.reveal(issue) } label: {
+                Button {
+                    controller.reveal(issue)
+                } label: {
                     Label(issue.description, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(Hero.danger)
                         .lineLimit(1)
@@ -72,7 +74,9 @@ private struct StatusMenu<Content: View>: View {
     @State private var hovered = false
 
     var body: some View {
-        Menu { content } label: {
+        Menu {
+            content
+        } label: {
             Text(title)
                 .foregroundStyle(hovered ? Hero.foreground : Hero.muted)
         }

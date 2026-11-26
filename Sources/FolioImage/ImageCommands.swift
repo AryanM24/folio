@@ -41,10 +41,12 @@ public struct ImageCommands: Commands {
         Button("Copy Image") { editor?.copyImage() }.keyboardShortcut("c", modifiers: [.command, .shift])
         Button("Export…") { editor?.requestedPopover = .export }.keyboardShortcut("e", modifiers: [.command, .shift])
         Button("Info") { editor?.requestedPopover = .info }.keyboardShortcut("i")
-        Toggle("Remove Location and Metadata on Save", isOn: Binding(
-            get: { editor?.recipe.stripMetadata ?? false },
-            set: { _ in editor?.toggleStripMetadata() }
-        ))
+        Toggle(
+            "Remove Location and Metadata on Save",
+            isOn: Binding(
+                get: { editor?.recipe.stripMetadata ?? false },
+                set: { _ in editor?.toggleStripMetadata() }
+            ))
         Divider()
         Button("Reset All Edits") { editor?.resetAll() }.keyboardShortcut("r", modifiers: [.command, .shift])
     }

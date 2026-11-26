@@ -48,7 +48,8 @@ struct PreviewPane: NSViewRepresentable {
                 case .markdown:
                     if pageLoaded {
                         // `evaluateJavaScript` runs as the app, unaffected by the page's JS setting.
-                        webView.evaluateJavaScript("document.getElementById('\(HTMLPage.contentID)').innerHTML = \(Self.jsString(pane.content));")
+                        webView.evaluateJavaScript(
+                            "document.getElementById('\(HTMLPage.contentID)').innerHTML = \(Self.jsString(pane.content));")
                     } else {
                         webView.loadHTMLString(HTMLPage.document(body: pane.content, title: pane.title), baseURL: pane.baseURL)
                     }
@@ -67,13 +68,14 @@ struct PreviewPane: NSViewRepresentable {
 
         private func scroll(_ webView: WKWebView, to line: Int) {
             scrolledLine = line
-            webView.evaluateJavaScript("""
-            (function(line) {
-              var els = document.querySelectorAll('[data-line]'), target = null;
-              for (var i = 0; i < els.length; i++) { if (+els[i].getAttribute('data-line') <= line) target = els[i]; else break; }
-              window.scrollTo(0, target && line > 0 ? target.getBoundingClientRect().top + window.scrollY - 16 : 0);
-            })(\(line));
-            """)
+            webView.evaluateJavaScript(
+                """
+                (function(line) {
+                  var els = document.querySelectorAll('[data-line]'), target = null;
+                  for (var i = 0; i < els.length; i++) { if (+els[i].getAttribute('data-line') <= line) target = els[i]; else break; }
+                  window.scrollTo(0, target && line > 0 ? target.getBoundingClientRect().top + window.scrollY - 16 : 0);
+                })(\(line));
+                """)
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation?) {
@@ -84,7 +86,10 @@ struct PreviewPane: NSViewRepresentable {
             }
         }
 
-        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
+        func webView(
+            _ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
+            decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void
+        ) {
             guard navigationAction.navigationType == .linkActivated, let url = navigationAction.request.url else {
                 decisionHandler(.allow)
                 return
@@ -100,13 +105,15 @@ struct PreviewPane: NSViewRepresentable {
 
         static func jsString(_ text: String) -> String {
             guard let data = try? JSONSerialization.data(withJSONObject: text, options: .fragmentsAllowed),
-                  let json = String(data: data, encoding: .utf8) else { return "''" }
+                let json = String(data: data, encoding: .utf8)
+            else { return "''" }
             return json
         }
 
         /// Adds a CSP to a user's HTML so its preview can't load anything from the network.
         static func lockDown(_ html: String) -> String {
-            let csp = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline' file:; img-src data: file:; font-src data: file:\">"
+            let csp =
+                "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline' file:; img-src data: file:; font-src data: file:\">"
             if html.prefix(15).lowercased().hasPrefix("<!doctype"), let end = html.firstIndex(of: ">") {
                 var copy = html
                 copy.insert(contentsOf: csp, at: copy.index(after: end))
@@ -118,16 +125,16 @@ struct PreviewPane: NSViewRepresentable {
         static func svgPage(_ svg: String) -> String {
             let body = svg.range(of: "<svg", options: .caseInsensitive).map { String(svg[$0.lowerBound...]) } ?? svg
             return """
-            <!doctype html><html><head><meta charset="utf-8">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
-            <style>
-            :root { color-scheme: light dark; }
-            html, body { margin: 0; height: 100%; background: \(SyntaxPalette.css(SyntaxPalette.codeBackground.light)); }
-            @media (prefers-color-scheme: dark) { html, body { background: \(SyntaxPalette.css(SyntaxPalette.codeBackground.dark)); } }
-            body { display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
-            svg { max-width: 100%; max-height: 100%; height: auto; }
-            </style></head><body>\(body)</body></html>
-            """
+                <!doctype html><html><head><meta charset="utf-8">
+                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+                <style>
+                :root { color-scheme: light dark; }
+                html, body { margin: 0; height: 100%; background: \(SyntaxPalette.css(SyntaxPalette.codeBackground.light)); }
+                @media (prefers-color-scheme: dark) { html, body { background: \(SyntaxPalette.css(SyntaxPalette.codeBackground.dark)); } }
+                body { display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+                svg { max-width: 100%; max-height: 100%; height: auto; }
+                </style></head><body>\(body)</body></html>
+                """
         }
     }
 }

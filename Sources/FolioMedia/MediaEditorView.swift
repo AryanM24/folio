@@ -1,5 +1,5 @@
-public import SwiftUI
 import FolioKit
+public import SwiftUI
 
 /// The media window: player (or waveform for audio), filmstrip, status bar and inspector.
 ///
@@ -15,9 +15,11 @@ public struct MediaEditorView: View {
         if let url = configuration?.fileURL {
             MediaScreen(url: url, openedAt: document.openedAt).id(url)
         } else {
-            ContentUnavailableView("Open a movie or sound file", systemImage: FileKind.media.symbol,
-                                   description: Text("Choose File › Open… to play a video or audio file."))
-                .background(Hero.background)
+            ContentUnavailableView(
+                "Open a movie or sound file", systemImage: FileKind.media.symbol,
+                description: Text("Choose File › Open… to play a video or audio file.")
+            )
+            .background(Hero.background)
         }
     }
 }

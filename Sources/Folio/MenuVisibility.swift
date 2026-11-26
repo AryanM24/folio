@@ -35,9 +35,9 @@ enum MenuVisibility {
     /// The editor kind of the front document window, or `nil` for Welcome, Settings or none.
     private static func activeKind() -> FileKind? {
         guard let window = NSApp.mainWindow,
-              let document = NSDocumentController.shared.document(for: window),
-              let typeName = document.fileType,
-              let type = UTType(typeName)
+            let document = NSDocumentController.shared.document(for: window),
+            let typeName = document.fileType,
+            let type = UTType(typeName)
         else { return nil }
         return FileKind.kind(for: type)
     }

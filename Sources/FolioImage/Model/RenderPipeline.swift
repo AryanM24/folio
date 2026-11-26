@@ -49,10 +49,12 @@ nonisolated enum RenderPipeline {
         size = CGSize(width: (size.width * scale).rounded(), height: (size.height * scale).rounded())
         if final, cropped, geometry.recipe.resize != nil {
             let rs = geometry.resizeScale
-            image = image.applyingFilter("CILanczosScaleTransform", parameters: [
-                kCIInputScaleKey: rs.height,
-                kCIInputAspectRatioKey: rs.width / rs.height,
-            ])
+            image = image.applyingFilter(
+                "CILanczosScaleTransform",
+                parameters: [
+                    kCIInputScaleKey: rs.height,
+                    kCIInputAspectRatioKey: rs.width / rs.height,
+                ])
             size = CGSize(width: geometry.outputSize.width * scale, height: geometry.outputSize.height * scale)
         }
         let extent = CGRect(origin: .zero, size: CGSize(width: max(1, size.width.rounded()), height: max(1, size.height.rounded())))
@@ -113,12 +115,15 @@ nonisolated enum RenderPipeline {
         out = out.cropped(to: frame)
         let vignette = recipe.adjustments[.vignette] / 100
         if vignette != 0 {
-            out = out.applyingFilter("CIVignetteEffect", parameters: [
-                kCIInputCenterKey: CIVector(x: frame.midX, y: frame.midY),
-                kCIInputRadiusKey: hypot(frame.width, frame.height) * 0.42,
-                kCIInputIntensityKey: vignette,
-                "inputFalloff": 0.6,
-            ]).cropped(to: frame)
+            out = out.applyingFilter(
+                "CIVignetteEffect",
+                parameters: [
+                    kCIInputCenterKey: CIVector(x: frame.midX, y: frame.midY),
+                    kCIInputRadiusKey: hypot(frame.width, frame.height) * 0.42,
+                    kCIInputIntensityKey: vignette,
+                    "inputFalloff": 0.6,
+                ]
+            ).cropped(to: frame)
         }
         return out
     }
@@ -136,29 +141,35 @@ nonisolated enum RenderPipeline {
             image = image.applyingFilter("CIGammaAdjust", parameters: ["inputPower": pow(2, -n(.brightness) * 0.8)])
         }
         if n(.contrast) != 0 || n(.saturation) != 0 {
-            image = image.applyingFilter("CIColorControls", parameters: [
-                kCIInputContrastKey: 1 + n(.contrast) * 0.5,
-                kCIInputSaturationKey: 1 + n(.saturation),
-                kCIInputBrightnessKey: 0,
-            ])
+            image = image.applyingFilter(
+                "CIColorControls",
+                parameters: [
+                    kCIInputContrastKey: 1 + n(.contrast) * 0.5,
+                    kCIInputSaturationKey: 1 + n(.saturation),
+                    kCIInputBrightnessKey: 0,
+                ])
         }
         let highlights = n(.highlights), shadows = n(.shadows)
         if shadows != 0 || highlights < 0 {
-            image = image.applyingFilter("CIHighlightShadowAdjust", parameters: [
-                "inputShadowAmount": shadows,
-                "inputHighlightAmount": 1 + min(0, highlights),
-                kCIInputRadiusKey: max(1, 10 * scale),
-            ])
+            image = image.applyingFilter(
+                "CIHighlightShadowAdjust",
+                parameters: [
+                    "inputShadowAmount": shadows,
+                    "inputHighlightAmount": 1 + min(0, highlights),
+                    kCIInputRadiusKey: max(1, 10 * scale),
+                ])
         }
         if highlights > 0 {
             // CIHighlightShadowAdjust can only darken highlights; brighten them with a curve.
-            image = image.applyingFilter("CIToneCurve", parameters: [
-                "inputPoint0": CIVector(x: 0, y: 0),
-                "inputPoint1": CIVector(x: 0.25, y: 0.25),
-                "inputPoint2": CIVector(x: 0.5, y: 0.5 + 0.04 * highlights),
-                "inputPoint3": CIVector(x: 0.75, y: 0.75 + 0.12 * highlights),
-                "inputPoint4": CIVector(x: 1, y: 1),
-            ])
+            image = image.applyingFilter(
+                "CIToneCurve",
+                parameters: [
+                    "inputPoint0": CIVector(x: 0, y: 0),
+                    "inputPoint1": CIVector(x: 0.25, y: 0.25),
+                    "inputPoint2": CIVector(x: 0.5, y: 0.5 + 0.04 * highlights),
+                    "inputPoint3": CIVector(x: 0.75, y: 0.75 + 0.12 * highlights),
+                    "inputPoint4": CIVector(x: 1, y: 1),
+                ])
         }
         if n(.vibrance) != 0 {
             image = image.applyingFilter("CIVibrance", parameters: [kCIInputAmountKey: n(.vibrance)])
@@ -167,13 +178,16 @@ nonisolated enum RenderPipeline {
             image = temperature(image, warmth: n(.warmth), tint: n(.tint))
         }
         if n(.noiseReduction) != 0 {
-            image = image.applyingFilter("CINoiseReduction", parameters: ["inputNoiseLevel": 0.06 * n(.noiseReduction), kCIInputSharpnessKey: 0.4])
+            image = image.applyingFilter(
+                "CINoiseReduction", parameters: ["inputNoiseLevel": 0.06 * n(.noiseReduction), kCIInputSharpnessKey: 0.4])
         }
         if n(.sharpness) != 0 {
-            image = image.applyingFilter("CISharpenLuminance", parameters: [
-                kCIInputSharpnessKey: n(.sharpness) * 1.5,
-                kCIInputRadiusKey: max(0.5, 2.5 * scale),
-            ])
+            image = image.applyingFilter(
+                "CISharpenLuminance",
+                parameters: [
+                    kCIInputSharpnessKey: n(.sharpness) * 1.5,
+                    kCIInputRadiusKey: max(0.5, 2.5 * scale),
+                ])
         }
         return image
     }
@@ -181,37 +195,47 @@ nonisolated enum RenderPipeline {
     /// Warmth > 0 warms (more red/yellow); tint > 0 shifts toward magenta.
     static func temperature(_ image: CIImage, warmth: Double, tint: Double) -> CIImage {
         // Telling Core Image the scene's neutral is cooler than it is warms the result.
-        image.applyingFilter("CITemperatureAndTint", parameters: [
-            "inputNeutral": CIVector(x: 6500, y: 0),
-            "inputTargetNeutral": CIVector(x: 6500 - warmth * 2500, y: tint * 60),
-        ])
+        image.applyingFilter(
+            "CITemperatureAndTint",
+            parameters: [
+                "inputNeutral": CIVector(x: 6500, y: 0),
+                "inputTargetNeutral": CIVector(x: 6500 - warmth * 2500, y: tint * 60),
+            ])
     }
 
     static func apply(_ preset: FilterPreset, strength: Double, to image: CIImage) -> CIImage {
-        let looked: CIImage = switch preset {
-        case .mono: image.applyingFilter("CIPhotoEffectMono")
-        case .noir: image.applyingFilter("CIPhotoEffectNoir")
-        case .tonal: image.applyingFilter("CIPhotoEffectTonal")
-        case .chrome: image.applyingFilter("CIPhotoEffectChrome")
-        case .fade: image.applyingFilter("CIPhotoEffectFade")
-        case .instant: image.applyingFilter("CIPhotoEffectInstant")
-        case .process: image.applyingFilter("CIPhotoEffectProcess")
-        case .transfer: image.applyingFilter("CIPhotoEffectTransfer")
-        case .silvertone:
-            image.applyingFilter("CIColorMonochrome", parameters: [
-                kCIInputColorKey: CIColor(red: 0.80, green: 0.82, blue: 0.86), kCIInputIntensityKey: 1,
-            ]).applyingFilter("CIColorControls", parameters: [kCIInputContrastKey: 1.15, kCIInputSaturationKey: 0.25, kCIInputBrightnessKey: 0.02])
-        case .vivid:
-            image.applyingFilter("CIVibrance", parameters: [kCIInputAmountKey: 0.6])
-                .applyingFilter("CIColorControls", parameters: [kCIInputSaturationKey: 1.2, kCIInputContrastKey: 1.06, kCIInputBrightnessKey: 0])
-        case .warm: temperature(image, warmth: 0.35, tint: 0.05)
-        case .cool: temperature(image, warmth: -0.35, tint: 0)
-        }
+        let looked: CIImage =
+            switch preset {
+            case .mono: image.applyingFilter("CIPhotoEffectMono")
+            case .noir: image.applyingFilter("CIPhotoEffectNoir")
+            case .tonal: image.applyingFilter("CIPhotoEffectTonal")
+            case .chrome: image.applyingFilter("CIPhotoEffectChrome")
+            case .fade: image.applyingFilter("CIPhotoEffectFade")
+            case .instant: image.applyingFilter("CIPhotoEffectInstant")
+            case .process: image.applyingFilter("CIPhotoEffectProcess")
+            case .transfer: image.applyingFilter("CIPhotoEffectTransfer")
+            case .silvertone:
+                image.applyingFilter(
+                    "CIColorMonochrome",
+                    parameters: [
+                        kCIInputColorKey: CIColor(red: 0.80, green: 0.82, blue: 0.86), kCIInputIntensityKey: 1,
+                    ]
+                ).applyingFilter(
+                    "CIColorControls", parameters: [kCIInputContrastKey: 1.15, kCIInputSaturationKey: 0.25, kCIInputBrightnessKey: 0.02])
+            case .vivid:
+                image.applyingFilter("CIVibrance", parameters: [kCIInputAmountKey: 0.6])
+                    .applyingFilter(
+                        "CIColorControls", parameters: [kCIInputSaturationKey: 1.2, kCIInputContrastKey: 1.06, kCIInputBrightnessKey: 0])
+            case .warm: temperature(image, warmth: 0.35, tint: 0.05)
+            case .cool: temperature(image, warmth: -0.35, tint: 0)
+            }
         let strength = min(1, max(0, strength))
         if strength >= 0.999 { return looked }
-        return image.applyingFilter("CIDissolveTransition", parameters: [
-            kCIInputTargetImageKey: looked, kCIInputTimeKey: strength,
-        ])
+        return image.applyingFilter(
+            "CIDissolveTransition",
+            parameters: [
+                kCIInputTargetImageKey: looked, kCIInputTimeKey: strength,
+            ])
     }
 
     // MARK: Auto-enhance
@@ -236,7 +260,9 @@ nonisolated enum RenderPipeline {
         specs.reduce(image) { image, spec in
             guard let filter = CIFilter(name: spec.name) else { return image }
             for (key, value) in spec.numbers { filter.setValue(value, forKey: key) }
-            for (key, value) in spec.vectors { filter.setValue(CIVector(values: value.map { CGFloat($0) }, count: value.count), forKey: key) }
+            for (key, value) in spec.vectors {
+                filter.setValue(CIVector(values: value.map { CGFloat($0) }, count: value.count), forKey: key)
+            }
             filter.setValue(image, forKey: kCIInputImageKey)
             return filter.outputImage ?? image
         }

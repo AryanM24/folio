@@ -1,5 +1,5 @@
-public import FolioKit
 import CoreImage
+public import FolioKit
 import Foundation
 import ImageIO
 import UniformTypeIdentifiers
@@ -20,7 +20,9 @@ public enum ImageTools {
         id: "image.convert", title: "Convert Images", subtitle: "Save copies as PNG, JPEG, HEIC or TIFF",
         symbol: "photo.on.rectangle.angled", inputTypes: inputs,
         options: [
-            .init(id: "format", label: "Format", choices: [("png", "PNG"), ("jpeg", "JPEG"), ("heic", "HEIC"), ("tiff", "TIFF")], defaultValue: "jpeg"),
+            .init(
+                id: "format", label: "Format", choices: [("png", "PNG"), ("jpeg", "JPEG"), ("heic", "HEIC"), ("tiff", "TIFF")],
+                defaultValue: "jpeg"),
             qualityOption,
         ]
     ) { urls, options in
@@ -35,8 +37,9 @@ public enum ImageTools {
         id: "image.resize", title: "Resize Images", subtitle: "Shrink and compress copies for sharing",
         symbol: "arrow.down.right.and.arrow.up.left", inputTypes: inputs,
         options: [
-            .init(id: "maxSize", label: "Longest side",
-                  choices: [("1024", "1024 px"), ("2048", "2048 px"), ("3000", "3000 px"), ("4096", "4096 px")], defaultValue: "2048"),
+            .init(
+                id: "maxSize", label: "Longest side",
+                choices: [("1024", "1024 px"), ("2048", "2048 px"), ("3000", "3000 px"), ("4096", "4096 px")], defaultValue: "2048"),
             qualityOption,
         ]
     ) { urls, options in
@@ -98,16 +101,17 @@ nonisolated enum ImageToolOps {
     static func convert(_ data: Data, to type: UTType, quality: Double) throws -> Data {
         let source = try SourceImage(data: data)
         let image = try RenderPipeline.render(source, recipe: EditRecipe(), final: true, flattenFor: type)
-        return try ImageCodec.encode(image, as: type, quality: quality, properties: ImageCodec.propertiesForSaving(source.properties, strip: false))
+        return try ImageCodec.encode(
+            image, as: type, quality: quality, properties: ImageCodec.propertiesForSaving(source.properties, strip: false))
     }
 
     /// Shrink so the long side is at most `maxEdge` (never enlarges). Keeps the format
     /// when macOS can write it, otherwise JPEG.
     static func resize(_ data: Data, maxEdge: Int, quality: Double) throws -> (Data, UTType) {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any],
-              let width = props[kCGImagePropertyPixelWidth as String] as? Int,
-              let height = props[kCGImagePropertyPixelHeight as String] as? Int
+            let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any],
+            let width = props[kCGImagePropertyPixelWidth as String] as? Int,
+            let height = props[kCGImagePropertyPixelHeight as String] as? Int
         else { throw FolioError("This file isn't an image Folio can read.") }
         let detected = CGImageSourceGetType(source).flatMap { UTType($0 as String) } ?? .jpeg
         let type = ImageCodec.canWrite(detected) ? detected : .jpeg

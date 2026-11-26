@@ -36,10 +36,12 @@ enum MarkdownExport {
     static func docx(markdown: String, title: String) throws -> Data {
         let attributed = try attributedString(markdown: markdown, title: title)
         do {
-            return try attributed.data(from: NSRange(location: 0, length: attributed.length), documentAttributes: [
-                .documentType: NSAttributedString.DocumentType.officeOpenXML,
-                .title: title,
-            ])
+            return try attributed.data(
+                from: NSRange(location: 0, length: attributed.length),
+                documentAttributes: [
+                    .documentType: NSAttributedString.DocumentType.officeOpenXML,
+                    .title: title,
+                ])
         } catch {
             throw FolioError("Folio couldn’t create the Word document.")
         }
@@ -122,8 +124,12 @@ enum PrintSupport {
             state = line.withUnsafeBufferPointer { lexer.lex($0, state: state, tokens: &tokens) }
             for token in tokens ?? [] {
                 guard let pair = SyntaxPalette.pair(for: token.kind) else { continue }
-                result.addAttribute(.foregroundColor, value: NSColor(srgbRed: CGFloat((pair.light >> 16) & 0xFF) / 255, green: CGFloat((pair.light >> 8) & 0xFF) / 255, blue: CGFloat(pair.light & 0xFF) / 255, alpha: 1),
-                                    range: NSRange(location: offset + token.start, length: token.end - token.start))
+                result.addAttribute(
+                    .foregroundColor,
+                    value: NSColor(
+                        srgbRed: CGFloat((pair.light >> 16) & 0xFF) / 255, green: CGFloat((pair.light >> 8) & 0xFF) / 255,
+                        blue: CGFloat(pair.light & 0xFF) / 255, alpha: 1),
+                    range: NSRange(location: offset + token.start, length: token.end - token.start))
             }
             offset = index + 1
             lineStart = index + 1

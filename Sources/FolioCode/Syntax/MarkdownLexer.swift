@@ -103,7 +103,9 @@ nonisolated struct MarkdownLexer: Lexer {
                 }
             case Char.of("["), Char.of("!"):
                 let open = c == Char.of("!") ? i + 1 : i
-                guard open < n, s[open] == Char.of("["), let close = matching(s, from: open, open: Char.of("["), close: Char.of("]")) else { i += 1; continue }
+                guard open < n, s[open] == Char.of("["), let close = matching(s, from: open, open: Char.of("["), close: Char.of("]")) else {
+                    i += 1; continue
+                }
                 emit(.link, i, close + 1)
                 i = close + 1
                 if i < n, s[i] == Char.of("("), let end = matching(s, from: i, open: Char.of("("), close: Char.of(")")) {

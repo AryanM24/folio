@@ -1,6 +1,6 @@
 import AppKit
-import Observation
 import FolioKit
+import Observation
 
 /// Editor preferences, mirrored from the Settings window's "Editor" tab (`code.*` keys).
 struct EditorSettings: Equatable {
@@ -61,12 +61,15 @@ final class EditorController: NSObject {
             let center = NotificationCenter.default
             for name in [NSNotification.Name.NSUndoManagerDidUndoChange, .NSUndoManagerDidRedoChange] {
                 if let oldValue { center.removeObserver(self, name: name, object: oldValue) }
-                if let undoManager { center.addObserver(self, selector: #selector(undoManagerDidChangeDocument), name: name, object: undoManager) }
+                if let undoManager {
+                    center.addObserver(self, selector: #selector(undoManagerDidChangeDocument), name: name, object: undoManager)
+                }
             }
         }
     }
     @ObservationIgnored var fileURL: URL?
-    @ObservationIgnored private(set) var settings = EditorSettings(fontSize: 13, wrapLines: true, showLineNumbers: true, tabWidth: 4, showInvisibles: false)
+    @ObservationIgnored private(set) var settings = EditorSettings(
+        fontSize: 13, wrapLines: true, showLineNumbers: true, tabWidth: 4, showInvisibles: false)
     @ObservationIgnored private(set) var language: Language = .plain
     @ObservationIgnored private var bracketRanges: [NSRange] = []
     @ObservationIgnored private var statsTask: Task<Void, Never>?
@@ -102,7 +105,8 @@ final class EditorController: NSObject {
         scrollView.backgroundColor = CodeTheme.background
         scrollView.documentView = textView
         scrollView.contentView.postsBoundsChangedNotifications = true
-        NotificationCenter.default.addObserver(self, selector: #selector(didScroll), name: NSView.boundsDidChangeNotification, object: scrollView.contentView)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didScroll), name: NSView.boundsDidChangeNotification, object: scrollView.contentView)
 
         if let storage = textView.textStorage {
             storage.setAttributedString(NSAttributedString(string: document.loadedText, attributes: baseAttributes()))
@@ -124,7 +128,8 @@ final class EditorController: NSObject {
         applyWrap()
         lineCount = highlighter.lines.count
         textView.setSelectedRange(NSRange(location: 0, length: 0))
-        NotificationCenter.default.addObserver(self, selector: #selector(didScroll), name: NSView.frameDidChangeNotification, object: scrollView.contentView)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didScroll), name: NSView.frameDidChangeNotification, object: scrollView.contentView)
         scheduleStats(immediately: true)
         scheduleJSONCheck()
         return scrollView
@@ -282,7 +287,8 @@ final class EditorController: NSObject {
     private var visibleCharacterRange: NSRange? {
         guard let textView, let layoutManager = textView.layoutManager, let container = textView.textContainer else { return nil }
         let visible = textView.visibleRect
-        let padded = visible.insetBy(dx: 0, dy: -visible.height).offsetBy(dx: -textView.textContainerOrigin.x, dy: -textView.textContainerOrigin.y)
+        let padded = visible.insetBy(dx: 0, dy: -visible.height).offsetBy(
+            dx: -textView.textContainerOrigin.x, dy: -textView.textContainerOrigin.y)
         let glyphs = layoutManager.glyphRange(forBoundingRect: padded, in: container)
         return layoutManager.characterRange(forGlyphRange: glyphs, actualGlyphRange: nil)
     }
@@ -384,7 +390,10 @@ final class EditorController: NSObject {
 
 /// Text storage callbacks arrive on the main thread: the storage is only edited by its text view.
 extension EditorController: @preconcurrency NSTextStorageDelegate {
-    func textStorage(_ textStorage: NSTextStorage, didProcessEditing editedMask: NSTextStorageEditActions, range editedRange: NSRange, changeInLength delta: Int) {
+    func textStorage(
+        _ textStorage: NSTextStorage, didProcessEditing editedMask: NSTextStorageEditActions, range editedRange: NSRange,
+        changeInLength delta: Int
+    ) {
         guard editedMask.contains(.editedCharacters) else { return }
         highlighter.didEdit(textStorage.mutableString, editedRange: editedRange, delta: delta)
     }

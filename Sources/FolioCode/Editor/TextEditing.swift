@@ -46,7 +46,9 @@ nonisolated enum TextEditing {
 
     /// Selection after a whole-line command: the caret moves with its line's edit; a range
     /// selection covers the rewritten lines.
-    private static func selection(after original: NSRange, block: NSRange, oldFirstLine: String, newFirstLine: String, replacement: String, trailing: Bool) -> NSRange {
+    private static func selection(
+        after original: NSRange, block: NSRange, oldFirstLine: String, newFirstLine: String, replacement: String, trailing: Bool
+    ) -> NSRange {
         if original.length == 0, !replacement.dropLast(trailing ? 1 : 0).contains("\n") {
             let delta = length(newFirstLine) - length(oldFirstLine)
             let column = original.location - block.location
@@ -64,8 +66,10 @@ nonisolated enum TextEditing {
         let (old, trailing) = lines(s, block)
         let new = old.map { $0.isEmpty ? $0 : unit + $0 }
         let replacement = join(new, trailing)
-        return TextEdit(range: block, replacement: replacement,
-                        selection: self.selection(after: selection, block: block, oldFirstLine: old[0], newFirstLine: new[0], replacement: replacement, trailing: trailing))
+        return TextEdit(
+            range: block, replacement: replacement,
+            selection: self.selection(
+                after: selection, block: block, oldFirstLine: old[0], newFirstLine: new[0], replacement: replacement, trailing: trailing))
     }
 
     static func outdent(_ s: NSString, selection: NSRange, width: Int) -> TextEdit {
@@ -77,8 +81,10 @@ nonisolated enum TextEditing {
             return String(line.dropFirst(min(spaces, width)))
         }
         let replacement = join(new, trailing)
-        return TextEdit(range: block, replacement: replacement,
-                        selection: self.selection(after: selection, block: block, oldFirstLine: old[0], newFirstLine: new[0], replacement: replacement, trailing: trailing))
+        return TextEdit(
+            range: block, replacement: replacement,
+            selection: self.selection(
+                after: selection, block: block, oldFirstLine: old[0], newFirstLine: new[0], replacement: replacement, trailing: trailing))
     }
 
     /// Tab: indents a multi-line selection, otherwise inserts a tab or spaces up to the next stop.
@@ -100,7 +106,9 @@ nonisolated enum TextEditing {
     // MARK: Comments
 
     /// ⌘/: comments out the lines, or uncomments them when every non-blank line already is.
-    static func toggleComment(_ s: NSString, selection: NSRange, lineComment: String?, blockComment: (open: String, close: String)?) -> TextEdit? {
+    static func toggleComment(
+        _ s: NSString, selection: NSRange, lineComment: String?, blockComment: (open: String, close: String)?
+    ) -> TextEdit? {
         let block = lineBlock(s, selection)
         let (old, trailing) = lines(s, block)
         let filled = old.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -149,8 +157,10 @@ nonisolated enum TextEditing {
             return nil
         }
         let replacement = join(new, trailing)
-        return TextEdit(range: block, replacement: replacement,
-                        selection: self.selection(after: selection, block: block, oldFirstLine: old[0], newFirstLine: new[0], replacement: replacement, trailing: trailing))
+        return TextEdit(
+            range: block, replacement: replacement,
+            selection: self.selection(
+                after: selection, block: block, oldFirstLine: old[0], newFirstLine: new[0], replacement: replacement, trailing: trailing))
     }
 
     // MARK: Moving and duplicating lines
@@ -166,8 +176,9 @@ nonisolated enum TextEditing {
             let prev = s.substring(with: NSRange(location: above.location, length: above.length - 1))
             let replacement = body + "\n" + prev + (blockTrailing ? "\n" : "")
             let shift = length(prev) + 1
-            return TextEdit(range: NSRange(location: above.location, length: block.upperBound - above.location),
-                            replacement: replacement, selection: NSRange(location: selection.location - shift, length: selection.length))
+            return TextEdit(
+                range: NSRange(location: above.location, length: block.upperBound - above.location),
+                replacement: replacement, selection: NSRange(location: selection.location - shift, length: selection.length))
         }
         // The last line (or the line before an empty last line) has nothing below to swap with.
         guard blockTrailing, block.upperBound < s.length else { return nil }
@@ -175,8 +186,9 @@ nonisolated enum TextEditing {
         let (nextLines, nextTrailing) = lines(s, below)
         let next = nextLines.joined(separator: "\n")
         let replacement = next + "\n" + body + (nextTrailing ? "\n" : "")
-        return TextEdit(range: NSRange(location: block.location, length: below.upperBound - block.location),
-                        replacement: replacement, selection: NSRange(location: selection.location + length(next) + 1, length: selection.length))
+        return TextEdit(
+            range: NSRange(location: block.location, length: below.upperBound - block.location),
+            replacement: replacement, selection: NSRange(location: selection.location + length(next) + 1, length: selection.length))
     }
 
     /// ⇧⌘D: copies the selected lines below themselves and selects the copy.
@@ -186,8 +198,9 @@ nonisolated enum TextEditing {
         let body = blockLines.joined(separator: "\n")
         let insert = trailing ? body + "\n" : "\n" + body
         let at = block.upperBound
-        return TextEdit(range: NSRange(location: at, length: 0), replacement: insert,
-                        selection: NSRange(location: selection.location + length(body) + 1, length: selection.length))
+        return TextEdit(
+            range: NSRange(location: at, length: 0), replacement: insert,
+            selection: NSRange(location: selection.location + length(body) + 1, length: selection.length))
     }
 
     // MARK: Typing
@@ -202,15 +215,18 @@ nonisolated enum TextEditing {
         if language == .markdown, let item = listItem(before) {
             if item.isEmpty {
                 // Return on an empty item ends the list.
-                return TextEdit(range: NSRange(location: lineStart, length: selection.upperBound - lineStart), replacement: "",
-                                selection: NSRange(location: lineStart, length: 0))
+                return TextEdit(
+                    range: NSRange(location: lineStart, length: selection.upperBound - lineStart), replacement: "",
+                    selection: NSRange(location: lineStart, length: 0))
             }
             let insert = "\n" + item.continuation
-            return TextEdit(range: selection, replacement: insert, selection: NSRange(location: selection.location + length(insert), length: 0))
+            return TextEdit(
+                range: selection, replacement: insert, selection: NSRange(location: selection.location + length(insert), length: 0))
         }
 
         let last = before.trimmingCharacters(in: .whitespaces).last
-        let next: Character? = selection.upperBound < s.length ? Character(UnicodeScalar(s.character(at: selection.upperBound)) ?? " ") : nil
+        let next: Character? =
+            selection.upperBound < s.length ? Character(UnicodeScalar(s.character(at: selection.upperBound)) ?? " ") : nil
         var insert = "\n" + indent
         var caret = length(insert)
         let opens = last == "{" || last == "[" || last == "(" || (language.colonIndents && last == ":")
@@ -267,25 +283,32 @@ nonisolated enum TextEditing {
 
         // Typing the closer that's already there just steps over it.
         if selection.length == 0, closers.contains(typed), next == typed {
-            return TextEdit(range: NSRange(location: selection.location, length: 0), replacement: "", selection: NSRange(location: selection.location + 1, length: 0))
+            return TextEdit(
+                range: NSRange(location: selection.location, length: 0), replacement: "",
+                selection: NSRange(location: selection.location + 1, length: 0))
         }
         guard let close = pairs[typed] else { return nil }
         if selection.length > 0 {
             let inner = s.substring(with: selection)
-            return TextEdit(range: selection, replacement: String(typed) + inner + String(close),
-                            selection: NSRange(location: selection.location + 1, length: selection.length))
+            return TextEdit(
+                range: selection, replacement: String(typed) + inner + String(close),
+                selection: NSRange(location: selection.location + 1, length: selection.length))
         }
         // Only pair before whitespace or punctuation, so typing `(` in front of a word doesn't.
         if let next, !(next.isWhitespace || closers.contains(next) || next == "," || next == ";") { return nil }
         if isQuote, let prev, prev.isLetter || prev.isNumber || prev == typed || prev == "\\" { return nil }
-        return TextEdit(range: selection, replacement: String(typed) + String(close), selection: NSRange(location: selection.location + 1, length: 0))
+        return TextEdit(
+            range: selection, replacement: String(typed) + String(close), selection: NSRange(location: selection.location + 1, length: 0))
     }
 
     /// Backspace between an empty pair, `(|)`, deletes both halves.
     static func deleteBackward(_ s: NSString, selection: NSRange) -> TextEdit? {
         guard selection.length == 0, let prev = character(s, at: selection.location - 1), let close = pairs[prev],
-              character(s, at: selection.location) == close else { return nil }
-        return TextEdit(range: NSRange(location: selection.location - 1, length: 2), replacement: "", selection: NSRange(location: selection.location - 1, length: 0))
+            character(s, at: selection.location) == close
+        else { return nil }
+        return TextEdit(
+            range: NSRange(location: selection.location - 1, length: 2), replacement: "",
+            selection: NSRange(location: selection.location - 1, length: 0))
     }
 
     private static func character(_ s: NSString, at index: Int) -> Character? {
@@ -299,7 +322,7 @@ nonisolated enum TextEditing {
     /// so a stray brace in a huge file can't stall the caret.
     static func matchingBracket(in s: NSString, at index: Int, limit: Int = 100_000) -> Int? {
         guard index >= 0, index < s.length else { return nil }
-        let open: [UInt16: UInt16] = [40: 41, 91: 93, 123: 125]   // ( [ {
+        let open: [UInt16: UInt16] = [40: 41, 91: 93, 123: 125]  // ( [ {
         let close: [UInt16: UInt16] = [41: 40, 93: 91, 125: 123]
         let c = s.character(at: index)
         let (partner, step): (UInt16, Int)
@@ -309,7 +332,9 @@ nonisolated enum TextEditing {
         var scanned = 0
         while i >= 0, i < s.length, scanned < limit {
             let d = s.character(at: i)
-            if d == c { depth += 1 } else if d == partner {
+            if d == c {
+                depth += 1
+            } else if d == partner {
                 depth -= 1
                 if depth == 0 { return i }
             }
@@ -330,25 +355,33 @@ nonisolated enum TextEditing {
             return TextEdit(range: selection, replacement: inner, selection: NSRange(location: selection.location, length: length(inner)))
         }
         if selection.location >= m, selection.upperBound + m <= s.length,
-           s.substring(with: NSRange(location: selection.location - m, length: m)) == marker,
-           s.substring(with: NSRange(location: selection.upperBound, length: m)) == marker {
-            return TextEdit(range: NSRange(location: selection.location - m, length: selection.length + 2 * m), replacement: selected,
-                            selection: NSRange(location: selection.location - m, length: selection.length))
+            s.substring(with: NSRange(location: selection.location - m, length: m)) == marker,
+            s.substring(with: NSRange(location: selection.upperBound, length: m)) == marker
+        {
+            return TextEdit(
+                range: NSRange(location: selection.location - m, length: selection.length + 2 * m), replacement: selected,
+                selection: NSRange(location: selection.location - m, length: selection.length))
         }
-        return TextEdit(range: selection, replacement: marker + selected + marker, selection: NSRange(location: selection.location + m, length: selection.length))
+        return TextEdit(
+            range: selection, replacement: marker + selected + marker,
+            selection: NSRange(location: selection.location + m, length: selection.length))
     }
 
     /// ⌘K: turns the selection into a link and selects the part still to fill in.
     static func link(_ s: NSString, selection: NSRange) -> TextEdit {
         let selected = s.substring(with: selection)
         if selected.hasPrefix("http://") || selected.hasPrefix("https://") {
-            return TextEdit(range: selection, replacement: "[](\(selected))", selection: NSRange(location: selection.location + 1, length: 0))
+            return TextEdit(
+                range: selection, replacement: "[](\(selected))", selection: NSRange(location: selection.location + 1, length: 0))
         }
         let text = selected.isEmpty ? "text" : selected
         let replacement = "[\(text)](https://)"
         if selected.isEmpty {
-            return TextEdit(range: selection, replacement: replacement, selection: NSRange(location: selection.location + 1, length: length(text)))
+            return TextEdit(
+                range: selection, replacement: replacement, selection: NSRange(location: selection.location + 1, length: length(text)))
         }
-        return TextEdit(range: selection, replacement: replacement, selection: NSRange(location: selection.location + length(text) + 3, length: length("https://")))
+        return TextEdit(
+            range: selection, replacement: replacement,
+            selection: NSRange(location: selection.location + length(text) + 3, length: length("https://")))
     }
 }

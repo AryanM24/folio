@@ -1,4 +1,5 @@
 import Testing
+
 @testable import FolioCode
 
 @Suite("JSON tools")
@@ -6,18 +7,18 @@ struct JSONToolsTests {
     @Test func formatsKeepingOrderAndNumbers() throws {
         let input = #"{"b":1.0,"a":[1,2,{}],"s":"x\"y","e":[]}"#
         let expected = """
-        {
-          "b": 1.0,
-          "a": [
-            1,
-            2,
-            {}
-          ],
-          "s": "x\\"y",
-          "e": []
-        }
+            {
+              "b": 1.0,
+              "a": [
+                1,
+                2,
+                {}
+              ],
+              "s": "x\\"y",
+              "e": []
+            }
 
-        """
+            """
         #expect(try JSONTools.format(input) == expected)
     }
 
@@ -30,14 +31,16 @@ struct JSONToolsTests {
         #expect(try JSONTools.minify(JSONTools.format(input)) == input)
     }
 
-    @Test("Reports line and column", arguments: [
-        ("{\n  \"a\": 1,\n}", 3, 1, "Trailing comma before ‘}’"),
-        ("[1, 2", 1, 6, "This array is never closed"),
-        ("{\"a\" 1}", 1, 6, "Expected ‘:’ after the property name"),
-        ("[01]", 1, 3, "Numbers can’t have leading zeros"),
-        ("\"é\" x", 1, 5, "Unexpected text after the end of the JSON"),
-        ("", 1, 1, "The document is empty"),
-    ])
+    @Test(
+        "Reports line and column",
+        arguments: [
+            ("{\n  \"a\": 1,\n}", 3, 1, "Trailing comma before ‘}’"),
+            ("[1, 2", 1, 6, "This array is never closed"),
+            ("{\"a\" 1}", 1, 6, "Expected ‘:’ after the property name"),
+            ("[01]", 1, 3, "Numbers can’t have leading zeros"),
+            ("\"é\" x", 1, 5, "Unexpected text after the end of the JSON"),
+            ("", 1, 1, "The document is empty"),
+        ])
     func reportsErrors(input: String, line: Int, column: Int, message: String) {
         let issue = JSONTools.validate(input)
         #expect(issue?.line == line)

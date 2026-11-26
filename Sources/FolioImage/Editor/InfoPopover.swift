@@ -53,8 +53,13 @@ nonisolated enum ImageInfo {
         }
         rows.append(Row(label: "File size", value: ByteCountFormatter.string(fromByteCount: Int64(source.data.count), countStyle: .file)))
         rows.append(Row(label: "Format", value: source.type.localizedDescription ?? source.type.identifier))
-        rows.append(Row(label: "Color profile", value: (p[kCGImagePropertyProfileName as String] as? String) ?? (source.colorSpace.name as String?)?.replacingOccurrences(of: "kCGColorSpace", with: "") ?? "Unknown"))
-        rows.append(Row(label: "Bit depth", value: "\(source.bitsPerComponent) bits per channel\(source.hasAlpha ? ", with transparency" : "")"))
+        rows.append(
+            Row(
+                label: "Color profile",
+                value: (p[kCGImagePropertyProfileName as String] as? String) ?? (source.colorSpace.name as String?)?.replacingOccurrences(
+                    of: "kCGColorSpace", with: "") ?? "Unknown"))
+        rows.append(
+            Row(label: "Bit depth", value: "\(source.bitsPerComponent) bits per channel\(source.hasAlpha ? ", with transparency" : "")"))
         if source.frameCount > 1 { rows.append(Row(label: "Frames", value: "\(source.frameCount) (edits use the first)")) }
         let camera = [tiff[kCGImagePropertyTIFFMake as String] as? String, tiff[kCGImagePropertyTIFFModel as String] as? String]
             .compactMap { $0?.trimmingCharacters(in: .whitespaces) }.joined(separator: " ")

@@ -25,7 +25,8 @@ struct LiveTextOverlay: NSViewRepresentable {
         context.coordinator.task = Task {
             guard ImageAnalyzer.isSupported else { return }
             do {
-                let analysis = try await ImageAnalyzer().analyze(image, orientation: .up, configuration: .init([.text, .machineReadableCode]))
+                let analysis = try await ImageAnalyzer().analyze(
+                    image, orientation: .up, configuration: .init([.text, .machineReadableCode]))
                 guard !Task.isCancelled else { return }
                 view.analysis = analysis
             } catch {

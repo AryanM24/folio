@@ -1,7 +1,7 @@
-public import SwiftUI
-public import UniformTypeIdentifiers
 import FolioKit
+public import SwiftUI
 import Synchronization
+public import UniformTypeIdentifiers
 
 nonisolated private let log = Log.make("Image")
 
@@ -52,7 +52,8 @@ public final class ImageDocument: ReferenceFileDocument {
             throw FolioError("This image couldn't be read. It may be a folder or an alias that no longer points anywhere.")
         }
         if let restored = EditSessionStore.shared.restore(fileData: data),
-           let original = try? SourceImage(data: restored.original, typeHint: UTType(restored.originalTypeIdentifier)) {
+            let original = try? SourceImage(data: restored.original, typeHint: UTType(restored.originalTypeIdentifier))
+        {
             source = original
             storage = Mutex(restored.recipe)
             session = SessionKey(restored.key)
@@ -97,8 +98,9 @@ public final class ImageDocument: ReferenceFileDocument {
         var current: String?
         if !snapshot.recipe.isIdentity, !snapshot.recipe.stripMetadata, output != snapshot.source.data {
             do {
-                current = try store.record(output: output, original: snapshot.source.data,
-                                           originalTypeIdentifier: snapshot.source.type.identifier, recipe: snapshot.recipe)
+                current = try store.record(
+                    output: output, original: snapshot.source.data,
+                    originalTypeIdentifier: snapshot.source.type.identifier, recipe: snapshot.recipe)
             } catch {
                 // Not fatal: the file itself saved; only reopen-and-keep-editing is lost.
                 log.error("Couldn't record the image edit session: \(error.localizedDescription, privacy: .public)")
@@ -110,8 +112,9 @@ public final class ImageDocument: ReferenceFileDocument {
 
     nonisolated static func blankPNG(width: Int = 1600, height: Int = 1000) -> Data {
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
-              let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
+            let ctx = CGContext(
+                data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
         else { return Data() }
         ctx.setFillColor(CGColor(gray: 1, alpha: 1))
         ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))

@@ -1,5 +1,5 @@
-import Foundation
 import FolioKit
+import Foundation
 
 /// Character encodings Folio reads and writes. Detected on open and kept on save, so
 /// editing a file never silently re-encodes it.
@@ -105,7 +105,9 @@ nonisolated enum TextCodec {
     static func encode(_ text: String, as format: TextFormat) throws -> Data {
         let body = format.lineEnding == .lf ? text : text.replacingOccurrences(of: "\n", with: format.lineEnding.characters)
         guard let bytes = body.data(using: format.encoding.stringEncoding, allowLossyConversion: false) else {
-            throw FolioError("This text has characters that can’t be saved as \(format.encoding.title). Choose UTF-8 from the encoding menu in the status bar, then try again.")
+            throw FolioError(
+                "This text has characters that can’t be saved as \(format.encoding.title). Choose UTF-8 from the encoding menu in the status bar, then try again."
+            )
         }
         return Data(format.encoding.bom) + bytes
     }

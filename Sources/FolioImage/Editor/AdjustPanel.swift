@@ -14,8 +14,9 @@ struct AdjustPanel: View {
                 InspectorSection(LocalizedStringKey(section.rawValue)) {
                     VStack(spacing: 16) {
                         ForEach(Adjustment.allCases.filter { $0.section == section }) { adjustment in
-                            RecipeSlider(model: model, title: adjustment.title,
-                                         keyPath: \.adjustments[adjustment], range: adjustment.range)
+                            RecipeSlider(
+                                model: model, title: adjustment.title,
+                                keyPath: \.adjustments[adjustment], range: adjustment.range)
                         }
                     }
                 }
@@ -41,8 +42,9 @@ struct FiltersPanel: View {
                 }
             }
             if model.recipe.filter != nil {
-                RecipeSlider(model: model, title: "Strength", keyPath: \.filterStrength, range: 0...1, step: 0.01,
-                             defaultValue: 1, format: { "\(Int(($0 * 100).rounded()))%" })
+                RecipeSlider(
+                    model: model, title: "Strength", keyPath: \.filterStrength, range: 0...1, step: 0.01,
+                    defaultValue: 1, format: { "\(Int(($0 * 100).rounded()))%" })
             }
         }
         .onAppear { model.refreshThumbnailsIfVisible() }

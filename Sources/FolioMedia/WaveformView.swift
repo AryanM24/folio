@@ -1,6 +1,6 @@
 import AVFoundation
-import SwiftUI
 import FolioKit
+import SwiftUI
 
 /// Audio waveform: click to seek, drag to select a range for trim and export.
 struct WaveformView: View {
@@ -38,7 +38,9 @@ struct WaveformView: View {
         }
         .accessibilityElement()
         .accessibilityLabel("Waveform")
-        .accessibilityValue("Playhead at \(MediaMath.timecode(time(controller.currentTime))). \(InfoFormat.selection(controller.selection))")
+        .accessibilityValue(
+            "Playhead at \(MediaMath.timecode(time(controller.currentTime))). \(InfoFormat.selection(controller.selection))"
+        )
         .accessibilityHint("Drag to select. Adjust to move the playhead by five seconds.")
         .accessibilityAdjustableAction { direction in
             let delta = direction == .increment ? 5.0 : -5.0
@@ -49,7 +51,9 @@ struct WaveformView: View {
     private func draw(in context: inout GraphicsContext, size: CGSize, total: Double) {
         if let selection = controller.selection {
             let x0 = selection.start.seconds / total * size.width, x1 = selection.end.seconds / total * size.width
-            context.fill(Path(roundedRect: CGRect(x: x0, y: 0, width: x1 - x0, height: size.height), cornerRadius: Hero.Radius.md), with: .color(Hero.accentSoft))
+            context.fill(
+                Path(roundedRect: CGRect(x: x0, y: 0, width: x1 - x0, height: size.height), cornerRadius: Hero.Radius.md),
+                with: .color(Hero.accentSoft))
         }
         if let peaks = controller.peaks, !peaks.isEmpty {
             // One bar per 3 pt, each the loudest of the bins it covers.
@@ -64,8 +68,9 @@ struct WaveformView: View {
                 let x = CGFloat(bar) * 3
                 let seconds = Double(x) / size.width * total
                 let selected = controller.selection.map { seconds >= $0.start.seconds && seconds <= $0.end.seconds } ?? false
-                context.fill(Path(roundedRect: CGRect(x: x, y: mid - h / 2, width: 2, height: h), cornerRadius: 1),
-                             with: .color(selected ? Hero.accent : Hero.muted.opacity(0.7)))
+                context.fill(
+                    Path(roundedRect: CGRect(x: x, y: mid - h / 2, width: 2, height: h), cornerRadius: 1),
+                    with: .color(selected ? Hero.accent : Hero.muted.opacity(0.7)))
             }
         }
         let playhead = controller.currentTime / total * size.width
@@ -84,7 +89,9 @@ struct FilmstripView: View {
         HStack(spacing: 2) {
             ForEach(controller.thumbnails.indices, id: \.self) { index in
                 let fraction = (Double(index) + 0.5) / Double(controller.thumbnails.count)
-                Button { controller.seek(toFraction: fraction) } label: {
+                Button {
+                    controller.seek(toFraction: fraction)
+                } label: {
                     Rectangle()
                         .fill(Hero.default)
                         .overlay {
@@ -95,7 +102,8 @@ struct FilmstripView: View {
                         .clipShape(.rect(cornerRadius: Hero.Radius.sm))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Jump to \(MediaMath.timecode(CMTime(seconds: fraction * controller.duration.seconds, preferredTimescale: 600)))")
+                .accessibilityLabel(
+                    "Jump to \(MediaMath.timecode(CMTime(seconds: fraction * controller.duration.seconds, preferredTimescale: 600)))")
             }
         }
         .frame(height: 48)

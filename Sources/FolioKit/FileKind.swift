@@ -47,15 +47,20 @@ public nonisolated enum FileKind: String, CaseIterable, Identifiable, Sendable {
         case .document: [.docx, .rtf, .rtfd, .odt, .html, .webArchive, .doc]
         case .spreadsheet: [.xlsx, .commaSeparatedText, .tabSeparatedText, .ods]
         case .image: [.png, .jpeg, .heic, .tiff, .gif, .bmp, .webP]
-        case .code: [.plainText, .markdown, .json, .sourceCode, .script, .xml, .yaml, .propertyList, .css, .javaScript, .swiftSource, .pythonScript]
+        case .code:
+            [
+                .plainText, .markdown, .json, .sourceCode, .script, .xml, .yaml, .propertyList, .css, .javaScript, .swiftSource,
+                .pythonScript,
+            ]
         case .media: [.audiovisualContent, .movie, .audio, .mpeg4Movie, .quickTimeMovie, .mp3, .wav, .mpeg4Audio]
         }
     }
 
     /// Resolve the kind for a file on disk, using its declared content type.
     public static func kind(for url: URL) -> FileKind? {
-        guard let type = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType
-            ?? UTType(filenameExtension: url.pathExtension)
+        guard
+            let type = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType
+                ?? UTType(filenameExtension: url.pathExtension)
         else { return nil }
         return kind(for: type)
     }

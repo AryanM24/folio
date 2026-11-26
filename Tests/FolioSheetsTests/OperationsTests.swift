@@ -207,10 +207,16 @@ struct DocumentTests {
         let doc = try SpreadsheetDocument(data: bytes("a,b\n"), format: .csv)
         doc.apply([ref("C1"): CellContent(input: "=1+1")], actionName: "Typing", undoManager: nil)
         #expect(doc.formatWarning == nil, "formulas are kept in CSV, so there's nothing to warn about")
-        doc.replaceWorkbook({ var w = doc.workbook; w.addSheet(); return w }(), actionName: "Add Sheet", undoManager: nil)
+        doc.replaceWorkbook(
+            {
+                var w = doc.workbook; w.addSheet(); return w
+            }(), actionName: "Add Sheet", undoManager: nil)
         #expect(doc.formatWarning != nil)
         doc.dismissFormatWarning()
-        doc.replaceWorkbook({ var w = doc.workbook; w.addSheet(); return w }(), actionName: "Add Sheet", undoManager: nil)
+        doc.replaceWorkbook(
+            {
+                var w = doc.workbook; w.addSheet(); return w
+            }(), actionName: "Add Sheet", undoManager: nil)
         #expect(doc.formatWarning == nil)
     }
 

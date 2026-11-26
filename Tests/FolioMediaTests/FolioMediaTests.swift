@@ -2,6 +2,7 @@ import AVFoundation
 import AppKit
 import Testing
 import UniformTypeIdentifiers
+
 @testable import FolioMedia
 
 // MARK: - Export settings mapping
@@ -99,7 +100,8 @@ import UniformTypeIdentifiers
 
     @Test func clampOrdersAndBoundsRanges() {
         let d = CMTime(seconds: 10, preferredTimescale: 600)
-        let r = MediaMath.clamp(from: CMTime(seconds: 12, preferredTimescale: 600), to: CMTime(seconds: 4, preferredTimescale: 600), within: d)
+        let r = MediaMath.clamp(
+            from: CMTime(seconds: 12, preferredTimescale: 600), to: CMTime(seconds: 4, preferredTimescale: 600), within: d)
         #expect(r?.start.seconds == 4 && r?.end.seconds == 10)
         #expect(MediaMath.clamp(CMTimeRange(start: d, end: d), to: d) == nil)
     }

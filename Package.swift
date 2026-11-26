@@ -29,11 +29,11 @@ let package = Package(
     name: "Folio",
     platforms: [.macOS(.v15)],
     products: [
-        .executable(name: "Folio", targets: ["Folio"]),
+        .executable(name: "Folio", targets: ["Folio"])
     ],
     dependencies: [
         // Reading and writing .xlsx / .ods packages (zip containers).
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.19"),
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.19")
     ],
     targets: [
         .executableTarget(
@@ -48,7 +48,8 @@ let package = Package(
         editor("FolioImage"),
         editor("FolioCode"),
         editor("FolioMedia"),
-    ] + (["FolioKit"] + editors).map { name in
-        .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
-    }
+    ]
+        + (["FolioKit"] + editors).map { name in
+            .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
+        }
 )

@@ -27,7 +27,9 @@ nonisolated final class CodeLayoutManager: NSLayoutManager {
             if attributes[.font] == nil { attributes[.font] = storage.attribute(.font, at: index, effectiveRange: nil) }
             let font = attributes[.font] as? NSFont
             let ascent = font?.ascender ?? 10
-            (mark as NSString).draw(at: NSPoint(x: origin.x + lineRect.minX + location.x, y: origin.y + lineRect.minY + location.y - ascent), withAttributes: attributes)
+            (mark as NSString).draw(
+                at: NSPoint(x: origin.x + lineRect.minX + location.x, y: origin.y + lineRect.minY + location.y - ascent),
+                withAttributes: attributes)
         }
     }
 }

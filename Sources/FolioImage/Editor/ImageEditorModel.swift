@@ -178,7 +178,11 @@ final class ImageEditorModel {
         Binding(
             get: { self.recipe[keyPath: keyPath] },
             set: { value in
-                if self.isLiveEditing { self.live { $0[keyPath: keyPath] = value } } else { self.commit(action) { $0[keyPath: keyPath] = value } }
+                if self.isLiveEditing {
+                    self.live { $0[keyPath: keyPath] = value }
+                } else {
+                    self.commit(action) { $0[keyPath: keyPath] = value }
+                }
             }
         )
     }
@@ -198,17 +202,25 @@ final class ImageEditorModel {
     func flipHorizontal() { commit("Flip Horizontal") { $0.flipHorizontallyOnScreen() } }
     func flipVertical() { commit("Flip Vertical") { $0.flipVerticallyOnScreen() } }
     func resetAll() { commit("Reset All") { $0 = EditRecipe() } }
-    func resetAdjustments() { commit("Reset Adjustments") { $0.adjustments = Adjustments(); $0.autoEnhance = nil } }
+    func resetAdjustments() {
+        commit("Reset Adjustments") {
+            $0.adjustments = Adjustments(); $0.autoEnhance = nil
+        }
+    }
     func resetCrop() {
         cropAspect = .free
-        commit("Reset Crop") { $0.crop = EditRecipe.fullCrop; $0.straighten = 0; $0.quarterTurns = 0; $0.flipHorizontal = false; $0.flipVertical = false; $0.resize = nil }
+        commit("Reset Crop") {
+            $0.crop = EditRecipe.fullCrop; $0.straighten = 0; $0.quarterTurns = 0; $0.flipHorizontal = false; $0.flipVertical = false;
+            $0.resize = nil
+        }
     }
 
     func setAspect(_ aspect: CropAspect) {
         cropAspect = aspect
         guard let ratio = aspect.ratio(original: geometry.canvasSize) else { return }
         commit("Crop Aspect") {
-            $0.crop = CropMath.fit(ratio: ratio, canvas: ImageGeometry(sourceSize: source.pixelSize, recipe: $0).canvasSize, around: $0.crop)
+            $0.crop = CropMath.fit(
+                ratio: ratio, canvas: ImageGeometry(sourceSize: source.pixelSize, recipe: $0).canvasSize, around: $0.crop)
             $0.resize = nil
         }
     }
@@ -316,7 +328,7 @@ final class ImageEditorModel {
         let canvas = tab == .crop
         var r = canvas ? recipe.withoutCrop : recipe
         r.markup = []  // drawn live by the overlay
-        r.resize = nil // the view stretches to the output aspect
+        r.resize = nil  // the view stretches to the output aspect
         r.stripMetadata = false
         let g = ImageGeometry(sourceSize: source.pixelSize, recipe: r)
         let shown = canvas ? g.canvasSize : g.croppedSize

@@ -1,9 +1,10 @@
 import CoreGraphics
+import FolioKit
 import ImageIO
 import Testing
 import UniformTypeIdentifiers
+
 @testable import FolioImage
-import FolioKit
 
 @Suite struct CodecTests {
     @Test(arguments: [UTType.png, .jpeg, .heic, .tiff, .gif, .bmp])
@@ -122,7 +123,8 @@ import FolioKit
         try store.record(output: output, original: original, originalTypeIdentifier: UTType.png.identifier, recipe: EditRecipe())
         store.prune(now: .now.addingTimeInterval(40 * 24 * 3600))
         #expect(store.restore(fileData: output) == nil)
-        let leftovers = try FileManager.default.contentsOfDirectory(at: store.root.appending(path: "originals"), includingPropertiesForKeys: nil)
+        let leftovers = try FileManager.default.contentsOfDirectory(
+            at: store.root.appending(path: "originals"), includingPropertiesForKeys: nil)
         #expect(leftovers.isEmpty)
     }
 }

@@ -40,7 +40,8 @@ nonisolated struct MarkdownRenderer {
             }
             if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") { fence = trimmed.first; continue }
             guard trimmed.hasPrefix("["), let close = trimmed.firstIndex(of: "]"),
-                  trimmed.index(after: close) < trimmed.endIndex, trimmed[trimmed.index(after: close)] == ":" else { continue }
+                trimmed.index(after: close) < trimmed.endIndex, trimmed[trimmed.index(after: close)] == ":"
+            else { continue }
             let label = Self.normalize(String(trimmed[trimmed.index(after: trimmed.startIndex)..<close]))
             guard !label.isEmpty, !label.hasPrefix("^") else { continue }
             var rest = trimmed[trimmed.index(close, offsetBy: 2)...].trimmingCharacters(in: .whitespaces)
@@ -80,13 +81,16 @@ nonisolated struct MarkdownRenderer {
                 var j = i + 1
                 var code: [String] = []
                 while j < lines.endIndex {
-                    if let close = Self.fence(lines[j]), close.char == fence.char, close.count >= fence.count, close.info.isEmpty { j += 1; break }
+                    if let close = Self.fence(lines[j]), close.char == fence.char, close.count >= fence.count, close.info.isEmpty {
+                        j += 1; break
+                    }
                     code.append(Self.dropIndent(lines[j], upTo: fence.indent))
                     j += 1
                 }
                 let language = Language(fenceName: fence.info.split(separator: " ").first.map(String.init) ?? "")
                 let classAttr = fence.info.isEmpty ? "" : " class=\"language-\(Self.escape(String(fence.info.split(separator: " ")[0])))\""
-                out += "<pre\(attr(i))><code\(classAttr)>\(CodeHighlighter.html(code.joined(separator: "\n"), language: language))</code></pre>\n"
+                out +=
+                    "<pre\(attr(i))><code\(classAttr)>\(CodeHighlighter.html(code.joined(separator: "\n"), language: language))</code></pre>\n"
                 i = j
                 continue
             }
@@ -176,7 +180,9 @@ nonisolated struct MarkdownRenderer {
 
     /// Whether `line` starts a block that can interrupt a paragraph.
     private func startsBlock(_ line: String) -> Bool {
-        if Self.fence(line) != nil || Self.atxHeading(line) != nil || Self.isThematicBreak(line) || Self.quoteContent(line) != nil { return true }
+        if Self.fence(line) != nil || Self.atxHeading(line) != nil || Self.isThematicBreak(line) || Self.quoteContent(line) != nil {
+            return true
+        }
         if let marker = Self.listMarker(line) { return !marker.ordered || marker.start == 1 }
         return false
     }
@@ -219,7 +225,8 @@ nonisolated struct MarkdownRenderer {
             if sawBlank { loose = true }
             sawBlank = false
             items.append(item)
-            guard i < lines.endIndex, let next = Self.listMarker(lines[i]), next.ordered == first.ordered, next.bullet == first.bullet else { break }
+            guard i < lines.endIndex, let next = Self.listMarker(lines[i]), next.ordered == first.ordered, next.bullet == first.bullet
+            else { break }
             if trailingBlank { loose = true }
             marker = next
         }
@@ -252,7 +259,9 @@ nonisolated struct MarkdownRenderer {
 
     // MARK: Tables
 
-    private func table(_ lines: ArraySlice<String>, from start: Int, header: [String], aligns: [String?], attr: String, into out: inout String) -> Int {
+    private func table(
+        _ lines: ArraySlice<String>, from start: Int, header: [String], aligns: [String?], attr: String, into out: inout String
+    ) -> Int {
         func row(_ cells: [String], tag: String) -> String {
             var html = "<tr>"
             for (index, align) in aligns.enumerated() {
@@ -418,7 +427,8 @@ nonisolated struct MarkdownRenderer {
         let content = String(after.dropFirst(max(1, spaces)))
         // A thematic break like `- - -` isn't a list.
         if isThematicBreak(line) { return nil }
-        return ListMarker(ordered: ordered, bullet: bullet, start: start, contentIndent: indent + markerLength + max(1, spaces), content: content)
+        return ListMarker(
+            ordered: ordered, bullet: bullet, start: start, contentIndent: indent + markerLength + max(1, spaces), content: content)
     }
 
     // MARK: Escaping

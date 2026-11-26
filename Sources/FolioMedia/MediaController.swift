@@ -1,7 +1,7 @@
 import AVKit
+import FolioKit
 import SwiftUI
 import UniformTypeIdentifiers
-import FolioKit
 
 /// State and actions for one media window. The view, the menu bar (`MediaCommands`)
 /// and the keyboard handler in `FolioPlayerView` all drive this one object.
@@ -161,7 +161,10 @@ final class MediaController {
         let time = player.currentTime()
         player.pause()
         Task {
-            guard let destination = await askDestination(name: "\(baseName) \(MediaMath.timecode(time).replacingOccurrences(of: ":", with: "."))", type: .png) else { return }
+            guard
+                let destination = await askDestination(
+                    name: "\(baseName) \(MediaMath.timecode(time).replacingOccurrences(of: ":", with: "."))", type: .png)
+            else { return }
             run("Saving frame", destination: destination) { [url] _ in
                 let image = try await Frames.still(url, at: time)
                 try await MediaExport.writeAtomically(to: destination) { try Frames.writePNG(image, to: $0) }
@@ -181,7 +184,9 @@ final class MediaController {
 
     func cancelJob() { job?.task?.cancel() }
 
-    private func run(_ title: String, destination: URL, work: @escaping @Sendable (@escaping @Sendable (Double) -> Void) async throws -> Void) {
+    private func run(
+        _ title: String, destination: URL, work: @escaping @Sendable (@escaping @Sendable (Double) -> Void) async throws -> Void
+    ) {
         job = Job(title: title)
         job?.task = Task {
             do {
@@ -214,7 +219,9 @@ final class MediaController {
         }
         guard response == .OK, let chosen = panel.url else { return nil }
         guard chosen.standardizedFileURL != url.standardizedFileURL else {
-            Alert.show(FolioError("Choose a different name. Folio never replaces the original file."), title: "Can't overwrite the original", window: playerView?.window)
+            Alert.show(
+                FolioError("Choose a different name. Folio never replaces the original file."), title: "Can't overwrite the original",
+                window: playerView?.window)
             return nil
         }
         return chosen

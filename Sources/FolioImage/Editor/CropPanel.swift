@@ -15,14 +15,19 @@ struct CropPanel: View {
                 LazyVGrid(columns: columns, spacing: 6) {
                     ForEach(CropAspect.allCases) { aspect in
                         Button(aspect.title) { model.setAspect(aspect) }
-                            .buttonStyle(.hero(model.cropAspect == aspect ? .secondary : .ghost, size: .sm, fullWidth: true, isSelected: model.cropAspect == aspect))
+                            .buttonStyle(
+                                .hero(
+                                    model.cropAspect == aspect ? .secondary : .ghost, size: .sm, fullWidth: true,
+                                    isSelected: model.cropAspect == aspect)
+                            )
                             .accessibilityAddTraits(model.cropAspect == aspect ? .isSelected : [])
                     }
                 }
             }
             InspectorSection("Rotate") {
-                RecipeSlider(model: model, title: "Straighten", keyPath: \.straighten, range: -45...45, step: 0.1,
-                             format: { String(format: "%.1f°", $0) })
+                RecipeSlider(
+                    model: model, title: "Straighten", keyPath: \.straighten, range: -45...45, step: 0.1,
+                    format: { String(format: "%.1f°", $0) })
                 HStack(spacing: 6) {
                     iconButton("Rotate Left", "rotate.left") { model.rotateLeft() }
                     iconButton("Rotate Right", "rotate.right") { model.rotateRight() }
@@ -85,14 +90,16 @@ struct CropPanel: View {
 
     private func applySize(changedWidth: Bool) {
         let cropped = model.geometry.croppedSize
-        guard let w = Int(widthText.filter(\.isNumber)), let h = Int(heightText.filter(\.isNumber)), w > 0, h > 0, w <= 30_000, h <= 30_000 else {
+        guard let w = Int(widthText.filter(\.isNumber)), let h = Int(heightText.filter(\.isNumber)), w > 0, h > 0, w <= 30_000, h <= 30_000
+        else {
             syncFields()
             return
         }
         var size = PixelSize(width: w, height: h)
         if keepAspect {
             let ratio = cropped.width / cropped.height
-            size = changedWidth
+            size =
+                changedWidth
                 ? PixelSize(width: w, height: Int((Double(w) / ratio).rounded()))
                 : PixelSize(width: Int((Double(h) * ratio).rounded()), height: h)
         }

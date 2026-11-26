@@ -88,7 +88,8 @@ nonisolated struct GenericLexer: Lexer {
 
             // Comments.
             if g.lineComments.contains(where: { s.has($0, at: i) }),
-               !g.commentNeedsBoundary || i == 0 || Char.isSpace(s[i - 1]) {
+                !g.commentNeedsBoundary || i == 0 || Char.isSpace(s[i - 1])
+            {
                 emit(.comment, i, n)
                 return LexState(depth: depth)
             }
@@ -126,7 +127,9 @@ nonisolated struct GenericLexer: Lexer {
                     let d = s[j]
                     if Char.isIdent(d) || d == Char.of(".") || d == Char.of("%") { j += 1; continue }
                     // Exponent sign: 1e-9, 2E+3 (not hex digits like 0xE).
-                    if (d == Char.of("-") || d == Char.of("+")), j > i, s[j - 1] | 0x20 == Char.of("e"), !(i + 1 < n && s[i + 1] | 0x20 == Char.of("x")) {
+                    if (d == Char.of("-") || d == Char.of("+")), j > i, s[j - 1] | 0x20 == Char.of("e"),
+                        !(i + 1 < n && s[i + 1] | 0x20 == Char.of("x"))
+                    {
                         j += 1; continue
                     }
                     break
@@ -169,7 +172,9 @@ nonisolated struct GenericLexer: Lexer {
                 i = j
                 continue
             }
-            if g.symbols, c == Char.of(":"), i + 1 < n, Char.isLetter(s[i + 1]), i == 0 || !(Char.isIdent(s[i - 1]) || s[i - 1] == Char.of(":")) {
+            if g.symbols, c == Char.of(":"), i + 1 < n, Char.isLetter(s[i + 1]),
+                i == 0 || !(Char.isIdent(s[i - 1]) || s[i - 1] == Char.of(":"))
+            {
                 let j = scanIdentifier(s, from: i + 1)
                 emit(.literal, i, j)
                 i = j

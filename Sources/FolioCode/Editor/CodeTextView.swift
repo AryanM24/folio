@@ -41,7 +41,8 @@ final class CodeTextView: NSTextView {
 
     override func insertText(_ string: Any, replacementRange: NSRange) {
         if replacementRange.location == NSNotFound, hasSingleSelection, let typed = string as? String,
-           let edit = TextEditing.typing(typed, in: text, selection: selectedRange(), pairQuotes: language.pairsQuotes) {
+            let edit = TextEditing.typing(typed, in: text, selection: selectedRange(), pairQuotes: language.pairsQuotes)
+        {
             apply(edit)
             return
         }
@@ -107,7 +108,9 @@ final class CodeTextView: NSTextView {
 
     override func drawBackground(in rect: NSRect) {
         super.drawBackground(in: rect)
-        guard highlightsCurrentLine, window?.firstResponder === self || window == nil, let lineRect = currentLineRect(), lineRect.intersects(rect) else { return }
+        guard highlightsCurrentLine, window?.firstResponder === self || window == nil, let lineRect = currentLineRect(),
+            lineRect.intersects(rect)
+        else { return }
         CodeTheme.currentLine.setFill()
         lineRect.fill()
     }
@@ -115,7 +118,8 @@ final class CodeTextView: NSTextView {
     /// The caret's visual line, full width. `nil` with a range selection.
     func currentLineRect() -> NSRect? {
         guard selectedRanges.count == 1, selectedRange().length == 0,
-              let layoutManager, let textStorage else { return nil }
+            let layoutManager, let textStorage
+        else { return nil }
         let location = selectedRange().location
         var rect: NSRect
         if location >= textStorage.length, !layoutManager.extraLineFragmentRect.isEmpty {
