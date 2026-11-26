@@ -74,8 +74,8 @@ public final class CodeDocument: ReferenceFileDocument, @unchecked Sendable {
     /// Called when the editor tears down, so later snapshots still see the latest text.
     @MainActor func editorWillClose(text: String) { loadedText = text }
 
-    public func snapshot(contentType: UTType) throws -> Snapshot {
-        Snapshot(text: text, format: format)
+    public nonisolated func snapshot(contentType: UTType) throws -> Snapshot {
+        readDuringSave { Snapshot(text: text, format: format) }
     }
 
     public nonisolated func fileWrapper(snapshot: Snapshot, configuration: WriteConfiguration) throws -> FileWrapper {

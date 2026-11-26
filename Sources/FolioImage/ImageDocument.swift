@@ -64,8 +64,8 @@ public final class ImageDocument: ReferenceFileDocument {
         }
     }
 
-    public func snapshot(contentType: UTType) throws -> Snapshot {
-        Snapshot(source: source, recipe: recipe, session: session)
+    public nonisolated func snapshot(contentType: UTType) throws -> Snapshot {
+        readDuringSave { Snapshot(source: source, recipe: recipe, session: session) }
     }
 
     public nonisolated func fileWrapper(snapshot: Snapshot, configuration: WriteConfiguration) throws -> FileWrapper {

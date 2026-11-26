@@ -46,27 +46,33 @@ struct FolioApp: App {
             CodeEditorView(document: file.document)
         }
         .commands { CodeCommands() }
+        .defaultSize(width: 1240, height: 820)
         DocumentGroup(newDocument: { RichTextDocument() }) { file in
             RichTextEditorView(document: file.document)
         }
         .commands { DocumentCommands() }
+        .defaultSize(width: 1240, height: 820)
         DocumentGroup(newDocument: { SpreadsheetDocument() }) { file in
             SpreadsheetEditorView(document: file.document)
         }
         .commands { SpreadsheetCommands() }
+        .defaultSize(width: 1240, height: 820)
         DocumentGroup(newDocument: { PDFFileDocument() }) { file in
             PDFEditorView(document: file.document)
         }
         .commands { PDFCommands() }
+        .defaultSize(width: 1240, height: 820)
         DocumentGroup(newDocument: { ImageDocument() }) { file in
             ImageEditorView(document: file.document)
         }
         .commands { ImageCommands() }
+        .defaultSize(width: 1240, height: 820)
         // Media is view-and-export: originals are never rewritten, so no "New" item.
         DocumentGroup(viewing: MediaDocument.self) { file in
             MediaEditorView(document: file.document)
         }
         .commands { MediaCommands() }
+        .defaultSize(width: 1240, height: 820)
 
         Settings { SettingsView() }
     }

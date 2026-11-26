@@ -54,7 +54,8 @@ public struct DocumentCommands: Commands {
             Divider()
         }
 
-        CommandMenu("Format") {
+        // Joins the system Format menu (one Format menu app-wide, shared with Spreadsheets).
+        CommandGroup(after: .textFormatting) {
             Group {
                 Menu("Font") {
                     Button("Show Fonts") { editor?.showFonts() }.keyboardShortcut("t")

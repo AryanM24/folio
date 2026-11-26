@@ -78,9 +78,9 @@ public final class SpreadsheetDocument: ReferenceFileDocument {
         engine.recalculateAll(workbook)
     }
 
-    /// SwiftUI calls this on the main thread (see docs/ARCHITECTURE.md, "Snapshots must be cheap").
-    public func snapshot(contentType: UTType) throws -> SpreadsheetSnapshot {
-        MainActor.assumeIsolated { SpreadsheetSnapshot(workbook: workbook, values: engine.values) }
+    /// Runs on AppKit's save thread with the main thread parked; see `readDuringSave`.
+    public nonisolated func snapshot(contentType: UTType) throws -> SpreadsheetSnapshot {
+        readDuringSave { SpreadsheetSnapshot(workbook: workbook, values: engine.values) }
     }
 
     public nonisolated func fileWrapper(snapshot: SpreadsheetSnapshot, configuration: WriteConfiguration) throws -> FileWrapper {

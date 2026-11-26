@@ -57,7 +57,7 @@ The engine is pure Swift (`Formula/`) and doesn't depend on the UI.
 | XLSX | ✓ | ✓ | Shared and inline strings, numbers, booleans, errors, formulas with cached values, shared formulas, bold/italic/underline, colours, fills, alignment, number formats, column widths, frozen panes and the active sheet. Worksheets are read by a byte-level scanner (`XLSXSheetParser`). |
 | ODS | ✓ | ✓ | Values, formulas (OpenFormula ↔ A1), repeated rows and cells, and date, percentage and currency types. Cell styles and column widths aren't written yet. |
 
-CSV and TSV can't hold formulas, formatting or more than one sheet. The first time an edit adds one of these to a CSV or TSV, a non-modal banner says what won't be kept. Saving writes formula results.
+CSV and TSV can't hold formatting or more than one sheet. The first time an edit adds either to a CSV or TSV, a non-modal banner says what won't be kept. Formulas are saved exactly as typed (`=C2*D2`), so autosave never changes what the file says; Excel, Numbers and Google Sheets all evaluate them on open.
 
 ## Performance
 

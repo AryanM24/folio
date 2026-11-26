@@ -203,13 +203,14 @@ struct DocumentTests {
         #expect(doc.activeSheet.columnWidths.isEmpty)
     }
 
-    @Test func csvDocumentWarnsOnceAboutFormulas() throws {
+    @Test func csvDocumentWarnsOnceAboutExtraSheets() throws {
         let doc = try SpreadsheetDocument(data: bytes("a,b\n"), format: .csv)
-        #expect(doc.formatWarning == nil)
         doc.apply([ref("C1"): CellContent(input: "=1+1")], actionName: "Typing", undoManager: nil)
+        #expect(doc.formatWarning == nil, "formulas are kept in CSV, so there's nothing to warn about")
+        doc.replaceWorkbook({ var w = doc.workbook; w.addSheet(); return w }(), actionName: "Add Sheet", undoManager: nil)
         #expect(doc.formatWarning != nil)
         doc.dismissFormatWarning()
-        doc.apply([ref("C2"): CellContent(input: "=2+2")], actionName: "Typing", undoManager: nil)
+        doc.replaceWorkbook({ var w = doc.workbook; w.addSheet(); return w }(), actionName: "Add Sheet", undoManager: nil)
         #expect(doc.formatWarning == nil)
     }
 
@@ -218,7 +219,7 @@ struct DocumentTests {
         doc.apply([ref("B1"): CellContent(input: "=1+1")], actionName: "Typing", undoManager: nil)
         let snap = try doc.snapshot(contentType: csvType)
         let out = try doc.format.write(snap.workbook, values: snap.values)
-        #expect(text(out) == "x,2\r\n")
+        #expect(text(out) == "x,=1+1\r\n")
     }
 
     @Test func selectingASheetIsNotAnEdit() {

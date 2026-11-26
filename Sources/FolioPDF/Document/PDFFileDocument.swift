@@ -64,8 +64,8 @@ public final class PDFFileDocument: ReferenceFileDocument {
         loadedAt = .now
     }
 
-    public func snapshot(contentType: UTType) throws -> Snapshot {
-        Snapshot(access: access)
+    public nonisolated func snapshot(contentType: UTType) throws -> Snapshot {
+        readDuringSave { Snapshot(access: access) }
     }
 
     public nonisolated func fileWrapper(snapshot: Snapshot, configuration: WriteConfiguration) throws -> FileWrapper {

@@ -53,8 +53,8 @@ public final class RichTextDocument: ReferenceFileDocument {
 
     /// Copies the text so the background save encodes a stable value while typing
     /// continues. Copying is linear but cheap next to encoding.
-    public func snapshot(contentType: UTType) throws -> DocumentSnapshot {
-        DocumentSnapshot(text: NSAttributedString(attributedString: storage), attributes: attributes, page: page)
+    public nonisolated func snapshot(contentType: UTType) throws -> DocumentSnapshot {
+        readDuringSave { DocumentSnapshot(text: NSAttributedString(attributedString: storage), attributes: attributes, page: page) }
     }
 
     public nonisolated func fileWrapper(snapshot: DocumentSnapshot, configuration: WriteConfiguration) throws -> FileWrapper {

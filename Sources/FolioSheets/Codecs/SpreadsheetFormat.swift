@@ -41,7 +41,7 @@ public nonisolated enum SpreadsheetFormat: String, Sendable, CaseIterable {
 
     public var fileExtension: String { rawValue }
 
-    /// CSV and TSV hold one sheet of values: no formulas, styles or extra sheets.
+    /// CSV and TSV hold one sheet of text: no styles or extra sheets. Formulas are kept as typed.
     public var isPlainText: Bool { self == .csv || self == .tsv }
 
     public func read(_ data: Data) throws -> Workbook {
@@ -69,15 +69,15 @@ public nonisolated enum SpreadsheetFormat: String, Sendable, CaseIterable {
         }
     }
 
-    /// What CSV stores for a cell: the computed value for formulas, the raw input otherwise
-    /// (so "00123" and "1,234" survive a round trip exactly as typed).
+    /// What CSV stores for a cell: exactly what was typed, formulas included.
+    ///
+    /// Autosave rewrites the file without asking, so it must never change what the file
+    /// says. A CSV that contained `=C2*D2` keeps `=C2*D2` (Excel, Numbers and Google
+    /// Sheets all evaluate it on open), and "00123" or "1,234" survive exactly as typed.
+    /// A leading apostrophe only marks text in the grid, so it isn't written.
     static func plainValue(sheet: Sheet, ref: CellRef, lookup: (Int, CellRef) -> CellValue?) -> String {
         let input = sheet[ref]
-        guard input.hasPrefix("=") else { return input.hasPrefix("'") ? String(input.dropFirst()) : input }
-        switch lookup(sheet.id, ref) ?? .empty {
-        case .number(let n): return CellValue.plainNumberText(n)
-        case let other: return (try? other.asText().get()) ?? other.errorValue?.rawValue ?? ""
-        }
+        return input.hasPrefix("'") ? String(input.dropFirst()) : input
     }
 
     /// Whether saving `wb` as this format would drop something, and what.
@@ -86,9 +86,6 @@ public nonisolated enum SpreadsheetFormat: String, Sendable, CaseIterable {
         var lost: [String] = []
         if wb.sheets.count > 1 { lost.append("only the current sheet is saved") }
         if wb.sheets.contains(where: { !$0.styles.isEmpty }) { lost.append("formatting isn't kept") }
-        if wb.sheets.contains(where: { $0.cells.values.contains { $0.hasPrefix("=") } }) {
-            lost.append("formulas are saved as their results")
-        }
         guard !lost.isEmpty else { return nil }
         let joined = lost.joined(separator: ", ")
         return "\(rawValue.uppercased()) holds plain values: " + joined + ". Save a copy as Excel (.xlsx) to keep everything."

@@ -62,12 +62,19 @@ struct CSVTests {
         #expect(cell(again, "C3") == "00123")  // raw text survives
     }
 
-    @Test func savesFormulaResultsNotFormulas() throws {
+    /// Autosave must never change what a CSV says, so formulas are written as typed.
+    @Test func savesFormulasAsTyped() throws {
         let wb = makeWorkbook(["A1": "2", "A2": "=A1*21", "A3": "'007"])
         let engine = FormulaEngine()
         engine.recalculateAll(wb)
         let out = text(try SpreadsheetFormat.csv.write(wb, values: engine.values))
-        #expect(out == "2\r\n42\r\n007\r\n")
+        #expect(out == "2\r\n=A1*21\r\n007\r\n")
+    }
+
+    @Test func formulaCSVRoundTripsExactly() throws {
+        let original = "Units,Price,Revenue\r\n3,4,=A2*B2\r\n"
+        let wb = try SpreadsheetFormat.csv.read(bytes(original))
+        #expect(text(try SpreadsheetFormat.csv.write(wb, values: [:])) == original)
     }
 
     @Test func tsvUsesTabs() throws {
@@ -77,9 +84,9 @@ struct CSVTests {
         #expect(text(try SpreadsheetFormat.tsv.write(wb, values: [:])) == "a,b\tc\r\n")
     }
 
-    @Test func losesWarnsAboutMultipleSheetsAndFormulas() {
+    @Test func losesWarnsAboutMultipleSheetsButNotFormulas() {
         var wb = makeWorkbook(["A1": "=1+1"])
-        #expect(SpreadsheetFormat.csv.losses(in: wb)?.contains("formulas") == true)
+        #expect(SpreadsheetFormat.csv.losses(in: wb) == nil)
         #expect(SpreadsheetFormat.xlsx.losses(in: wb) == nil)
         wb.addSheet()
         #expect(SpreadsheetFormat.csv.losses(in: wb)?.contains("current sheet") == true)

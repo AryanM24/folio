@@ -72,9 +72,15 @@ Autosave fires when the document's `UndoManager` records a change. So **every mu
 
   Get the undo manager with `@Environment(\.undoManager)` in SwiftUI, or `view.undoManager` in AppKit.
 
-### Snapshots must be cheap
+### Snapshots: off the main thread, with the main thread parked
 
-`snapshot(contentType:)` runs on the main thread, and `fileWrapper(snapshot:configuration:)` runs in the background. So keep `snapshot` cheap: copy a value type or take an immutable reference, and do the slow encoding (PDF serialisation, XLSX zipping, image encoding) in `fileWrapper`.
+During autosave, AppKit calls `snapshot(contentType:)` on a **background save thread**, while it keeps the main thread parked until the snapshot is taken (`NSDocument.unblockUserInteraction`). Then `fileWrapper(snapshot:configuration:)` encodes the snapshot on that save thread while you keep editing.
+
+So:
+
+- Declare `snapshot` as `nonisolated`, and read your main-actor state inside `readDuringSave { … }` (FolioKit). It's race-free because the main thread is parked. Don't use `MainActor.assumeIsolated`, which traps on the save thread, or `DispatchQueue.main.sync`, which deadlocks.
+- Keep `snapshot` to a cheap copy, such as value types or an immutable copy, and do the slow encoding (PDF serialization, XLSX zipping, image encoding) in `fileWrapper`.
+- Check saving in the real app: edit a file and confirm it changes on disk about a second later.
 
 ### Large files
 

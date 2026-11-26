@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Finder > Quick Actions and the Services menu call `runTool(_:userData:error:)`.
         NSApp.servicesProvider = self
         NSUpdateDynamicServices()
+        MenuVisibility.install()
     }
 
     /// Quit fast: documents are already saved as you type, so there is nothing to wait for
