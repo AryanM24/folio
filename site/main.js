@@ -58,7 +58,7 @@ for (const button of document.querySelectorAll("[data-copy]")) {
 // request 404s quietly and the mock stays.
 const heroImage = new Image();
 heroImage.onload = () => {
-  heroImage.alt = "Folio editing a proposal: a page with a table and lists, an outline sidebar and a formatting toolbar.";
+  heroImage.alt = "The Folio workspace: a sidebar with Home, Recent, Favorites and the library, new-file tiles, and a grid of recent files with previews.";
   heroImage.width = heroImage.naturalWidth;
   heroImage.height = heroImage.naturalHeight;
   document.getElementById("hero-visual").replaceChildren(heroImage);

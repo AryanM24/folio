@@ -134,3 +134,25 @@ nonisolated enum FileNaming {
 nonisolated func formattedSize(_ bytes: Int64) -> String {
     ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
 }
+
+/// Whether a file sits inside one of the folders the user chose (library, locations).
+nonisolated enum TrustedFolders {
+    /// True when `url` is `root` itself or anywhere beneath it.
+    ///
+    /// Compares normalised paths: `URL.path(percentEncoded:)` keeps a trailing slash on
+    /// directory URLs, and a naive `root + "/"` prefix then never matches. That bug once
+    /// hid every Recent file in libraries outside ~/Documents.
+    static func contains(_ url: URL, in roots: [URL]) -> Bool {
+        let path = normalized(url)
+        return roots.contains { root in
+            let base = normalized(root)
+            return path == base || path.hasPrefix(base + "/")
+        }
+    }
+
+    private static func normalized(_ url: URL) -> String {
+        var path = url.standardizedFileURL.path(percentEncoded: false)
+        while path.count > 1 && path.hasSuffix("/") { path.removeLast() }
+        return path
+    }
+}

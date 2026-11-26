@@ -167,3 +167,25 @@ struct LibraryTests {
         #expect(FileItem.load(url)?.isFavorite == false)
     }
 }
+
+@Suite("Trusted folders")
+struct TrustedFolderTests {
+    @Test func filesInsideAChosenFolderAreTrustedEvenUnderLibrary() {
+        let root = URL(fileURLWithPath: "/Users/me/Library/Application Support/Folio", isDirectory: true)
+        #expect(TrustedFolders.contains(URL(fileURLWithPath: "/Users/me/Library/Application Support/Folio/Notes.md"), in: [root]))
+        #expect(TrustedFolders.contains(URL(fileURLWithPath: "/Users/me/Library/Application Support/Folio/Sub/a.pdf"), in: [root]))
+    }
+
+    @Test func siblingsWithASharedPrefixAreNotTrusted() {
+        let root = URL(fileURLWithPath: "/Users/me/Documents/Folio", isDirectory: true)
+        #expect(!TrustedFolders.contains(URL(fileURLWithPath: "/Users/me/Documents/Folio Old/a.pdf"), in: [root]))
+        #expect(!TrustedFolders.contains(URL(fileURLWithPath: "/Users/me/Library/Caches/a.pdf"), in: [root]))
+    }
+
+    @Test func trailingSlashesDoNotMatter() {
+        let withSlash = URL(fileURLWithPath: "/tmp/lib/", isDirectory: true)
+        let withoutSlash = URL(fileURLWithPath: "/tmp/lib")
+        #expect(TrustedFolders.contains(URL(fileURLWithPath: "/tmp/lib/x.txt"), in: [withSlash]))
+        #expect(TrustedFolders.contains(URL(fileURLWithPath: "/tmp/lib/x.txt"), in: [withoutSlash]))
+    }
+}

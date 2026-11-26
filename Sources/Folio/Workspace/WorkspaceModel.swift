@@ -226,8 +226,9 @@ final class WorkspaceModel {
         recentGeneration += 1
         let generation = recentGeneration
         let snapshot = dates
+        let roots = trustedRoots
         Task {
-            let items = await Self.load(snapshot)
+            let items = await Self.load(snapshot, trusted: roots)
             guard generation == recentGeneration else { return }
             recent = FileSort.lastOpened.sorted(items.filter { !$0.isFolder }, ascending: false)
             loadingRecent = false
@@ -240,8 +241,9 @@ final class WorkspaceModel {
         var urls = spotlightFavorites
         for item in libraryItems + folderItems + recent where item.isFavorite { urls.insert(item.url.standardizedFileURL) }
         let snapshot = Dictionary(urls.map { ($0, Date?.none) }) { a, _ in a }
+        let roots = trustedRoots
         Task {
-            let items = await Self.load(snapshot)
+            let items = await Self.load(snapshot, trusted: roots)
             favorites = FileSort.lastOpened.sorted(items.filter(\.isFavorite), ascending: false)
         }
     }
@@ -285,9 +287,17 @@ final class WorkspaceModel {
         FileItem.list(folder: folder)
     }
 
-    nonisolated private static func load(_ urls: [URL: Date?]) async -> [FileItem] {
-        urls.compactMap { url, date in SpotlightSearch.isNoise(url) ? nil : FileItem.load(url, lastUsed: date) }
+    /// Loads items, skipping system noise (caches, app support) unless the file is inside a
+    /// folder the user chose: the library and added locations are never noise, wherever they are.
+    nonisolated private static func load(_ urls: [URL: Date?], trusted roots: [URL]) async -> [FileItem] {
+        return urls.compactMap { url, date in
+            let trusted = TrustedFolders.contains(url, in: roots)
+            return !trusted && SpotlightSearch.isNoise(url) ? nil : FileItem.load(url, lastUsed: date)
+        }
     }
+
+    /// Folders the user picked, whose contents always count as their files.
+    private var trustedRoots: [URL] { [libraryURL] + locations }
 
     nonisolated private static func capacity(of url: URL) async -> (Int64, Int64)? {
         let values = try? url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeTotalCapacityKey])

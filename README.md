@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="site/assets/icon.png" width="96" alt="">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/logo/folio-lockup-white.svg">
+    <img src="brand/logo/folio-lockup.svg" width="240" alt="Folio">
+  </picture>
 </p>
-
-<h1 align="center">Folio</h1>
 
 <p align="center">
   Every file you edit, in one native Mac app.<br>
@@ -13,28 +14,33 @@
   <a href="https://github.com/AryanM24/folio/releases/latest"><b>Download for Mac</b></a> ·
   <a href="#build-from-source">Build from source</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="CONTRIBUTING.md">Contributing</a> ·
+  <a href="brand/README.md">Brand</a>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/documents.png" alt="Folio editing a proposal with a table, lists and an outline sidebar">
+  <img src="docs/screenshots/workspace.png" alt="The Folio workspace: a sidebar of places, new-file tiles and recent files with previews">
 </p>
 
 <table>
   <tr>
+    <td><img src="docs/screenshots/documents.png" alt="Document editor with a table, lists and an outline sidebar"></td>
     <td><img src="docs/screenshots/pdf.png" alt="PDF editor with page thumbnails and annotation toolbar"></td>
-    <td><img src="docs/screenshots/spreadsheet-dark.png" alt="Spreadsheet editor in dark mode with formulas"></td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/spreadsheet-dark.png" alt="Spreadsheet editor in dark mode with formulas"></td>
     <td><img src="docs/screenshots/markdown.png" alt="Markdown editor with live preview"></td>
+  </tr>
+  <tr>
     <td><img src="docs/screenshots/image-dark.png" alt="Image editor with adjustment sliders in dark mode"></td>
+    <td><img src="docs/screenshots/code-dark.png" alt="Swift source with syntax highlighting in dark mode"></td>
   </tr>
 </table>
 
 ## A home for your files
 
 <p align="center">
-  <img src="docs/screenshots/workspace.png" alt="The Folio workspace: a sidebar of places, Start something tiles, and recent files as cards">
+  <img src="docs/screenshots/workspace-dark.png" alt="The Folio workspace in dark mode">
 </p>
 
 Folio opens to its **workspace**: start a new document, spreadsheet, note or PDF in one click, then pick up recent work across your Mac. Files stay ordinary files in folders you choose (new work goes to *~/Documents/Folio*); favorites are a Finder tag, so the star shows up in Finder too. Search, filter by kind, preview with Space, rename, move, share or trash with Undo, run tools on a selection, and press ⌘K for everything else.

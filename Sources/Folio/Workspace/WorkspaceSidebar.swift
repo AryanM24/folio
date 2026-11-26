@@ -14,6 +14,16 @@ struct WorkspaceSidebar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // The lockup, as in brand/logo/folio-lockup.svg: wordmark height ≈ 60% of the tile.
+            HStack(spacing: 8) {
+                FolioMark().frame(width: 22, height: 22)
+                FolioWordmark().frame(height: 13).foregroundStyle(Hero.foreground)
+            }
+            .padding(.horizontal, 22)
+            .padding(.top, 6)
+            .padding(.bottom, 14)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Folio")
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
                     row("Home", symbol: "house", destination: .home)
