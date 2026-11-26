@@ -10,10 +10,18 @@ export const PageView = memo(function PageView({ page, box, zoom, active }: { pa
 
   useEffect(() => {
     const el = ref.current!
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '600px' })
+    // root must be the clipping viewport, or rootMargin is ignored
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { root: el.closest('.canvas-bg'), rootMargin: '600px' })
     io.observe(el)
     return () => io.disconnect()
   }, [])
+
+  // free the backing store off-screen; long documents would otherwise hold GBs
+  useEffect(() => {
+    if (visible || !ref.current) return
+    ref.current.width = ref.current.height = 0
+    setRendered(0)
+  }, [visible])
 
   useEffect(() => {
     if (!visible) return

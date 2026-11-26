@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Box, Obj, Pt, StickyObj, TextObj } from '../lib/types'
+import type { Box, DocState, Obj, Pt, StickyObj, TextObj } from '../lib/types'
 import { bbox, FONT, intersects, layout, LINE_H, moveObj, resizeObj, unionBox } from '../lib/geometry'
 import { uid } from '../lib/storage'
 import {
@@ -15,7 +15,7 @@ type Drag =
   | { kind: 'resize'; start: Pt; handle: string; box: Box; orig: Obj[]; moved: boolean }
   | { kind: 'marquee'; start: Pt; add: string[] }
   | { kind: 'draw'; start: Pt }
-  | { kind: 'erase' }
+  | { kind: 'erase'; checked: boolean }
 
 const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as const
 const CURSORS: Record<string, string> = { nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize', n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize' }
@@ -98,8 +98,10 @@ export function Canvas() {
 
     if (tool === 'select') {
       const handle = target.getAttribute('data-handle')
-      if (handle && selBox) {
-        setDrag({ kind: 'resize', start: p, handle, box: selBox, orig: selObjs, moved: false })
+      const movable = selObjs.filter((o) => !o.locked)
+      const mBox = unionBox(movable.map(bbox))
+      if (handle && mBox) {
+        setDrag({ kind: 'resize', start: p, handle, box: mBox, orig: movable, moved: false })
         return
       }
       const id = target.closest('[data-id]')?.getAttribute('data-id')
@@ -120,9 +122,8 @@ export function Canvas() {
     }
 
     if (tool === 'eraser') {
-      checkpoint()
-      setDrag({ kind: 'erase' })
-      eraseAt(e)
+      setDrag({ kind: 'erase', checked: false })
+      eraseAt(e, { checked: false })
       return
     }
 
@@ -153,10 +154,14 @@ export function Canvas() {
     setDrag({ kind: 'draw', start: p })
   }
 
-  function eraseAt(e: { clientX: number; clientY: number }) {
+  function eraseAt(e: { clientX: number; clientY: number }, d: { checked: boolean }) {
     const el = document.elementFromPoint(e.clientX, e.clientY)
     const id = el?.closest('[data-id]')?.getAttribute('data-id')
-    if (id) setDoc((d) => ({ ...d, objects: d.objects.filter((o) => o.id !== id || o.locked) }))
+    const o = id && getState().doc.objects.find((x) => x.id === id)
+    if (!o || o.locked) return
+    // checkpoint lazily so a click that erases nothing leaves history alone
+    if (!d.checked) { checkpoint(); d.checked = true }
+    setDoc((doc) => ({ ...doc, objects: doc.objects.filter((x) => x.id !== id) }))
   }
 
   function onPointerMove(e: React.PointerEvent) {
@@ -165,7 +170,7 @@ export function Canvas() {
     if (drag.kind === 'pan') {
       setState((s) => ({ view: { ...s.view, x: drag.vx + e.clientX - drag.sx, y: drag.vy + e.clientY - drag.sy } }))
     } else if (drag.kind === 'erase') {
-      eraseAt(e)
+      eraseAt(e, drag)
     } else if (drag.kind === 'move') {
       const dx = p[0] - drag.start[0], dy = p[1] - drag.start[1]
       if (!drag.moved) {
@@ -206,7 +211,7 @@ export function Canvas() {
     } else if (drag.kind === 'draw' && draft) {
       const [sx, sy] = drag.start
       if (draft.type === 'path') {
-        setDraft({ ...draft, points: [...draft.points, p] })
+        setDraft((d) => (d?.type === 'path' ? { ...d, points: [...d.points, p] } : d))
       } else if (draft.type === 'line' || draft.type === 'arrow') {
         let [ex, ey] = p
         if (e.shiftKey) {
@@ -331,7 +336,10 @@ function TextEditor({ o }: { o: TextObj | StickyObj }) {
     const el = ref.current
     const h = el ? el.scrollHeight : o.h
     if (!sticky && !text.trim()) {
-      setDoc((d) => ({ ...d, objects: d.objects.filter((x) => x.id !== o.id) }))
+      // a fresh empty text was already checkpointed by addObject; an emptied existing one needs its own step
+      const drop = (d: DocState) => ({ ...d, objects: d.objects.filter((x) => x.id !== o.id) })
+      if (o.text) commit(drop)
+      else setDoc(drop)
     } else if (text !== o.text || (!sticky && Math.abs(h - o.h) > 1)) {
       commit((d) => ({
         ...d,

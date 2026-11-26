@@ -20,6 +20,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { Logo } from './Library'
 
 let clipboard: Obj[] = []
+const CLIP_MARK = '\u2063folio-objects'
 
 export function Editor({ docId }: { docId: string }) {
   const [loaded, setLoaded] = useState<'loading' | 'ok' | 'missing'>('loading')
@@ -53,21 +54,39 @@ export function Editor({ docId }: { docId: string }) {
     let t: ReturnType<typeof setTimeout>
     let prev = getState().doc
     let prevName = getState().name
+    let dirty = false
+    let pendingThumb = false
+    const flush = async () => {
+      clearTimeout(t)
+      if (!dirty) return
+      dirty = false
+      const { doc, name } = getState()
+      const wantThumb = pendingThumb
+      pendingThumb = false
+      try {
+        await saveState(docId, doc)
+        const thumb = wantThumb && doc.pages[0] ? await thumbnail(doc.pages[0]).catch(() => undefined) : undefined
+        await touchMeta(docId, doc, { name, ...(thumb ? { thumb } : {}) })
+      } catch (e) {
+        toast.danger("Couldn't save to browser storage", { description: (e as Error).message })
+      } finally {
+        if (!dirty) setSaving(false)
+      }
+    }
     const un = subscribe(() => {
       const { doc, name } = getState()
       if (doc === prev && name === prevName) return
-      const firstChanged = doc.pages[0] !== prev.pages[0]
+      if (doc.pages[0] !== prev.pages[0]) pendingThumb = true
       prev = doc; prevName = name
+      dirty = true
       setSaving(true)
       clearTimeout(t)
-      t = setTimeout(async () => {
-        await saveState(docId, doc)
-        const thumb = firstChanged && doc.pages[0] ? await thumbnail(doc.pages[0]).catch(() => undefined) : undefined
-        await touchMeta(docId, doc, { name, ...(thumb ? { thumb } : {}) })
-        setSaving(false)
-      }, 400)
+      t = setTimeout(flush, 400)
     })
-    return () => { un(); clearTimeout(t) }
+    const onHide = () => { if (document.visibilityState === 'hidden') flush() }
+    addEventListener('pagehide', flush)
+    document.addEventListener('visibilitychange', onHide)
+    return () => { un(); removeEventListener('pagehide', flush); document.removeEventListener('visibilitychange', onHide); flush() }
   }, [docId, loaded])
 
   // keyboard shortcuts
@@ -83,8 +102,7 @@ export function Editor({ docId }: { docId: string }) {
       if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return }
       if (mod && k === 'y') { e.preventDefault(); redo(); return }
       if (mod && k === 'a') { e.preventDefault(); setState({ tool: 'select', selection: s.doc.objects.map((o) => o.id) }); return }
-      if (mod && k === 'c') { clipboard = s.doc.objects.filter((o) => s.selection.includes(o.id)); return }
-      if (mod && k === 'x') { clipboard = s.doc.objects.filter((o) => s.selection.includes(o.id)); deleteSelection(); return }
+      if (mod && k === 'x' && s.selection.length) { setTimeout(deleteSelection); return }
       if (mod && k === 'd') { e.preventDefault(); paste(clipboardOf(s.selection), 16); return }
       if (mod && e.shiftKey && k === 'l') { e.preventDefault(); const sel = s.doc.objects.filter((o) => s.selection.includes(o.id)); const lock = !sel.every((o) => o.locked); updateObjects(s.selection, (o) => ({ ...o, locked: lock })); return }
       if (mod && (k === '=' || k === '+')) { e.preventDefault(); zoomAt(s.view.zoom * 1.25); return }
@@ -116,12 +134,21 @@ export function Editor({ docId }: { docId: string }) {
       if (tool && !e.repeat) activateTool(tool, () => setSigOpen(true))
     }
     const up = (e: KeyboardEvent) => { if (e.key === ' ') setState({ spaceDown: false }) }
+    const blur = () => setState({ spaceDown: false })
+    // copying objects writes a marker to the system clipboard so a later paste knows which wins
+    const onCopy = (e: ClipboardEvent) => {
+      const s = getState()
+      if (isField(e.target) || !s.selection.length) return
+      clipboard = s.doc.objects.filter((o) => s.selection.includes(o.id))
+      e.clipboardData?.setData('text/plain', CLIP_MARK)
+      e.preventDefault()
+    }
     const onPaste = async (e: ClipboardEvent) => {
       if (isField(e.target)) return
       const files = [...(e.clipboardData?.files ?? [])]
       if (files.length) { e.preventDefault(); return importFiles(files) }
       const text = e.clipboardData?.getData('text/plain')
-      if (clipboard.length) { e.preventDefault(); return paste(clipboard, 24) }
+      if (text === CLIP_MARK) { e.preventDefault(); return paste(clipboard, 24) }
       if (text) {
         e.preventDefault()
         const [x, y] = viewCenterWorld()
@@ -131,7 +158,13 @@ export function Editor({ docId }: { docId: string }) {
     addEventListener('keydown', down)
     addEventListener('keyup', up)
     addEventListener('paste', onPaste)
-    return () => { removeEventListener('keydown', down); removeEventListener('keyup', up); removeEventListener('paste', onPaste) }
+    addEventListener('copy', onCopy)
+    addEventListener('cut', onCopy)
+    addEventListener('blur', blur)
+    return () => {
+      removeEventListener('keydown', down); removeEventListener('keyup', up); removeEventListener('paste', onPaste)
+      removeEventListener('copy', onCopy); removeEventListener('cut', onCopy); removeEventListener('blur', blur)
+    }
   }, [])
 
   if (loaded === 'loading') return <div className="grid h-full place-items-center"><Spinner /></div>

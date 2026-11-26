@@ -18,6 +18,7 @@ export function loadPdf(srcId: string, bytes?: Uint8Array) {
       return pdfjs.getDocument({ data: b.slice() }).promise
     })()
     cache.set(srcId, p)
+    p.catch(() => cache.delete(srcId)) // let a transient failure retry
   }
   return p
 }

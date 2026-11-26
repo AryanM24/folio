@@ -127,6 +127,7 @@ export function setPages(fn: (p: Page[]) => Page[]) {
     const pages = fn(d.pages)
     return { pages, objects: relayoutObjects(d.pages, pages, d.objects) }
   })
+  setState({ hits: [] }) // search hits are page-local and would now be misplaced
 }
 
 export const setTool = (tool: Tool) => setState({ tool, editingId: null, ...(tool !== 'select' ? { selection: [] } : {}) })
