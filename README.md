@@ -24,7 +24,7 @@
 | --- | --- |
 | **PDF** | Annotate, highlight, draw, sign, fill forms, redact for real, recognize text in scans, and insert, delete, rotate, reorder or extract pages. |
 | **Documents** | Word (.docx), RTF, ODT and HTML, with styles, lists, tables, images, a page view, Find & Replace and Writing Tools. |
-| **Spreadsheets** | Excel (.xlsx), CSV, TSV and ODS, with over 60 functions, multiple sheets, formatting, sorting, clipboard that works with Numbers and Excel, and charts. |
+| **Spreadsheets** | Excel (.xlsx), CSV, TSV and ODS, with nearly 50 functions, multiple sheets, formatting, sorting, clipboard that works with Numbers and Excel, and charts. |
 | **Images** | Non-destructive adjustments and filters, crop and straighten, resize, markup, background removal and Live Text. |
 | **Text and code** | Syntax highlighting for 20+ languages, a live Markdown preview, JSON formatting, and the file's own encoding and line endings preserved. |
 | **Audio and video** | Playback, lossless trimming, export presets, audio extraction, frame grabs and waveforms. |

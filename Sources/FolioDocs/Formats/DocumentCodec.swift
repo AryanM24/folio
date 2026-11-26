@@ -16,7 +16,9 @@ public nonisolated enum DocumentCodec {
             guard let text = NSAttributedString(rtfdFileWrapper: wrapper, documentAttributes: &attributes) else {
                 throw FolioError("This RTFD package is damaged or empty.")
             }
-            return (NSMutableAttributedString(attributedString: text), attributes as? Attributes ?? [:])
+            let mutable = NSMutableAttributedString(attributedString: text)
+            ListFormatting.normalizeImportedLists(in: mutable)
+            return (mutable, attributes as? Attributes ?? [:])
         }
         guard let data = wrapper.regularFileContents else {
             throw FolioError("Folio couldn't read this file's contents.")
@@ -48,6 +50,7 @@ public nonisolated enum DocumentCodec {
             }
             let mutable = NSMutableAttributedString(attributedString: text)
             if format == .docx { DocxStyles.apply(docx: data, to: mutable) }
+            ListFormatting.normalizeImportedLists(in: mutable)
             return (mutable, attributes as? Attributes ?? [:])
         }
     }

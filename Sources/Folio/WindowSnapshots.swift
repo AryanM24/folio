@@ -31,8 +31,13 @@ enum WindowSnapshots {
     private static func write(_ window: NSWindow, to folder: URL) {
         // The theme frame (contentView's superview) includes the title bar and toolbar.
         guard let view = window.contentView?.superview ?? window.contentView,
-            let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds)
+            let rep = NSBitmapImageRep(
+                bitmapDataPlanes: nil, pixelsWide: Int(view.bounds.width * 2), pixelsHigh: Int(view.bounds.height * 2),
+                bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
         else { return }
+        // Always 2x, so screenshots stay sharp on Retina displays whatever screen the app runs on.
+        rep.size = view.bounds.size
         view.cacheDisplay(in: view.bounds, to: rep)
         let name = window.title.isEmpty ? "window-\(window.windowNumber)" : window.title
         let dark = ProcessInfo.processInfo.environment["FOLIO_APPEARANCE"] == "dark"

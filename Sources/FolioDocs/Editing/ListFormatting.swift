@@ -90,6 +90,28 @@ nonisolated enum ListFormatting {
         return out
     }
 
+    /// Gives every imported list item room for its marker.
+    ///
+    /// RTF and Word files written elsewhere often give list items a first-line indent of
+    /// 0, because older text systems kept the marker ("•", "1.") as characters at the
+    /// start of the line. From macOS 26 the reader drops those characters, so the first
+    /// line would start flush left and `MarkerLayoutManager` would have nowhere to draw
+    /// the marker (it would land outside the text view and be clipped). This applies the
+    /// same hanging indent Folio uses for its own lists: the marker sits in the indent.
+    static func normalizeImportedLists(in text: NSMutableAttributedString) {
+        guard !markersInContent, text.length > 0 else { return }
+        text.enumerateAttribute(.paragraphStyle, in: NSRange(location: 0, length: text.length)) { value, range, _ in
+            guard let style = value as? NSParagraphStyle, !style.textLists.isEmpty else { return }
+            let level = CGFloat(style.textLists.count - 1)
+            let needed = max(style.headIndent, indent * (level + 1))
+            guard style.firstLineHeadIndent < needed - 0.5 || style.headIndent < needed - 0.5 else { return }
+            let fixed = style.mutableCopy() as! NSMutableParagraphStyle  // NSParagraphStyle always copies to its mutable subclass
+            fixed.headIndent = needed
+            fixed.firstLineHeadIndent = needed
+            text.addAttribute(.paragraphStyle, value: fixed, range: range)
+        }
+    }
+
     /// Sets the indent and tab stops a one-level list item needs.
     static func configure(_ style: NSMutableParagraphStyle, list: NSTextList) {
         style.textLists = [list]
