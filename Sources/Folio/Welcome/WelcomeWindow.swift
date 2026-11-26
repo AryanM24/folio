@@ -4,13 +4,13 @@ import FolioKit
 import FolioPDF
 import FolioDocs
 import FolioSheets
-import FolioImage
 import FolioCode
 
 /// The launch window: start something new, reopen something recent, or run a tool.
 ///
-/// Shown at launch and from Window > Welcome to Folio (⇧⌘1). Opening any document
-/// closes it, the same way Xcode's welcome window behaves.
+/// Shown at launch (unless turned off in Settings) and from Window › Welcome to Folio
+/// (⇧⌘1). Opening a document closes it, like Xcode's welcome window. Dropping any
+/// file on it opens the file in the right editor.
 struct WelcomeWindow: View {
     static let id = "welcome"
 
@@ -20,36 +20,47 @@ struct WelcomeWindow: View {
     @State private var tab: Tab = .recent
     @State private var dropTargeted = false
 
-    enum Tab: String, CaseIterable { case recent = "Recent", tools = "Tools" }
+    enum Tab: Hashable { case recent, tools }
 
     var body: some View {
         HStack(spacing: 0) {
             sidebar
-                .frame(width: 260)
-                .background(.background.secondary)
-            Divider()
+                .frame(width: 248)
+                .background(Hero.surface.ignoresSafeArea())
+            Rectangle().fill(Hero.separator).frame(width: 1).ignoresSafeArea()
             VStack(spacing: 0) {
-                Picker("Section", selection: $tab) {
-                    ForEach(Tab.allCases, id: \.self) { Text($0.rawValue) }
+                HeroTabs([(Tab.recent, "Recent", "clock"), (Tab.tools, "Tools", "wrench.and.screwdriver")], selection: $tab)
+                    .padding(.top, 4)
+                    .padding(.bottom, 12)
+                Group {
+                    switch tab {
+                    case .recent: RecentFilesView(open: open)
+                    case .tools: ToolsListView()
+                    }
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .fixedSize()
-                .padding(.top, 14)
-                .padding(.bottom, 10)
-                switch tab {
-                case .recent: RecentFilesView(open: open)
-                case .tools: ToolsListView()
-                }
+                .frame(maxHeight: .infinity, alignment: .top)
             }
-            .frame(width: 520)
+            .frame(width: 560)
+            .background(Hero.background.ignoresSafeArea())
         }
-        .frame(height: 460)
+        .frame(height: 452)
+        // Don't start with the search field focused: an empty window with a glowing
+        // focus ring reads as "type here", which isn't what most people came to do.
+        .task {
+            try? await Task.sleep(for: .milliseconds(10))
+            NSApp.keyWindow?.makeFirstResponder(nil)
+        }
         .overlay {
             if dropTargeted {
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(.tint, style: StrokeStyle(lineWidth: 2, dash: [6]))
-                    .padding(6)
+                RoundedRectangle(cornerRadius: Hero.Radius.xl)
+                    .fill(Hero.accentSoft)
+                    .strokeBorder(Hero.accent, style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                    .overlay {
+                        Label("Drop to open", systemImage: "arrow.down.doc")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(Hero.accentSoftForeground)
+                    }
+                    .padding(8)
                     .allowsHitTesting(false)
             }
         }
@@ -63,34 +74,42 @@ struct WelcomeWindow: View {
         VStack(alignment: .leading, spacing: 0) {
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
-                .frame(width: 64, height: 64)
-                .padding(.top, 36)
+                .frame(width: 56, height: 56)
+                .padding(.top, 16)
             Text("Folio")
-                .font(.title.weight(.semibold))
-                .padding(.top, 10)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(Hero.foreground)
+                .padding(.top, 12)
             Text("Version \(Bundle.main.shortVersion)")
-                .font(.callout)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 12))
+                .foregroundStyle(Hero.muted)
 
             VStack(alignment: .leading, spacing: 2) {
-                NewButton("Document", symbol: FileKind.document.symbol, shortcut: "N") { newDocument { RichTextDocument() } }
-                NewButton("Spreadsheet", symbol: FileKind.spreadsheet.symbol) { newDocument { SpreadsheetDocument() } }
-                NewButton("Text file", symbol: FileKind.code.symbol) { newDocument { CodeDocument() } }
-                NewButton("Blank PDF", symbol: FileKind.pdf.symbol) { newDocument { PDFFileDocument() } }
-                Divider().padding(.vertical, 6)
-                NewButton("Open…", symbol: "folder", shortcut: "O") {
-                    NSDocumentController.shared.openDocument(nil)
-                }
+                Text("New")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Hero.muted)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 4)
+                SidebarRow("Document", symbol: FileKind.document.symbol, shortcut: "⌘N") { newDocument { RichTextDocument() } }
+                SidebarRow("Spreadsheet", symbol: FileKind.spreadsheet.symbol) { newDocument { SpreadsheetDocument() } }
+                SidebarRow("Text file", symbol: FileKind.code.symbol) { newDocument { CodeDocument() } }
+                SidebarRow("Blank PDF", symbol: FileKind.pdf.symbol) { newDocument { PDFFileDocument() } }
             }
             .padding(.top, 28)
+
             Spacer()
-            Text("Drop any file here to open it")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .padding(.bottom, 16)
+
+            Button("Open…", systemImage: "folder") { NSDocumentController.shared.openDocument(nil) }
+                .buttonStyle(.hero(.primary, fullWidth: true))
+                .keyboardShortcut("o")
+            Text("Or drop any file on this window")
+                .font(.system(size: 11))
+                .foregroundStyle(Hero.muted)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8)
+                .padding(.bottom, 20)
         }
-        .padding(.horizontal, 20)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
     }
 
     private func open(_ url: URL) {
@@ -105,15 +124,15 @@ struct WelcomeWindow: View {
     }
 }
 
-/// A full-width row button in the Welcome sidebar.
-private struct NewButton: View {
-    let title: LocalizedStringKey
+/// A full-width row in the Welcome sidebar: icon, title, optional shortcut hint.
+private struct SidebarRow: View {
+    let title: String
     let symbol: String
     let shortcut: String?
     let action: () -> Void
     @State private var hovering = false
 
-    init(_ title: LocalizedStringKey, symbol: String, shortcut: String? = nil, action: @escaping () -> Void) {
+    init(_ title: String, symbol: String, shortcut: String? = nil, action: @escaping () -> Void) {
         self.title = title
         self.symbol = symbol
         self.shortcut = shortcut
@@ -124,21 +143,25 @@ private struct NewButton: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: symbol)
+                    .font(.system(size: 14))
                     .frame(width: 18)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Hero.muted)
                 Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Hero.foreground)
                 Spacer()
                 if let shortcut {
-                    Text("⌘\(shortcut)").font(.callout).foregroundStyle(.tertiary)
+                    Text(shortcut).font(.system(size: 12)).foregroundStyle(Hero.muted)
                 }
             }
-            .padding(.horizontal, 10)
-            .frame(height: 30)
+            .padding(.horizontal, 12)
+            .frame(height: 34)
+            .background(hovering ? Hero.defaultHover : .clear, in: .rect(cornerRadius: Hero.Radius.lg))
             .contentShape(.rect)
-            .background(hovering ? AnyShapeStyle(.quaternary) : AnyShapeStyle(.clear), in: .rect(cornerRadius: 6))
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
+        .animation(Hero.animation, value: hovering)
     }
 }
 

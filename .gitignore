@@ -14,3 +14,6 @@ site/node_modules/
 
 # macOS
 .DS_Store
+
+# Local agent worktrees and editor settings
+.claude/

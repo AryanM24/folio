@@ -19,6 +19,7 @@ import FolioMedia
 @main
 struct FolioApp: App {
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
+    @AppStorage("general.showWelcome") private var showWelcome = true
 
     var body: some Scene {
         Window("Welcome to Folio", id: WelcomeWindow.id) {
@@ -26,7 +27,7 @@ struct FolioApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .defaultLaunchBehavior(.presented)
+        .defaultLaunchBehavior(showWelcome ? .presented : .suppressed)
         .restorationBehavior(.disabled)
         .commands { FolioCommands() }
 

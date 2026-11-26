@@ -3,8 +3,8 @@
 // Usage: swift scripts/make-icon.swift <output.iconset>
 //
 // Drawn in code so the icon is reviewable in a diff and needs no design tools.
-// Geometry follows Apple's macOS icon grid: an 824 pt rounded square centred on a
-// 1024 pt canvas, corner radius ≈ 185 pt.
+// The art is full-bleed and opaque: macOS 26 applies its own squircle mask to icons
+// like this, while art with its own transparent margins gets placed on a grey tile.
 
 import AppKit
 
@@ -24,14 +24,14 @@ func render(_ px: Int) -> Data {
     let s = CGFloat(px) / 1024
     ctx.scaleBy(x: s, y: s)
 
-    // Tile: HeroUI "eclipse" with a soft drop shadow, like system icons.
-    let tile = CGRect(x: 100, y: 100, width: 824, height: 824)
-    ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: 0, height: -12), blur: 28, color: NSColor.black.withAlphaComponent(0.35).cgColor)
-    ctx.addPath(CGPath(roundedRect: tile, cornerWidth: 185, cornerHeight: 185, transform: nil))
+    // Background: HeroUI "eclipse", full bleed.
     ctx.setFillColor(color(0x18181B).cgColor)
-    ctx.fillPath()
-    ctx.restoreGState()
+    ctx.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024))
+
+    // Scale the artwork up a little to fill the larger canvas.
+    ctx.translateBy(x: 512, y: 512)
+    ctx.scaleBy(x: 1.18, y: 1.18)
+    ctx.translateBy(x: -512, y: -512)
 
     // Page with a folded corner.
     let page = CGMutablePath()

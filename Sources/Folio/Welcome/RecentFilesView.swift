@@ -2,7 +2,10 @@ import SwiftUI
 import QuickLookThumbnailing
 import FolioKit
 
-/// Recent documents from the system list (File > Open Recent), with Quick Look thumbnails.
+/// Recent documents from the system list (File › Open Recent), with Quick Look thumbnails.
+///
+/// Reading the list is instant; thumbnails load lazily per tile, so this never slows
+/// down launch.
 struct RecentFilesView: View {
     let open: (URL) -> Void
     @State private var urls: [URL] = []
@@ -15,23 +18,24 @@ struct RecentFilesView: View {
     var body: some View {
         VStack(spacing: 0) {
             TextField("Search recent files", text: $query)
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
+                .textFieldStyle(.hero)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 4)
             if shown.isEmpty {
                 ContentUnavailableView(
                     query.isEmpty ? "No recent files" : "No matches",
-                    systemImage: "clock",
+                    systemImage: query.isEmpty ? "clock" : "magnifyingglass",
                     description: Text(query.isEmpty ? "Files you open appear here." : "Try a different name.")
                 )
+                .foregroundStyle(Hero.muted)
             } else {
                 ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 16)], spacing: 18) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 148), spacing: 16)], spacing: 20) {
                         ForEach(shown, id: \.self) { url in
                             RecentFileTile(url: url) { open(url) }
                         }
                     }
-                    .padding(20)
+                    .padding(24)
                 }
             }
         }
@@ -47,35 +51,42 @@ private struct RecentFileTile: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5))
                     if let thumbnail {
-                        Image(nsImage: thumbnail).resizable().scaledToFit().padding(8)
+                        Image(nsImage: thumbnail).resizable().scaledToFit().padding(10)
                     } else {
                         Image(systemName: FileKind.kind(for: url)?.symbol ?? "doc")
-                            .font(.system(size: 28, weight: .light))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 26, weight: .light))
+                            .foregroundStyle(Hero.muted)
                     }
                 }
-                .frame(height: 110)
+                .frame(maxWidth: .infinity)
+                .frame(height: 112)
+                .background(Hero.surface, in: .rect(cornerRadius: Hero.Radius.xxl))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(hovering ? AnyShapeStyle(.tint) : AnyShapeStyle(.separator), lineWidth: hovering ? 2 : 1)
+                    RoundedRectangle(cornerRadius: Hero.Radius.xxl)
+                        .strokeBorder(hovering ? Hero.accent : Hero.border, lineWidth: hovering ? 2 : 1)
                 }
-                Text(url.deletingPathExtension().lastPathComponent)
-                    .font(.callout)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Text(url.deletingLastPathComponent().lastPathComponent)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(url.deletingPathExtension().lastPathComponent)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(Hero.foreground)
+                    Text(url.deletingLastPathComponent().lastPathComponent)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Hero.muted)
+                }
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .padding(.horizontal, 2)
             }
+            .scaleEffect(hovering ? 1.01 : 1)
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
+        .animation(Hero.animation, value: hovering)
         .help(url.path(percentEncoded: false))
+        .accessibilityLabel("Open \(url.lastPathComponent)")
         .contextMenu {
             Button("Open") { action() }
             Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([url]) }

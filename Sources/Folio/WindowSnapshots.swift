@@ -13,8 +13,10 @@ enum WindowSnapshots {
     static func enableIfRequested() {
         guard let dir = ProcessInfo.processInfo.environment["FOLIO_SNAPSHOT_DIR"] else { return }
         let folder = URL(fileURLWithPath: dir, isDirectory: true)
-        if ProcessInfo.processInfo.environment["FOLIO_APPEARANCE"] == "dark" {
-            NSApp.appearance = NSAppearance(named: .darkAqua)
+        switch ProcessInfo.processInfo.environment["FOLIO_APPEARANCE"] {
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        default: break
         }
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let delay = Double(ProcessInfo.processInfo.environment["FOLIO_SNAPSHOT_DELAY"] ?? "") ?? 1.5
@@ -33,7 +35,8 @@ enum WindowSnapshots {
         else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
         let name = window.title.isEmpty ? "window-\(window.windowNumber)" : window.title
-        let safe = name.replacingOccurrences(of: "/", with: "-")
+        let dark = ProcessInfo.processInfo.environment["FOLIO_APPEARANCE"] == "dark"
+        let safe = name.replacingOccurrences(of: "/", with: "-") + (dark ? " (dark)" : "")
         try? rep.representation(using: .png, properties: [:])?.write(to: folder.appending(path: "\(safe).png"))
     }
 }
