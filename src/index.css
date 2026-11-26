@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html, body, #root { height: 100%; }
+body { margin: 0; overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
+.canvas-bg {
+  background-color: var(--color-background-secondary);
+  background-image: radial-gradient(circle, color-mix(in oklab, var(--color-foreground) 14%, transparent) 1px, transparent 1px);
+}
+.no-select { user-select: none; -webkit-user-select: none; }
