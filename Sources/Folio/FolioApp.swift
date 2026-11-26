@@ -52,6 +52,7 @@ struct FolioApp: App {
         DocumentGroup(newDocument: { PDFFileDocument() }) { file in
             PDFEditorView(document: file.document)
         }
+        .commands { PDFCommands() }
         DocumentGroup(newDocument: { ImageDocument() }) { file in
             ImageEditorView(document: file.document)
         }
