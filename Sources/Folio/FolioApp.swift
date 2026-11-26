@@ -43,6 +43,7 @@ struct FolioApp: App {
         DocumentGroup(newDocument: { RichTextDocument() }) { file in
             RichTextEditorView(document: file.document)
         }
+        .commands { DocumentCommands() }
         DocumentGroup(newDocument: { SpreadsheetDocument() }) { file in
             SpreadsheetEditorView(document: file.document)
         }

@@ -32,6 +32,13 @@ struct EditorRenderTests {
         try await Task.sleep(for: .seconds(seconds))
     }
 
+    /// Outline and statistics are recomputed off the critical path after edits, so wait
+    /// for them instead of guessing a delay: a fixed sleep flakes when the suite is busy.
+    private func waitUntil(timeout: Double = 5, _ condition: () -> Bool) async throws {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while !condition(), Date.now < deadline { try await Task.sleep(for: .milliseconds(50)) }
+    }
+
     private func findTextView(in view: NSView) -> DocsTextView? {
         if let tv = view as? DocsTextView { return tv }
         for sub in view.subviews { if let tv = findTextView(in: sub) { return tv } }
@@ -55,6 +62,7 @@ struct EditorRenderTests {
     @Test func rendersLightAndDark() async throws {
         for appearance in [NSAppearance.Name.aqua, .darkAqua] {
             let (window, controller) = try await host(try document(Fixtures.richDocument()), appearance: appearance)
+            try await waitUntil { controller.outline.count == 5 && controller.stats.words > 30 }
             #expect(controller.outline.count == 5)
             #expect(controller.stats.words > 30)
             save(window, appearance == .aqua ? "editor-light" : "editor-dark")
