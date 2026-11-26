@@ -19,7 +19,7 @@ import SwiftUI
 @main
 struct FolioApp: App {
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
-    @AppStorage("general.showWelcome") private var showWelcome = true
+    @AppStorage("general.showWelcome") private var showWorkspace = true
 
     init() {
         // Build-time hook: scripts/bundle.sh runs `Folio --services-json` to generate the
@@ -31,14 +31,21 @@ struct FolioApp: App {
     }
 
     var body: some Scene {
-        Window("Welcome to Folio", id: WelcomeWindow.id) {
-            WelcomeWindow()
+        // The workspace: the app's home window. The key predates the workspace (it was the
+        // Welcome window's), and is kept so existing preferences carry over.
+        Window("Folio", id: WorkspaceWindow.id) {
+            WorkspaceWindow()
         }
         .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
-        .defaultLaunchBehavior(showWelcome ? .presented : .suppressed)
+        .windowResizability(.contentMinSize)
+        .windowBackgroundDragBehavior(.enabled)
+        .defaultSize(width: 1180, height: 760)
+        .defaultLaunchBehavior(showWorkspace ? .presented : .suppressed)
         .restorationBehavior(.disabled)
-        .commands { FolioCommands() }
+        .commands {
+            FolioCommands()
+            WorkspaceCommands()
+        }
 
         // Order matters: when a file matches several groups (a CSV is also plain text),
         // SwiftUI uses the group declared last. Text & Code is the catch-all, so it goes first.

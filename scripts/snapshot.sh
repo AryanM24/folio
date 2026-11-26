@@ -5,6 +5,8 @@
 #   scripts/snapshot.sh [file ...]        → build/snapshots/*.png
 #   SCHEME=dark scripts/snapshot.sh file  → same, in dark mode (default: light)
 #   WAIT=6 scripts/snapshot.sh big.pdf    → wait longer before quitting
+#   FOLIO_LIBRARY_DIR=dir scripts/snapshot.sh → workspace shows only files in dir
+#                                            (never the real library or your recents)
 #
 # Uses the app's own drawing (Sources/Folio/WindowSnapshots.swift), so it needs no
 # screen-recording permission. Runs a separate instance (-n) and quits only that one,
@@ -16,6 +18,7 @@ OUT="$ROOT/build/snapshots"
 mkdir -p "$OUT"
 args=(-n --env "FOLIO_SNAPSHOT_DIR=$OUT")
 args+=(--env "FOLIO_APPEARANCE=${SCHEME:-light}")
+if [[ -n "${FOLIO_LIBRARY_DIR:-}" ]]; then args+=(--env "FOLIO_LIBRARY_DIR=$FOLIO_LIBRARY_DIR"); fi
 open "${args[@]}" -a "$APP" "$@"
 sleep "${WAIT:-4}"
 pkill -f "$APP/Contents/MacOS/Folio" 2>/dev/null || true

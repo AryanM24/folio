@@ -1,7 +1,9 @@
 import AppKit
 import FolioKit
+import Quartz
 
-/// App-level hooks SwiftUI doesn't expose: autosave timing and Finder Quick Actions.
+/// App-level hooks SwiftUI doesn't expose: autosave timing, Finder Quick Actions, and the
+/// Quick Look panel's data source for the workspace.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let log = Log.make("App")
 
@@ -23,6 +25,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Quit fast: documents are already saved as you type, so there is nothing to wait for
     /// beyond AppKit's own final autosave of any still-dirty document.
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
+
+    // The Quick Look panel looks for a controller along the responder chain, which ends at
+    // the app delegate. The workspace's selection is the only thing Folio previews.
+    // The panel calls these on the main thread.
+    nonisolated override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+        MainActor.assumeIsolated { !QuickLook.shared.urls.isEmpty }
+    }
+    nonisolated override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        MainActor.assumeIsolated { panel.dataSource = QuickLook.shared }
+    }
+    nonisolated override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        MainActor.assumeIsolated { panel.dataSource = nil }
+    }
 
     /// Entry point for every `NSServices` item in Info.plist. `userData` is a `FolioTool.id`.
     @objc func runTool(_ pasteboard: NSPasteboard, userData: String, error: AutoreleasingUnsafeMutablePointer<NSString?>) {

@@ -37,6 +37,12 @@ public final class RichTextDocument: ReferenceFileDocument {
         openedAt = Date()
     }
 
+    /// The bytes of a new, empty Word document, for creating a real file on disk before
+    /// opening it (the workspace's "Start something" tiles) rather than an untitled window.
+    public nonisolated static func emptyFileData() -> Data {
+        DocxWriter.data(from: NSAttributedString(), page: PageSetup())
+    }
+
     public nonisolated init(configuration: ReadConfiguration) throws {
         let start = Date()
         openedAt = start

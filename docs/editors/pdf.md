@@ -67,7 +67,7 @@ All of these act on the pages selected in the sidebar (⌘-click to add, ⇧-cli
 
 ### Tools
 
-These are available without opening the file, from the Welcome window, *File › Tools*, and Finder Quick Actions. They write new files next to the first input and never change the inputs.
+These are available without opening the file, from the workspace's Tools view, *File › Tools*, and Finder Quick Actions. They write new files next to the first input and never change the inputs.
 
 | Id | Tool | Output |
 | --- | --- | --- |

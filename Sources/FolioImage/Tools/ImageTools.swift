@@ -4,7 +4,7 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-/// File tools owned by this module. Surfaced in the Welcome window, File > Tools and
+/// File tools owned by this module. Surfaced in the workspace's Tools view, File > Tools and
 /// Finder Quick Actions. See `FolioTool`. Each runs ``ImageToolOps`` per file.
 public enum ImageTools {
     public nonisolated static let all: [FolioTool] = [convert, resize, removeBackground, stripMetadata]

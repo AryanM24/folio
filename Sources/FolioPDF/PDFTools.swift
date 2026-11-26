@@ -3,7 +3,7 @@ import Foundation
 import PDFKit
 import UniformTypeIdentifiers
 
-/// File tools owned by this module. Surfaced in the Welcome window, File > Tools and
+/// File tools owned by this module. Surfaced in the workspace's Tools view, File > Tools and
 /// Finder Quick Actions. See `FolioTool`.
 ///
 /// Each tool is a thin wrapper: load inputs, call a pure function in

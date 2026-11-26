@@ -2,7 +2,7 @@ public import FolioKit
 import Foundation
 import UniformTypeIdentifiers
 
-/// File tools owned by this module. Surfaced in the Welcome window, File > Tools and
+/// File tools owned by this module. Surfaced in the workspace's Tools view, File > Tools and
 /// Finder Quick Actions. See `FolioTool`.
 public enum SpreadsheetTools {
     public nonisolated static let all: [FolioTool] = [convert, mergeCSV]

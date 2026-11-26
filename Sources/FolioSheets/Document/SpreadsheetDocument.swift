@@ -70,6 +70,12 @@ public final class SpreadsheetDocument: ReferenceFileDocument {
         )
     }
 
+    /// The bytes of a new, empty workbook (one blank sheet) as .xlsx, for creating a real
+    /// file on disk before opening it, the same content `init()` starts with.
+    public nonisolated static func emptyFileData() throws -> Data {
+        try SpreadsheetFormat.xlsx.write(Workbook(), values: [:])
+    }
+
     /// Opens bytes directly (tests, tools).
     public nonisolated init(data: Data, format: SpreadsheetFormat) throws {
         workbook = try format.read(data)

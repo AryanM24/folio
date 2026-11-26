@@ -45,6 +45,12 @@ public final class PDFFileDocument: ReferenceFileDocument {
         loadedAt = .now
     }
 
+    /// The bytes of a new PDF with one blank page in the user's paper size, for creating
+    /// a real file on disk before opening it, the same content `init()` starts with.
+    public nonisolated static func emptyFileData() -> Data {
+        PageFactory.blankDocument().dataRepresentation() ?? Data()
+    }
+
     /// Parses the file. `PDFDocument` is lazy, so this costs about the same for 5 pages
     /// as for 500: pages, text and thumbnails are decoded only when first shown.
     public nonisolated init(configuration: ReadConfiguration) throws {

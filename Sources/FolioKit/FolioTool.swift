@@ -6,7 +6,8 @@ public import UniformTypeIdentifiers
 /// Tools are declared by the editor modules that own the format (PDF tools live in
 /// `FolioPDF`, image tools in `FolioImage`) and surfaced in three places:
 ///
-/// 1. The Welcome window's Tools section.
+/// 1. The workspace's Tools view (click a card, or drop files on it), and each
+///    file's Tools › context menu.
 /// 2. Finder > Quick Actions and the Services menu, via `NSServices` in Info.plist.
 ///    The service's `NSUserData` is the tool's ``id``.
 /// 3. `File > Tools` in the menu bar.
@@ -76,12 +77,14 @@ public nonisolated extension FolioTool {
         unique(in: input.deletingLastPathComponent(), name: name, ext: ext)
     }
 
+    /// An empty `ext` gives a name with no extension (folders).
     nonisolated static func unique(in folder: URL, name: String, ext: String) -> URL {
         let fm = FileManager.default
-        var candidate = folder.appending(path: "\(name).\(ext)")
+        let suffix = ext.isEmpty ? "" : ".\(ext)"
+        var candidate = folder.appending(path: "\(name)\(suffix)")
         var n = 2
         while fm.fileExists(atPath: candidate.path(percentEncoded: false)) {
-            candidate = folder.appending(path: "\(name) \(n).\(ext)")
+            candidate = folder.appending(path: "\(name) \(n)\(suffix)")
             n += 1
         }
         return candidate

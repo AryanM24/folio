@@ -12,6 +12,12 @@ public extension View {
             .modifier(SurfaceShadow())
     }
 
+    /// The card shadow on its own, for custom shapes (pills, fields) that sit on a
+    /// surface: two soft layers in light mode, nothing in dark mode.
+    func heroSurfaceShadow() -> some View {
+        modifier(SurfaceShadow())
+    }
+
     /// Floating panels (inspectors, popovers, floating toolbars): overlay fill and the
     /// HeroUI overlay shadow. In dark mode the shadow becomes a faint inner highlight.
     func heroOverlay(cornerRadius: CGFloat = Hero.Radius.xxl) -> some View {

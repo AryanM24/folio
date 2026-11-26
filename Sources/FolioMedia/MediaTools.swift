@@ -2,7 +2,7 @@ import AVFoundation
 public import FolioKit
 import UniformTypeIdentifiers
 
-/// Media tools for the Welcome window, File › Tools and Finder Quick Actions.
+/// Media tools for the workspace's Tools view, File › Tools and Finder Quick Actions.
 /// Each writes new files next to its input and never changes the input.
 public enum MediaTools {
     public nonisolated static let all: [FolioTool] = [extractAudio, convertToMP4, compress, makeGIF]

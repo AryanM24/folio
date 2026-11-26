@@ -24,7 +24,7 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first. It explains the module 
 | Fix something in one editor | `Sources/Folio<Editor>/` and its tests |
 | Add a file tool or Quick Action | `<Editor>Tools.swift` in the owning module. The Quick Action is generated at build time. |
 | Change colors, buttons or other shared UI | `Sources/FolioKit/Design/` |
-| Change menus, the Welcome window or Settings | `Sources/Folio/` |
+| Change menus, the workspace window or Settings | `Sources/Folio/` (workspace in `Sources/Folio/Workspace/`) |
 
 ## Making a change
 

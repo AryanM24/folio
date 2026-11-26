@@ -2,7 +2,7 @@ public import FolioKit
 import Foundation
 import UniformTypeIdentifiers
 
-/// File tools owned by this module. Surfaced in the Welcome window, File > Tools and
+/// File tools owned by this module. Surfaced in the workspace's Tools view, File > Tools and
 /// Finder Quick Actions. Each writes new files next to its inputs and never changes them.
 public enum CodeTools {
     public nonisolated static let all: [FolioTool] = [

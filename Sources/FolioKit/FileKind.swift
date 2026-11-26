@@ -2,8 +2,8 @@ public import UniformTypeIdentifiers
 
 /// The editor families Folio ships. Every file Folio can open maps to exactly one kind.
 ///
-/// The app target uses this to build one `DocumentGroup` per kind, the Welcome window
-/// uses it for the "New" tiles, and `Info.plist` declares the same content types
+/// The app target uses this to build one `DocumentGroup` per kind, the workspace uses
+/// it for kind icons and filters, and `Info.plist` declares the same content types
 /// (see `Resources/Info.plist`; `make check-plist` verifies the two agree).
 public nonisolated enum FileKind: String, CaseIterable, Identifiable, Sendable {
     case pdf
@@ -15,7 +15,7 @@ public nonisolated enum FileKind: String, CaseIterable, Identifiable, Sendable {
 
     public var id: String { rawValue }
 
-    /// Name shown in menus and the Welcome window.
+    /// Name shown in menus and the workspace.
     public var title: String {
         switch self {
         case .pdf: "PDF"
@@ -40,7 +40,7 @@ public nonisolated enum FileKind: String, CaseIterable, Identifiable, Sendable {
     }
 
     /// Content types this kind's editor can open. Order matters: the first type is the
-    /// default for new documents created from the Welcome window.
+    /// default for new, untitled documents (File › New).
     public var readableTypes: [UTType] {
         switch self {
         case .pdf: [.pdf]

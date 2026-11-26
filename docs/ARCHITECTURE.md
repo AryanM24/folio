@@ -14,7 +14,7 @@ Folio is a native macOS app written in Swift 6 with SwiftUI and AppKit. It edits
 ```
 Package.swift
 Sources/
-  Folio/          App target: scenes, Welcome window, Settings, menus, tool runner, Services
+  Folio/          App target: scenes, the workspace window, Settings, menus, tool runner, Services
   FolioKit/       Shared by every module: FileKind, FolioTool, Exporter, Log, Hero design system
   FolioPDF/       PDF editor (PDFKit) and PDF tools
   FolioDocs/      Rich-text editor (NSTextView: docx, rtf, rtfd, odt, html, doc)
@@ -86,6 +86,18 @@ So:
 
 `init(configuration:)` reads the bytes and parses only what the first screen needs. Defer the rest (page thumbnails, syntax highlighting past the viewport, video thumbnails) until after first paint with `.task {}`.
 
+## The workspace
+
+The workspace (`Sources/Folio/Workspace/`) is the app's home window: a single `Window` scene, opened at launch unless *Settings › General* turns it off. It manages files the Mac way, with no private database:
+
+- **Library.** New files are written to disk before they open, in the library folder (`~/Documents/Folio` by default, changeable in Settings) with Finder-style unique names. Each editor module provides its empty file (`RichTextDocument.emptyFileData()`, `SpreadsheetDocument.emptyFileData()`, `PDFFileDocument.emptyFileData()`).
+- **Recent** merges *Open Recent*, a Spotlight query (`kMDItemLastUsedDate` within 30 days, Folio's content types) and recently changed library files. **Favorites** are the Finder tag "Folio Favorite", found with Spotlight. **Locations** are folders the person adds, stored as bookmarks.
+- **Folder views** list one level, off the main thread, and stay live through a kqueue watcher (`FolderWatcher`). Thumbnails come from Quick Look, lazily per visible card, cached in memory.
+- `WorkspaceModel` (`@Observable`, one per app) holds navigation, lists, selection and every file action; menus reach it through `FocusedValues.workspace`. Pure logic (search, fuzzy matching, sorting, filters, dates, rename rules) lives in `WorkspaceLogic.swift` and is tested in `Tests/FolioTests`.
+- `FOLIO_LIBRARY_DIR` points the library at another folder and keeps Recent and Favorites inside it, so tests and `scripts/snapshot.sh` never touch real files.
+
+Launch rule: the window draws from in-memory state first; Spotlight, listings and thumbnails start after the first frame and stream in.
+
 ## Concurrency
 
 UI modules use Swift 6.2's `defaultIsolation(MainActor.self)`, so types are main-actor isolated unless they opt out. Pure logic (formula engine, codecs, geometry) is marked `nonisolated` and `Sendable`, and is unit-tested without a UI. Expensive work runs in `Task.detached` or `nonisolated async` functions and hops back to the main actor to publish results.
@@ -94,7 +106,7 @@ UI modules use Swift 6.2's `defaultIsolation(MainActor.self)`, so types are main
 
 A `FolioTool` (FolioKit) is a one-shot operation such as combining PDFs or converting images. Modules declare tools in `XTools.all`. The app surfaces them in:
 
-- the Welcome window's Tools tab,
+- the workspace's Tools view and each file's *Tools ›* context menu,
 - *File › Tools*,
 - Finder › Quick Actions and the Services menu. `scripts/bundle.sh` runs `Folio --services-json` and writes one `NSServices` entry per tool into the built app's Info.plist, so adding a tool to `XTools.all` is all it takes. `NSUserData` is the tool's `id`, and `AppDelegate.runTool` dispatches it.
 

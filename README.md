@@ -31,6 +31,14 @@
   </tr>
 </table>
 
+## A home for your files
+
+<p align="center">
+  <img src="docs/screenshots/workspace.png" alt="The Folio workspace: a sidebar of places, Start something tiles, and recent files as cards">
+</p>
+
+Folio opens to its **workspace**: start a new document, spreadsheet, note or PDF in one click, then pick up recent work across your Mac. Files stay ordinary files in folders you choose (new work goes to *~/Documents/Folio*); favorites are a Finder tag, so the star shows up in Finder too. Search, filter by kind, preview with Space, rename, move, share or trash with Undo, run tools on a selection, and press ⌘K for everything else.
+
 ## What it edits
 
 | | |
@@ -42,13 +50,14 @@
 | **Text and code** | Syntax highlighting for 20+ languages, a live Markdown preview, JSON formatting, and the file's own encoding and line endings preserved. |
 | **Audio and video** | Playback, lossless trimming, export presets, audio extraction, frame grabs and waveforms. |
 
-Plus one-step **tools**: combine PDFs, images to PDF, compress images, convert spreadsheets, extract audio and more. Run them from the Welcome window, from *File › Tools*, or by right-clicking files in Finder (*Quick Actions*).
+Plus one-step **tools**: combine PDFs, images to PDF, compress images, convert spreadsheets, extract audio and more. Run them from the workspace, from *File › Tools*, or by right-clicking files in Finder (*Quick Actions*).
 
 ## Built for the Mac
 
 - **Never loses your work.** Folio saves about a second after you stop typing. Every save is atomic, and *File › Revert To* browses every earlier version.
 - **Opens and quits in under a second.** That's a budget enforced by `make launch-time`, not a hope.
 - **Uses Apple's own engines:** PDFKit, the Cocoa text system, Core Image, AVFoundation and Vision. Undo, Find, Services, tabs, full screen, iCloud Drive, Continuity Camera, dictation and dark mode work as they do everywhere else on your Mac.
+- **Finder manners.** The workspace speaks Spotlight, Quick Look, Finder tags, the Trash and drag and drop, and every action has a menu item and a shortcut.
 - **Private by design.** No account, no analytics, no network requests at all. Your files never leave your Mac.
 
 ## Build from source

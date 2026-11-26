@@ -25,6 +25,12 @@ func editor(_ name: String, dependencies extra: [Target.Dependency] = []) -> Tar
     )
 }
 
+/// One suite per module, plus `FolioTests` for the app target's pure logic (workspace
+/// sorting, search, naming), which `@testable import Folio` reaches.
+let testTargets: [Target] = (["FolioKit"] + editors + ["Folio"]).map { name in
+    .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
+}
+
 let package = Package(
     name: "Folio",
     platforms: [.macOS(.v15)],
@@ -49,7 +55,5 @@ let package = Package(
         editor("FolioCode"),
         editor("FolioMedia"),
     ]
-        + (["FolioKit"] + editors).map { name in
-            .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
-        }
+        + testTargets
 )
