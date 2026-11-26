@@ -46,9 +46,11 @@ struct FolioApp: App {
         DocumentGroup(newDocument: { ImageDocument() }) { file in
             ImageEditorView(document: file.document)
         }
-        DocumentGroup(newDocument: { MediaDocument() }) { file in
+        // Media is view-and-export: originals are never rewritten, so no "New" item.
+        DocumentGroup(viewing: MediaDocument.self) { file in
             MediaEditorView(document: file.document)
         }
+        .commands { MediaCommands() }
 
         Settings { SettingsView() }
     }
