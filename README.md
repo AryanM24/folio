@@ -16,7 +16,20 @@
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
-<!-- SCREENSHOTS -->
+<p align="center">
+  <img src="docs/screenshots/documents.png" alt="Folio editing a proposal with a table, lists and an outline sidebar">
+</p>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/pdf.png" alt="PDF editor with page thumbnails and annotation toolbar"></td>
+    <td><img src="docs/screenshots/spreadsheet-dark.png" alt="Spreadsheet editor in dark mode with formulas"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/markdown.png" alt="Markdown editor with live preview"></td>
+    <td><img src="docs/screenshots/image-dark.png" alt="Image editor with adjustment sliders in dark mode"></td>
+  </tr>
+</table>
 
 ## What it edits
 
