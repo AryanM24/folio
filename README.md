@@ -70,7 +70,7 @@ Plus one-step **tools**: combine PDFs, images to PDF, compress images, convert s
 
 Download `Folio-0.1.0.dmg` from the [latest release](https://github.com/AryanM24/folio/releases/latest), open it and drag Folio to Applications. It needs macOS 15 or later on Apple silicon.
 
-This build isn't notarized yet, so the first time you open it macOS says it can't check it for malware. Open **System Settings › Privacy & Security**, scroll to the message about Folio and click **Open Anyway**. You only do this once. Or, in Terminal:
+This build is signed with a Developer ID but isn't notarized yet, so the first time you open it macOS says it can't check it for malware. Open **System Settings › Privacy & Security**, scroll to the message about Folio and click **Open Anyway**. You only do this once. Or, in Terminal:
 
 ```sh
 xattr -dr com.apple.quarantine /Applications/Folio.app
