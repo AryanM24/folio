@@ -21,11 +21,24 @@
    ditto -c -k --keepParent build/Folio.app "build/Folio-$(cat VERSION).zip"
    ```
 
-5. Tag and publish:
+5. Package a disk image next to the zip:
 
    ```sh
-   git tag "v$(cat VERSION)" && git push --tags
-   gh release create "v$(cat VERSION)" "build/Folio-$(cat VERSION).zip" --notes-file <(sed -n "/## \[$(cat VERSION)\]/,/## \[/p" CHANGELOG.md | sed '$d')
+   V=$(cat VERSION); S=$(mktemp -d)
+   cp -R build/Folio.app "$S/" && ln -s /Applications "$S/Applications"
+   hdiutil create -volname "Folio $V" -srcfolder "$S" -format UDZO -fs APFS "build/Folio-$V.dmg"
+   cp "build/Folio-$V.dmg" build/Folio.dmg
+   (cd build && shasum -a 256 "Folio-$V.zip" "Folio-$V.dmg" > SHA256SUMS.txt)
    ```
 
-The landing page links to `releases/latest`, so it picks up the new build automatically.
+6. Tag and publish:
+
+   ```sh
+   git tag "v$V" && git push --tags
+   gh release create "v$V" "build/Folio-$V.dmg" "build/Folio-$V.zip" build/Folio.dmg build/SHA256SUMS.txt \
+     --title "Folio $V" --notes-file <(sed -n "/## \[$V\]/,/## \[/p" CHANGELOG.md | sed '$d')
+   ```
+
+The landing page's Download button points at `releases/latest/download/Folio.dmg`, so it picks up the new build automatically. Keep uploading the unversioned `Folio.dmg`.
+
+Until a release is signed with a Developer ID and notarized (step 4), say so in the release notes and keep the README's *Install* section, which explains **Open Anyway**.

@@ -291,6 +291,12 @@ h1 {
   font-size: 13px;
 }
 
+.fine-print a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .hero-visual { margin-top: 72px; }
 .hero-visual > img {
   width: 100%;

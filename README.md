@@ -66,6 +66,16 @@ Plus one-step **tools**: combine PDFs, images to PDF, compress images, convert s
 - **Finder manners.** The workspace speaks Spotlight, Quick Look, Finder tags, the Trash and drag and drop, and every action has a menu item and a shortcut.
 - **Private by design.** No account, no analytics, no network requests at all. Your files never leave your Mac.
 
+## Install
+
+Download `Folio-0.1.0.dmg` from the [latest release](https://github.com/AryanM24/folio/releases/latest), open it and drag Folio to Applications. It needs macOS 15 or later on Apple silicon.
+
+This build isn't notarized yet, so the first time you open it macOS says it can't check it for malware. Open **System Settings › Privacy & Security**, scroll to the message about Folio and click **Open Anyway**. You only do this once. Or, in Terminal:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Folio.app
+```
+
 ## Build from source
 
 Requirements: macOS 15 or later, and Swift 6.2 (Xcode 26 or the Command Line Tools).
