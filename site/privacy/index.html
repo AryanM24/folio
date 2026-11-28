@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy · Folio</title>
+  <meta name="description" content="Folio doesn't collect anything. How the app, the folio command and this website handle your data.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F5F5F5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060607" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Folio">
+  <meta property="og:title" content="Folio: one native Mac app for every file">
+  <meta property="og:description" content="Open, edit and convert PDFs, documents, spreadsheets, images, code and media on your Mac. Free, open source, and usable by your coding agent.">
+  <meta property="og:image" content="https://folio-kappa-lac.vercel.app/assets/hero.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script>try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}</script>
+  <script src="/main.js" defer></script>
+</head>
+<body>
+  <!-- Line icons, 1.5 stroke, currentColor. Drawn to sit next to SF Pro the way SF Symbols do in the app. -->
+  <svg width="0" height="0" class="sprite" aria-hidden="true"><defs>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-docin" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M10 14l5-5M10.5 9H15v4.5"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 0 10h-2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 10-10M15 4v3M15 13v3M11 9h3M18 9h3"/></symbol>
+    <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m21 16-5-5L5 20"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M6 3l12 9-5.5 1.2L10 19z" fill="currentColor"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 10-10-3-3L5 16z"/><path d="M13 7l3 3"/></symbol>
+    <symbol id="i-hl" viewBox="0 0 24 24"><path d="M9 4h6l-1 9h-4z"/><path d="M7 20h10M10 13l-1 4h6l-1-4"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 9h8M12 9v7"/></symbol>
+    <symbol id="i-square" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1.5"/></symbol>
+    <symbol id="i-sign" viewBox="0 0 24 24"><path d="M3 17c3-1 4-9 6-9s0 9 2 9 3-5 4-5 1 3 3 3 2-2 3-2"/><path d="M3 21h18"/></symbol>
+    <symbol id="i-redact" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1.5" fill="currentColor"/></symbol>
+    <symbol id="wordmark" viewBox="0 0 84 33"><g fill="none" stroke="currentColor" stroke-width="5"><path d="M5.5 32V10.5A8 8 0 0 1 13.5 2.5H16"/><path d="M1 14.5H14"/><circle cx="29" cy="22" r="7.5"/><path d="M45.5 0V32"/><path d="M56.5 12V32"/><circle cx="74" cy="22" r="7.5"/></g><rect x="54" y="0" width="5" height="5" fill="#0485F7" stroke="none"/></symbol>
+    <symbol id="glyph" viewBox="0 0 64 64"><g transform="translate(32 32) scale(1.1) translate(-33 -32)"><path d="M20 16H40L46 22V24H28V30H40V38H28V48H20Z" fill="currentColor" stroke="none"/></g></symbol>
+  </defs></svg>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="Folio home"><img src="/favicon.svg" width="24" height="24" alt=""><svg class="wordmark" aria-hidden="true"><use href="#wordmark"/></svg></a>
+      <nav class="site-nav" aria-label="Sections">
+        <a href="/#features">Features</a>
+        <a href="https://github.com/AryanM24/folio/blob/main/docs/AGENTS.md">For agents</a>
+        <a href="https://github.com/AryanM24/folio">Source</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-icon" id="theme-toggle" type="button" aria-label="Switch to dark theme"><svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
+        <a class="btn btn-primary btn-sm" href="https://github.com/AryanM24/folio/releases/latest/download/Folio.dmg">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container legal">
+    <h1>Privacy</h1>
+    <p class="legal-meta">Effective 27 November 2026</p>
+    <p class="legal-lede">Folio doesn't collect anything. This page explains what that means for the app, the <code>folio</code> command, and this website.</p>
+
+    <h2>The Folio app</h2>
+    <ul>
+      <li><strong>No data leaves your Mac.</strong> Folio makes no network requests: no analytics, telemetry, crash reports, accounts or update checks.</li>
+      <li><strong>Your files stay where they are.</strong> Folio reads and writes only the files you open, save or convert. Conversions write new files next to the originals and never change or delete them.</li>
+      <li><strong>Converting web pages stays offline.</strong> When Folio opens HTML or Markdown, it removes links to remote images, styles and scripts and blocks every network load, so a document can't make your Mac contact a server.</li>
+      <li><strong>Local data.</strong> Signatures you draw and your settings are stored on your Mac, in <code>~/Library/Application Support/Folio/</code> and Folio's preferences. Deleting the app and that folder removes them.</li>
+      <li><strong>Spotlight and Finder tags.</strong> Recent and Favorites use your Mac's own Spotlight index and Finder tags. Nothing is copied anywhere.</li>
+    </ul>
+
+    <h2>The <code>folio</code> command and AI agents</h2>
+    <ul>
+      <li>The <code>folio</code> command and its MCP server run on your Mac and make no network requests either.</li>
+      <li>When you connect an AI client (Claude Code, Claude Desktop, Cursor, Codex or another), that client decides what to send to its own servers. If you ask it to read a file through Folio, the text it reads may go to the client's provider under that provider's privacy policy. Folio has no part in that and receives nothing.</li>
+      <li>Folio only reads and writes inside folders you allow, and always refuses sensitive places such as <code>~/Library</code> and <code>~/.ssh</code>. See the <a href="https://github.com/AryanM24/folio/blob/main/docs/AGENTS.md#security-model">security model</a>.</li>
+      <li><em>Settings › Agents</em> changes another app's configuration only after you confirm, and keeps a backup.</li>
+    </ul>
+
+    <h2>This website</h2>
+    <ul>
+      <li>No cookies, no analytics, no tracking scripts, no forms.</li>
+      <li>Your theme choice is kept in your browser's local storage and never sent anywhere.</li>
+      <li>The site is hosted by Vercel, which processes standard request logs (such as IP address and browser) to deliver and protect the site. See <a href="https://vercel.com/legal/privacy-policy">Vercel's privacy policy</a>.</li>
+      <li>Downloads and source code are served by GitHub under <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>.</li>
+    </ul>
+
+    <h2>Changes and contact</h2>
+    <p>If this ever changes, this page and the changelog will say so before a release ships it. Questions go to <a href="https://github.com/AryanM24/folio/issues">GitHub issues</a>; security reports go through <a href="https://github.com/AryanM24/folio/security/advisories/new">private vulnerability reporting</a>.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>© 2026 Folio contributors · MIT</span>
+      <nav aria-label="Footer">
+        <a href="https://github.com/AryanM24/folio">GitHub</a>
+        <a href="https://github.com/AryanM24/folio/releases">Releases</a>
+        <a href="https://github.com/AryanM24/folio/blob/main/docs/AGENTS.md">Agents</a>
+        <a href="/brand/">Brand</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+        <a href="https://github.com/AryanM24/folio/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/AryanM24/folio/blob/main/LICENSE">License</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
