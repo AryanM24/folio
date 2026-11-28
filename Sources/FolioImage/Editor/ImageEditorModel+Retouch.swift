@@ -86,22 +86,38 @@ extension ImageEditorModel {
                 sampleAllLayers: state.sampleAllLayers, amount: state.tool == .redEye ? 1 : 0))
     }
 
-    /// Upscale the base image by `factor`, stored as a pixel asset.
-    ///
-    /// shortcut: the document's original can't be swapped from here (`ImageDocument.source`
-    /// is fixed), so the upscaled edit is saved as a new PNG through Export; the
-    /// integration step can turn it into a base-layer swap once the document supports one.
+    /// Upscale the image by `factor` and make the result the document base image, as one
+    /// undo step. The edits so far are baked into the new base, so the recipe starts over
+    /// (keeping only metadata stripping).
     func upscale(by factor: Double) {
         let source = self.source
         let recipe = document.recipe
         let assets = document.assets
         let label = factor == factor.rounded() ? "\(Int(factor))×" : "\(factor)×"
-        Task {
-            let url = await Exporter.save(suggestedName: "\(baseName) \(label)", type: .png) {
-                try await Self.upscaledPNG(source: source, recipe: recipe, assets: assets, factor: factor)
+        runBusy("Upscaling…") {
+            do {
+                let upscaled = try await Self.upscaledSource(source: source, recipe: recipe, assets: assets, factor: factor)
+                var baked = EditRecipe()
+                baked.stripMetadata = recipe.stripMetadata
+                self.replaceBase(upscaled, recipe: baked, actionName: "Upscale \(label)")
+                self.showToast("Upscaled \(label) (\(SuperResolution.methodTitle))")
+            } catch {
+                self.show(error, title: "Couldn’t upscale the image")
             }
-            if url != nil { showToast("Upscaled \(label) (\(SuperResolution.methodTitle))") }
         }
+    }
+
+    /// Put `new` and `recipe` in the document as one undoable step, and re-render.
+    func replaceBase(_ new: SourceImage, recipe: EditRecipe, actionName: String) {
+        let oldSource = source
+        let oldRecipe = document.recipe
+        document.replace(source: new, recipe: recipe)
+        undoManager?.registerUndo(withTarget: self) { model in
+            model.replaceBase(oldSource, recipe: oldRecipe, actionName: actionName)
+        }
+        undoManager?.setActionName(actionName)
+        requestRender()
+        refreshThumbnailsIfVisible()
     }
 
     /// Redact every face, text block and/or barcode Vision finds.
@@ -262,12 +278,19 @@ extension ImageEditorModel {
         return PlacedAsset(asset: id, rect: placed)
     }
 
-    nonisolated static func upscaledPNG(
+    /// The full-size render of `recipe`, upscaled by `factor`, as a new base image. Encoded in
+    /// the original format when macOS can write it, so Save keeps the file type.
+    nonisolated static func upscaledSource(
         source: SourceImage, recipe: EditRecipe, assets: any AssetStore, factor: Double
-    ) async throws -> Data {
+    ) async throws -> SourceImage {
         let rendered = try await offCooperativePool { try RenderPipeline.render(source, recipe: recipe, assets: assets, final: true) }
         let upscaled = try await SuperResolution.upscale(rendered, factor: factor)
-        return try await offCooperativePool { try ImageCodec.encode(upscaled, as: .png) }
+        return try await offCooperativePool {
+            let type = ImageCodec.canWrite(source.type) ? source.type : .png
+            let properties = ImageCodec.propertiesForSaving(source.properties, strip: recipe.stripMetadata)
+            let data = try ImageCodec.encode(upscaled, as: type, quality: ImageCodec.isLossy(type) ? 0.95 : nil, properties: properties)
+            return try SourceImage(data: data)
+        }
     }
 
     nonisolated static func detectPupils(in image: CGImage) async throws -> [CGPoint] {
