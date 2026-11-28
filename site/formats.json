@@ -1,0 +1,1037 @@
+{
+ "version": "placeholder",
+ "pairs": [
+  {
+   "from": "pdf",
+   "family": "pdf",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "lossy",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "txt",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "images"
+     ]
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "images"
+     ]
+    },
+    {
+     "to": "docx",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "images"
+     ]
+    }
+   ]
+  },
+  {
+   "from": "docx",
+   "family": "document",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "rtf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments"
+     ]
+    },
+    {
+     "to": "odt",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments"
+     ]
+    },
+    {
+     "to": "html",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments"
+     ]
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "fonts"
+     ]
+    },
+    {
+     "to": "txt",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "rtf",
+   "family": "document",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "docx",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "odt",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "html",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "fonts"
+     ]
+    },
+    {
+     "to": "txt",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "odt",
+   "family": "document",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "docx",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments"
+     ]
+    },
+    {
+     "to": "rtf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments"
+     ]
+    },
+    {
+     "to": "html",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments"
+     ]
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "fonts"
+     ]
+    },
+    {
+     "to": "txt",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "html",
+   "family": "document",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "docx",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "rtf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "odt",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "fonts"
+     ]
+    },
+    {
+     "to": "txt",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "md",
+   "family": "document",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "docx",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "rtf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "odt",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "html",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "txt",
+     "fidelity": "content_only",
+     "lossless_available": true,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "txt",
+   "family": "document",
+   "targets": [
+    {
+     "to": "pdf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "docx",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "rtf",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "odt",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "html",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": true,
+     "drops": [
+      "page layout",
+      "fonts"
+     ]
+    }
+   ]
+  },
+  {
+   "from": "xlsx",
+   "family": "spreadsheet",
+   "targets": [
+    {
+     "to": "ods",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "csv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "tsv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "json",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    }
+   ]
+  },
+  {
+   "from": "ods",
+   "family": "spreadsheet",
+   "targets": [
+    {
+     "to": "xlsx",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "csv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "tsv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "json",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    }
+   ]
+  },
+  {
+   "from": "csv",
+   "family": "spreadsheet",
+   "targets": [
+    {
+     "to": "xlsx",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "ods",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "tsv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "json",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    }
+   ]
+  },
+  {
+   "from": "json",
+   "family": "spreadsheet",
+   "targets": [
+    {
+     "to": "xlsx",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "ods",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "csv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "tsv",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    }
+   ]
+  },
+  {
+   "from": "png",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "jpeg",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "heic",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "avif",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "tiff",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "gif",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "webp",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossless",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "wav",
+   "family": "audio",
+   "targets": [
+    {
+     "to": "alac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "flac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "aiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "m4a",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "flac",
+   "family": "audio",
+   "targets": [
+    {
+     "to": "alac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "wav",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "aiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "m4a",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "m4a",
+   "family": "audio",
+   "targets": [
+    {
+     "to": "alac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "flac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "wav",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "aiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "m4a",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "mp3",
+   "family": "audio",
+   "targets": [
+    {
+     "to": "alac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "flac",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "wav",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "aiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "m4a",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "mov",
+   "family": "video",
+   "targets": [
+    {
+     "to": "mp4",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "mov",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "m4a",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "wav",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "mp4",
+   "family": "video",
+   "targets": [
+    {
+     "to": "mov",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "mp4",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "m4a",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "wav",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  }
+ ]
+}

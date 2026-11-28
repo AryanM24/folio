@@ -1,0 +1,8 @@
+{
+  "machine": "an M4 Mac (placeholder numbers from research, regenerate with make bench)",
+  "rows": [
+    { "task": "Convert 40 photos, JPEG to JPEG", "folio_ms": 1100, "other_ms": 5240, "other": "sips, one by one" },
+    { "task": "Change a 30 s 4K clip from MOV to MP4", "folio_ms": 60, "other_ms": 6690, "other": "avconvert preset" },
+    { "task": "One HEIC photo to JPEG", "folio_ms": 137, "other_ms": 149, "other": "sips" }
+  ]
+}
