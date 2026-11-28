@@ -1,29 +1,29 @@
-import CoreGraphics
+public import CoreGraphics
 import FolioKit
-import Foundation
+public import Foundation
 import ImageIO
-import UniformTypeIdentifiers
+public import UniformTypeIdentifiers
 
 /// Every frame of an animated GIF, APNG, animated WebP or HEICS, with its delay, for
 /// editing and saving. Writes GIF, APNG and HEICS (macOS can not write WebP).
 ///
 /// shortcut: frames are decoded all at once; decode lazily if long animations run out of memory.
-nonisolated struct AnimatedImage {
-    struct Frame {
-        var image: CGImage
+public nonisolated struct AnimatedImage {
+    public struct Frame {
+        public var image: CGImage
         /// Seconds.
-        var delay: Double
+        public var delay: Double
     }
 
-    var frames: [Frame]
+    public var frames: [Frame]
     /// 0 = forever.
-    var loopCount = 0
+    public var loopCount = 0
 
     /// The ImageIO dictionary and keys that hold delays and loop counts for one format.
     /// `@unchecked`: only immutable ImageIO key constants.
     struct Keys: @unchecked Sendable {
         var dictionary: CFString
-        var delay: CFString
+        public var delay: CFString
         var unclampedDelay: CFString
         var loopCount: CFString
     }
@@ -50,7 +50,7 @@ nonisolated struct AnimatedImage {
     }
 
     /// Whether `type` can hold every frame (GIF, APNG, HEICS).
-    static func canAnimate(_ type: UTType) -> Bool { writeKeys(for: type) != nil }
+    public static func canAnimate(_ type: UTType) -> Bool { writeKeys(for: type) != nil }
 
     /// The ImageIO identifier to write `type` with: APNG is written as PNG with frames.
     private static func destinationType(for type: UTType) -> String {
@@ -59,7 +59,7 @@ nonisolated struct AnimatedImage {
 }
 
 nonisolated extension AnimatedImage {
-    init(data: Data) throws {
+    public init(data: Data) throws {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil), CGImageSourceGetCount(source) > 0 else {
             throw FolioError("This animation couldn’t be read.")
         }
@@ -84,7 +84,7 @@ nonisolated extension AnimatedImage {
     }
 
     /// Every frame with its delay, as `type` (GIF, APNG or HEICS).
-    func encoded(as type: UTType) throws -> Data {
+    public func encoded(as type: UTType) throws -> Data {
         guard let keys = Self.writeKeys(for: type), ImageCodec.canWrite(type) || type.conforms(to: .png) else {
             throw FolioError("Folio can’t save animations as \(type.preferredFilenameExtension?.uppercased() ?? "this format").")
         }

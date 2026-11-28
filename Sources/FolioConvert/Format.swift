@@ -20,7 +20,9 @@ public nonisolated enum Format: String, CaseIterable, Codable, Sendable {
     case png, jpeg, heic, avif, tiff, gif, bmp, jp2, webp, jxl
     /// Every camera RAW extension (dng, cr2, nef, arw…); read-only, never a target.
     case raw
-    case psd, ico, icns, exr, hdr, tga, pbm, apng, heics, svg
+    case psd, ico, icns, exr, hdr, tga, pbm, apng, heics, svg, dds
+    /// Encapsulated PostScript: only its embedded TIFF preview can be read (macOS 13 dropped PostScript).
+    case eps
     // Audio
     case m4a, alac, flac, wav, aiff, mp3
     case ogg, opus, caf, aac, ac3, w64, m4b, mid
@@ -37,6 +39,8 @@ public nonisolated enum Format: String, CaseIterable, Codable, Sendable {
     case srt, vtt, ass
     // 3D models
     case usdz, usda, usdc, obj, stl, ply, abc
+    /// glTF 2.0 (JSON + buffers) and its binary form; read by Folio itself, never a target.
+    case gltf, glb
     // Data and config (json is a spreadsheet source; data converters can still target it)
     case plist, xml, yaml, toml, json5
 
@@ -50,14 +54,14 @@ public nonisolated enum Format: String, CaseIterable, Codable, Sendable {
         case .docx, .doc, .rtf, .odt, .html, .md, .txt, .rtfd, .webarchive, .epub, .eml, .mbox, .pptx: .document
         case .xlsx, .ods, .csv, .tsv, .json, .xls, .jsonl, .sqlite, .ics, .vcf, .gpx, .kml, .geojson: .spreadsheet
         case .png, .jpeg, .heic, .avif, .tiff, .gif, .bmp, .jp2, .webp, .jxl, .raw, .psd, .ico, .icns, .exr, .hdr, .tga, .pbm, .apng,
-            .heics, .svg:
+            .heics, .svg, .dds, .eps:
             .image
         case .m4a, .alac, .flac, .wav, .aiff, .mp3, .ogg, .opus, .caf, .aac, .ac3, .w64, .m4b, .mid: .audio
         case .mp4, .mov, .m4v, .ts, .mpg, .threegp, .dv, .mkv, .webm, .prores: .video
         case .zip, .tar, .tgz, .tbz, .txz, .gz, .bz2, .xz, .sevenZip, .rar, .iso, .cpio, .xar: .archive
         case .ttf, .otf, .ttc, .woff, .woff2: .font
         case .srt, .vtt, .ass: .subtitle
-        case .usdz, .usda, .usdc, .obj, .stl, .ply, .abc: .model
+        case .usdz, .usda, .usdc, .obj, .stl, .ply, .abc, .gltf, .glb: .model
         case .plist, .xml, .yaml, .toml, .json5: .data
         }
     }
@@ -133,6 +137,8 @@ public nonisolated enum Format: String, CaseIterable, Codable, Sendable {
         case .tgz, .tbz, .txz: fileExtension + " archive"
         case .jsonl: "JSON Lines"
         case .sqlite: "SQLite database"
+        case .gltf: "glTF model"
+        case .glb: "glTF binary model"
         default: rawValue.uppercased() + noun
         }
     }

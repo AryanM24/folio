@@ -1,4 +1,5 @@
 import CoreGraphics
+import FolioImage
 public import Foundation
 import ImageIO
 import UniformTypeIdentifiers
@@ -12,47 +13,90 @@ public nonisolated enum ImageConverter: FamilyConverter {
     /// What ImageIO reads on every supported macOS.
     static let readable: Set<Format> = [
         .png, .jpeg, .heic, .avif, .tiff, .gif, .bmp, .jp2, .webp, .jxl, .raw, .psd, .ico, .icns, .exr, .hdr, .tga, .pbm, .apng, .heics,
+        .dds,
     ]
-    /// Readable formats that don't offer targets yet (0.3 adds them with their tests).
-    static let pending: Set<Format> = [.raw, .psd, .ico, .icns, .exr, .hdr, .tga, .pbm, .apng, .heics]
+    /// Sources Folio draws into pixels first: SVG with AppKit, EPS from its embedded TIFF preview.
+    static let rendered: Set<Format> = [.svg, .eps]
+    /// Sources that can hold frames, and the targets that keep them.
+    static let animatedSources: Set<Format> = [.gif, .apng, .heics, .webp]
+    static let animatedTargets: Set<Format> = [.gif, .apng, .heics]
 
-    /// Probed once: codec lists change between macOS releases (AVIF write especially).
-    static let writable: Set<Format> = {
+    /// Probed once: codec lists change between macOS releases (AVIF write especially). ICO and ICNS are written
+    /// by `ImageCodec` (multi-size, and ImageIO stops icns at 512 px); APNG is ImageIO's PNG writer with frames.
+    /// DDS is left out: ImageIO "writes" it as 0 bytes.
+    static let writable: Set<Format> = probeWritable()
+
+    static func probeWritable() -> Set<Format> {
         let ids = Set(CGImageDestinationCopyTypeIdentifiers() as? [String] ?? [])
-        return Set([Format.png, .jpeg, .heic, .avif, .tiff, .gif, .bmp, .jp2].filter { ids.contains($0.contentType.identifier) })
-    }()
+        let native = [Format.png, .jpeg, .heic, .avif, .tiff, .gif, .bmp, .jp2, .psd, .exr, .tga, .pbm, .heics]
+        let ours: Set<Format> = ids.contains(UTType.png.identifier) ? [.apng, .ico, .icns] : []
+        return ours.union(native.filter { ids.contains($0.contentType.identifier) })
+    }
 
-    /// Codecs that decode to exactly the pixels they were given (JPEG 2000 only at quality 1).
-    static let losslessCodecs: Set<Format> = [.png, .tiff, .bmp, .jp2]
+    /// Targets that decode to exactly the pixels they were given.
+    static let losslessTargets: Set<Format> = [.png, .apng, .tiff, .bmp, .psd, .exr, .tga, .pbm]
+    /// Codecs that can be lossless (JPEG 2000 only at quality 1).
+    static let losslessCodecs: Set<Format> = losslessTargets.union([.jp2])
+    /// 8-bit-only containers: a 16-bit source loses precision in them.
+    static let eightBit: Set<Format> = [.bmp, .gif, .tga, .pbm, .ico, .icns]
 
     public static func targets(from source: Format) -> [Target] {
-        guard readable.contains(source), !pending.contains(source) else { return [] }
+        guard readable.contains(source) || rendered.contains(source) else { return [] }
         let images = Format.allCases.filter { writable.contains($0) }.map { to -> Target in
             var drops: [String] = []
-            if source == .gif && to != .gif { drops.append("animation") }
+            if animatedSources.contains(source) && !animatedTargets.contains(to) { drops.append("animation") }
             if to == .jpeg { drops.append("transparency") }
             if to == .gif { drops.append("colours beyond 256") }
+            if source == .eps { drops.append("vector artwork (only the embedded preview is read)") }
             if to == source {
                 return Target(
-                    to: to, fidelity: [.png, .tiff, .bmp].contains(to) ? .lossless : .lossy, losslessAvailable: true, drops: drops,
+                    to: to, fidelity: lossless(from: source, to: to) ? .lossless : .lossy, losslessAvailable: true, drops: drops,
                     notes: "Compress. Lossless only rewrites metadata (or recompresses PNG/TIFF without loss).")
             }
+            let icon = [.ico, .icns].contains(to)
             return Target(
-                to: to, fidelity: [.png, .tiff, .bmp].contains(to) ? .lossless : .lossy, losslessAvailable: losslessCodecs.contains(to),
-                drops: drops)
+                to: to, fidelity: lossless(from: source, to: to) ? .lossless : .lossy,
+                losslessAvailable: icon
+                    ? !rendered.contains(source) : lossless(from: source, to: to) || (to == .jp2 && lossless(from: source, to: .png)),
+                drops: drops,
+                notes: icon
+                    ? "Every standard icon size up to the image's own; lossless for a square image of an icon size."
+                    : source == .svg
+                        ? "Rendered at max_dimension pixels on the long edge (default 2048)." : nil)
+        }
+        if source == .svg {
+            return images + [
+                Target(
+                    to: .pdf, fidelity: .lossless, losslessAvailable: true, drops: ["scripts", "animation"],
+                    notes: "Vector: shapes and text stay sharp.")
+            ]
         }
         let embedsAsIs = source == .jpeg || source == .png
         let pdf = Target(
-            to: .pdf, fidelity: embedsAsIs ? .lossless : .lossy, losslessAvailable: embedsAsIs, drops: source == .gif ? ["animation"] : [],
+            to: .pdf, fidelity: embedsAsIs ? .lossless : .lossy, losslessAvailable: embedsAsIs,
+            drops: animatedSources.contains(source) ? ["animation"] : [],
             notes: embedsAsIs ? "One page; the image is embedded as is." : "One page; the image is stored as JPEG.")
         return images + [pdf]
     }
 
-    public static func resource(for job: Job) -> Resource { job.target == .heic ? .hardwareImage : .cpu }
+    /// Whether `source` → `target` keeps every pixel: lossless codecs, except float (HDR) sources into 8/16-bit
+    /// integer formats, and vector or preview sources, which are rendered.
+    static func lossless(from source: Format, to target: Format) -> Bool {
+        if rendered.contains(source) { return false }
+        if [.exr, .hdr].contains(source) { return [.exr, .tiff].contains(target) }
+        return losslessTargets.contains(target)
+    }
+
+    public static func resource(for job: Job) -> Resource { [.heic, .heics].contains(job.target) ? .hardwareImage : .cpu }
 
     // MARK: Convert
 
     public static func convert(_ job: Job) async throws -> Outcome {
+        try await offPool { try convertNow(job) }
+    }
+
+    static func convertNow(_ job: Job) throws -> Outcome {
+        if rendered.contains(job.source) { return try convertRendered(job) }
         let source = try open(job.input)
         let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
         let width = props[kCGImagePropertyPixelWidth] as? Int ?? 0
@@ -65,23 +109,29 @@ public nonisolated enum ImageConverter: FamilyConverter {
         if job.target == .pdf { return try writePDF(source, props: props, job: job, maxPixels: maxPixels) }
 
         let strip = job.stripMetadata || job.quality == .small
+        let wide = (props[kCGImagePropertyDepth] as? Int ?? 8) > 8
         var outcome: Outcome
         if job.target == job.source, job.quality == .lossless {
             outcome = try copy(source, job: job, strip: strip)
+        } else if [.ico, .icns].contains(job.target) {
+            outcome = try writeIcon(source, props: props, job: job, maxPixels: maxPixels, wide: wide)
         } else {
-            let wide = (props[kCGImagePropertyDepth] as? Int ?? 8) > 8
             let encoded = try encodeWithinBudget(source, job: job, maxPixels: maxPixels, strip: strip)
             try encoded.data.write(to: job.output)
             let exact =
-                losslessCodecs.contains(job.target) && encoded.quality ?? 1 >= 1 && encoded.maxPixels == nil
-                && job.quality != .small && !(wide && [.bmp, .gif].contains(job.target))
+                losslessCodecs.contains(job.target) && lossless(from: job.source, to: job.target == .jp2 ? .png : job.target)
+                && encoded.quality ?? 1 >= 1 && encoded.maxPixels == nil && job.quality != .small
+                && !(wide && eightBit.contains(job.target))
             var details: [String: JSONValue] = [
                 "width": .int(Int64(encoded.width)), "height": .int(Int64(encoded.height)), "codec": .string(job.target.rawValue),
             ]
             if let q = encoded.quality, !losslessCodecs.contains(job.target) || q < 1 { details["quality"] = .double(q) }
-            if job.target == .heic { details["hardware"] = true }
+            if [.heic, .heics].contains(job.target) { details["hardware"] = true }
+            if encoded.frames > 1 { details["frames"] = .int(Int64(encoded.frames)) }
             var warnings: [String] = []
-            if CGImageSourceGetCount(source) > 1, job.target != .gif { warnings.append("Only the first frame was kept.") }
+            if CGImageSourceGetCount(source) > 1, encoded.frames == 1, ![.ico, .icns].contains(job.source) {
+                warnings.append("Only the first frame was kept.")
+            }
             outcome = Outcome(
                 fidelity: exact ? .lossless : .lossy, method: job.target == job.source ? "encode" : "transcode", details: details,
                 dropped: targets(from: job.source).first { $0.to == job.target }?.drops ?? [], warnings: warnings)
@@ -90,6 +140,30 @@ public nonisolated enum ImageConverter: FamilyConverter {
             outcome.verification = try verify(job: job, fidelity: outcome.fidelity, strip: strip)
         }
         return outcome
+    }
+
+    /// ICO ("favicon") and ICNS: every standard icon size up to the image's own, written by `ImageCodec`.
+    static func writeIcon(_ source: CGImageSource, props: [CFString: Any], job: Job, maxPixels: Int?, wide: Bool) throws -> Outcome {
+        guard let image = uprightImage(source, props: props, maxPixels: maxPixels) else { throw undecodable(job) }
+        let sizes = job.target == .ico ? Array(1...256) : [16, 32, 64, 128, 256, 512, 1024]
+        let exact = image.width == image.height && sizes.contains(image.width) && !wide && job.quality != .small
+        if job.quality == .lossless, !exact {
+            throw ConvertError(
+                .losslessUnavailable, "Only a square image of an icon size fits \(job.target.title) without resizing.",
+                hint: job.target == .ico
+                    ? "ICO holds up to 256 px; use quality balanced." : "ICNS sizes are 16…1024 px; use quality balanced.")
+        }
+        let data: Data
+        do {
+            data = try job.target == .ico ? ImageCodec.ico(image) : ImageCodec.icns(image)
+        } catch {
+            throw ConvertError(.internal, error.localizedDescription)
+        }
+        try data.write(to: job.output)
+        return Outcome(
+            fidelity: exact ? .lossless : .lossy, method: "encode",
+            details: ["width": .int(Int64(image.width)), "height": .int(Int64(image.height)), "codec": .string(job.target.rawValue)],
+            dropped: ["metadata"])
     }
 
     static func open(_ url: URL) throws -> CGImageSource {
@@ -126,14 +200,15 @@ public nonisolated enum ImageConverter: FamilyConverter {
         var width: Int, height: Int
         var quality: Double?
         var maxPixels: Int?
+        var frames = 1
     }
 
     /// Preset quality per target codec (research §3). `nil` for codecs without a quality knob.
     static func quality(for target: Format, _ preset: Quality) -> Double? {
         switch (target, preset) {
-        case (.jpeg, .small), (.heic, .small), (.avif, .small), (.jp2, .small): 0.6
+        case (.jpeg, .small), (.heic, .small), (.heics, .small), (.avif, .small), (.jp2, .small): 0.6
         case (.jpeg, _): 0.85
-        case (.heic, _): 0.80
+        case (.heic, _), (.heics, _): 0.80
         case (.avif, _): 0.7
         case (.jp2, .lossless): 1.0
         case (.jp2, _): 0.85
@@ -176,27 +251,27 @@ public nonisolated enum ImageConverter: FamilyConverter {
 
     /// One encode, in memory so budget retries never touch the disk.
     static func encode(_ source: CGImageSource, job: Job, quality: Double?, maxPixels: Int?, strip: Bool) throws -> Encoded {
-        let frames = job.target == .gif ? CGImageSourceGetCount(source) : 1
+        if animatedTargets.contains(job.target), animatedSources.contains(job.source) || job.source == .png,
+            CGImageSourceGetCount(source) > 1
+        {
+            return try encodeAnimation(job, maxPixels: maxPixels)
+        }
+        let frames = 1
         let data = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(data, job.target.contentType.identifier as CFString, frames, nil) else {
+        let type = job.target == .apng ? UTType.png.identifier : job.target.contentType.identifier
+        guard let destination = CGImageDestinationCreateWithData(data, type as CFString, frames, nil) else {
             throw ConvertError(.unsupportedPair, "This Mac can't write \(job.target.title) files.")
         }
         var options: [CFString: Any] = [:]
         if let quality { options[kCGImageDestinationLossyCompressionQuality] = quality }
         // PNG filter "sub": faster and smaller than the default on photos (research §2.1).
-        if job.target == .png { options[kCGImagePropertyPNGDictionary] = [kCGImagePropertyPNGCompressionFilter: 0x10] }
+        if [.png, .apng].contains(job.target) { options[kCGImagePropertyPNGDictionary] = [kCGImagePropertyPNGCompressionFilter: 0x10] }
         if job.target == .tiff { options[kCGImagePropertyTIFFDictionary] = [kCGImagePropertyTIFFCompression: 5] }  // LZW
         if job.quality == .small { options[kCGImageDestinationOptimizeColorForSharing] = true }  // sRGB
-        if frames > 1, let file = CGImageSourceCopyProperties(source, nil) as? [CFString: Any],
-            let gif = file[kCGImagePropertyGIFDictionary]
-        {
-            CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: gif] as CFDictionary)
-        }
         var size = (0, 0)
         for index in 0..<frames {
             let frame = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any] ?? [:]
             var perFrame = options
-            if let gif = frame[kCGImagePropertyGIFDictionary] { perFrame[kCGImagePropertyGIFDictionary] = gif }
             if let maxPixels {
                 // Thumbnail decode applies orientation, so the output is upright and tagged so.
                 let thumbOptions: [CFString: Any] = [
@@ -239,6 +314,7 @@ public nonisolated enum ImageConverter: FamilyConverter {
     // MARK: Inspect and extract
 
     public static func inspect(_ url: URL, format: Format) async throws -> [String: JSONValue] {
+        if rendered.contains(format) { return try await offPool { try inspectRendered(url, format: format) } }
         let source = try open(url)
         let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
         var meta: [String: JSONValue] = [
@@ -278,4 +354,57 @@ public nonisolated enum ImageConverter: FamilyConverter {
         }
         return (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
     }
+}
+
+// MARK: Animation
+
+extension ImageConverter {
+    /// Every frame with its delay and the loop count, as GIF, APNG or HEICS, through FolioImage's `AnimatedImage`.
+    static func encodeAnimation(_ job: Job, maxPixels: Int?) throws -> Encoded {
+        var animation: AnimatedImage
+        do {
+            animation = try AnimatedImage(data: Data(contentsOf: job.input))
+        } catch {
+            throw ConvertError(.corruptInput, error.localizedDescription)
+        }
+        if let maxPixels {
+            for index in animation.frames.indices {
+                animation.frames[index].image = try scaled(animation.frames[index].image, longEdge: maxPixels)
+            }
+        }
+        let data: Data
+        do {
+            data = try animation.encoded(as: job.target == .apng ? .png : job.target.contentType)
+        } catch {
+            throw ConvertError(.unsupportedPair, error.localizedDescription)
+        }
+        let first = animation.frames[0].image
+        return Encoded(
+            data: data, width: first.width, height: first.height, quality: nil, maxPixels: maxPixels, frames: animation.frames.count)
+    }
+
+    /// `image` redrawn so its long edge is `longEdge` pixels, in sRGB (GIF frames can be indexed).
+    static func scaled(_ image: CGImage, longEdge: Int) throws -> CGImage {
+        let scale = Double(longEdge) / Double(max(image.width, image.height))
+        let width = max(1, Int((Double(image.width) * scale).rounded()))
+        let height = max(1, Int((Double(image.height) * scale).rounded()))
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+            let context = CGContext(
+                data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { throw ConvertError(.internal, "Couldn't resize the frames.") }
+        context.interpolationQuality = .high
+        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let resized = context.makeImage() else { throw ConvertError(.internal, "Couldn't resize the frames.") }
+        return resized
+    }
+}
+
+/// Runs a blocking ImageIO or ModelIO call on a GCD thread, so it doesn't hold one of the few threads Swift
+/// concurrency shares between every task (the same helper as FolioMedia's analysis code).
+nonisolated func offPool<T>(_ work: @escaping @Sendable () throws -> T) async throws -> T {
+    let result: UncheckedSendable<Result<T, any Error>> = await withCheckedContinuation { continuation in
+        DispatchQueue.global(qos: .userInitiated).async { continuation.resume(returning: UncheckedSendable(Result { try work() })) }
+    }
+    return try result.value.get()
 }
