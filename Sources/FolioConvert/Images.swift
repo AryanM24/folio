@@ -137,8 +137,8 @@ public nonisolated enum ImageConverter: FamilyConverter {
         }
     }
 
-    /// The preset encode, then for `maxBytes`: binary-search quality (≤6 encodes), then
-    /// downscale and search again. Returns the smallest attempt when nothing fits; the
+    /// The preset encode, then for `maxBytes`: binary-search quality down to 0.5 (≤6 encodes),
+    /// then downscale and search again. Below 0.5 artefacts show more than a smaller image does. Returns the smallest attempt when nothing fits; the
     /// engine turns that into `SIZE_UNREACHABLE`.
     static func encodeWithinBudget(_ source: CGImageSource, job: Job, maxPixels: Int?, strip: Bool) throws -> Encoded {
         let preset = quality(for: job.target, job.quality)
@@ -148,10 +148,10 @@ public nonisolated enum ImageConverter: FamilyConverter {
         var pixels = maxPixels
         for _ in 0..<3 {
             if let preset {
-                let floor = try encode(source, job: job, quality: 0.1, maxPixels: pixels, strip: strip)
+                let floor = try encode(source, job: job, quality: min(0.5, preset), maxPixels: pixels, strip: strip)
                 if floor.data.count < smallest.data.count { smallest = floor }
                 if floor.data.count <= budget {
-                    var best = floor, low = 0.1, high = preset
+                    var best = floor, low = min(0.5, preset), high = preset
                     for _ in 0..<5 {
                         let mid = (low + high) / 2
                         let attempt = try encode(source, job: job, quality: mid, maxPixels: pixels, strip: strip)

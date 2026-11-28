@@ -155,8 +155,7 @@ public nonisolated enum Engine {
     ) async -> ConvertResult {
         let start = ContinuousClock.now
         let bytesIn = fileSize(input)
-        var result = ConvertResult(
-            input: input.path, status: .failed, bytesIn: bytesIn, durationMs: 0, details: [:], dropped: [], warnings: [])
+        var result = ConvertResult(input: input.path, status: .failed, bytesIn: bytesIn)
         func fail(_ error: any Error) -> ConvertResult {
             result.error = wrap(error)
             result.status = .failed
@@ -266,7 +265,8 @@ public nonisolated enum Engine {
         }
     }
 
-    static func wrap(_ error: any Error) -> ConvertError {
+    /// Any error as a ``ConvertError``, so every caller reports the same shape.
+    public static func wrap(_ error: any Error) -> ConvertError {
         if let error = error as? ConvertError { return error }
         if error is CancellationError { return ConvertError(.cancelled, "Cancelled.") }
         return ConvertError(.internal, error.localizedDescription)

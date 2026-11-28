@@ -22,7 +22,7 @@ nonisolated enum Human {
     }
 
     static func error(_ error: any Error) -> String {
-        self.error(Engine.wrapped(error))
+        self.error(Engine.wrap(error))
     }
 
     /// `report.docx → report.pdf  482 KB → 391 KB  visually lossless  0.4 s ✓`

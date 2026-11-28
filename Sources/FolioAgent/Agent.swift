@@ -184,7 +184,7 @@ public nonisolated enum Agent {
 
         if dryRun {
             return finish(
-                inputs.map { makeResult(input: $0.path, status: .planned, bytesIn: Engine.fileSize($0), durationMs: 0) }, start: start)
+                inputs.map { ConvertResult(input: $0.path, status: .planned, bytesIn: Engine.fileSize($0), durationMs: 0) }, start: start)
         }
 
         context.progress?(0, inputs[0].lastPathComponent)
@@ -203,7 +203,7 @@ public nonisolated enum Agent {
             // output (a combined PDF, split pages) is credited to all inputs together.
             let paired = inputs.count == outputs.count
             let input = paired ? inputs[index] : inputs[0]
-            var result = makeResult(
+            var result = ConvertResult(
                 input: input.path, status: .ok, bytesIn: paired ? Engine.fileSize(input) : bytesIn, durationMs: duration)
             let bytesOut = size(of: output)
             result.output = output.path
@@ -246,7 +246,7 @@ public nonisolated enum Agent {
             url = try context.policy.check(path, .read)
             text = try await Engine.extract(url, as: kind, options: ExtractOptions(pages: pages, sheet: sheet))
         } catch {
-            return .failure(Engine.wrapped(error))
+            return .failure(Engine.wrap(error))
         }
         let total = text.count
         let from = min(max(offset, 0), total)
@@ -306,18 +306,9 @@ public nonisolated enum Agent {
     // MARK: Helpers
 
     /// `ConvertResult` has no public initializer, so build it the way it decodes.
-    static func makeResult(input: String, status: ConvertResult.Status, bytesIn: Int64, durationMs: Int) -> ConvertResult {
-        let json: JSONValue = [
-            "input": .string(input), "status": .string(status.rawValue), "bytes_in": .int(bytesIn), "duration_ms": .int(Int64(durationMs)),
-            "details": [:], "dropped": [], "warnings": [],
-        ]
-        // Shape matches ConvertResult's CodingKeys, so this can't fail.
-        return try! JSONDecoder().decode(ConvertResult.self, from: Data(json.encoded.utf8))
-    }
-
     static func failedResult(_ path: String, _ error: any Error) -> ConvertResult {
-        var result = makeResult(input: path, status: .failed, bytesIn: 0, durationMs: 0)
-        result.error = Engine.wrapped(error)
+        var result = ConvertResult(input: path, status: .failed, bytesIn: 0, durationMs: 0)
+        result.error = Engine.wrap(error)
         return result
     }
 
@@ -334,11 +325,3 @@ public nonisolated enum Agent {
     }
 }
 
-extension Engine {
-    /// `Engine.wrap` is internal to the engine; same mapping, for errors raised here.
-    nonisolated static func wrapped(_ error: any Error) -> ConvertError {
-        if let error = error as? ConvertError { return error }
-        if error is CancellationError { return ConvertError(.cancelled, "Cancelled.") }
-        return ConvertError(.internal, error.localizedDescription)
-    }
-}

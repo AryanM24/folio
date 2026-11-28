@@ -171,6 +171,17 @@ public nonisolated struct ConvertResult: Codable, Sendable {
     public var warnings: [String]
     public var error: ConvertError?
 
+    /// A result with nothing filled in yet; callers set the rest as they learn it.
+    public init(input: String, status: Status, bytesIn: Int64, durationMs: Int = 0) {
+        self.input = input
+        self.status = status
+        self.bytesIn = bytesIn
+        self.durationMs = durationMs
+        details = [:]
+        dropped = []
+        warnings = []
+    }
+
     enum CodingKeys: String, CodingKey {
         case input, output, status, fidelity, method, ratio, details, verification, dropped, warnings, error
         case bytesIn = "bytes_in", bytesOut = "bytes_out", durationMs = "duration_ms"
@@ -192,7 +203,7 @@ public nonisolated struct ConvertReport: Codable, Sendable {
         }
     }
 
-    init(results: [ConvertResult], durationMs: Int) {
+    public init(results: [ConvertResult], durationMs: Int) {
         self.results = results
         summary = Summary(
             ok: results.count { $0.status == .ok },

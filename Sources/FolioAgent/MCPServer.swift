@@ -132,7 +132,7 @@ public actor MCPServer {
                 output = .failure(
                     ConvertError(.unsupportedInput, error.message, hint: "Check the arguments against the tool's inputSchema."))
             } catch {
-                output = .failure(Engine.wrapped(error))
+                output = .failure(Engine.wrap(error))
             }
             // A cancelled request gets no response (MCP cancellation rules).
             if !Task.isCancelled { self.reply(Self.result(output, tool: tool.name), id: id) }

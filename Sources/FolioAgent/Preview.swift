@@ -41,7 +41,7 @@ extension Agent {
                 structured: structured, text: "\(url.lastPathComponent): \(rendered.1), \(rendered.0.width)×\(rendered.0.height) px",
                 image: png, isError: false, ok: 1, failed: 0)
         } catch {
-            return .failure(Engine.wrapped(error))
+            return .failure(Engine.wrap(error))
         }
     }
 
