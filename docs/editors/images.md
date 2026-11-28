@@ -74,7 +74,7 @@ Housekeeping and privacy:
 | Remove background | ⇧⌘K (Preview's shortcut) |
 | Live Text | ⌥⌘T |
 | Pick color (copies hex, sets markup color) | ⌥⌘C |
-| Compare with original | hold **M**, or press and hold the toolbar button |
+| Compare with original | hold `\`, or press and hold the toolbar button |
 | Copy image | ⇧⌘C |
 | Export… / Info | ⇧⌘E / ⌘I |
 | Reset all edits | ⇧⌘R |
