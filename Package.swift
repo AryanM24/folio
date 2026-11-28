@@ -15,6 +15,12 @@ let uiSettings: [SwiftSetting] = [
     .enableUpcomingFeature("InternalImportsByDefault"),
 ]
 
+/// The conversion engine and the agent layer have no UI, so nothing there defaults to the main actor.
+let engineSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("InternalImportsByDefault"),
+]
+
 let editors = ["FolioPDF", "FolioDocs", "FolioSheets", "FolioImage", "FolioCode", "FolioMedia"]
 
 func editor(_ name: String, dependencies extra: [Target.Dependency] = []) -> Target {
@@ -27,15 +33,22 @@ func editor(_ name: String, dependencies extra: [Target.Dependency] = []) -> Tar
 
 /// One suite per module, plus `FolioTests` for the app target's pure logic (workspace
 /// sorting, search, naming), which `@testable import Folio` reaches.
-let testTargets: [Target] = (["FolioKit"] + editors + ["Folio"]).map { name in
-    .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
-}
+let testTargets: [Target] =
+    (["FolioKit"] + editors + ["Folio"]).map { name in
+        .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
+    }
+    + ["FolioConvert", "FolioAgent"].map { name in
+        .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: engineSettings)
+    }
 
 let package = Package(
     name: "Folio",
     platforms: [.macOS(.v15)],
     products: [
-        .executable(name: "Folio", targets: ["Folio"])
+        .executable(name: "Folio", targets: ["Folio"]),
+        // Bundled as Folio.app/Contents/Helpers/folio (a different name from `Folio`,
+        // since the Mac's file system ignores case).
+        .executable(name: "folio-cli", targets: ["FolioCLI"]),
     ],
     dependencies: [
         // Reading and writing .xlsx / .ods packages (zip containers).
@@ -44,8 +57,20 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Folio",
-            dependencies: ["FolioKit"] + editors.map { .target(name: $0) },
+            dependencies: ["FolioKit", "FolioConvert", "FolioAgent"] + editors.map { .target(name: $0) },
             swiftSettings: uiSettings
+        ),
+        // `folio`: the command-line tool and local MCP server. One binary, both jobs.
+        .executableTarget(name: "FolioCLI", dependencies: ["FolioAgent"], swiftSettings: engineSettings),
+        .target(
+            name: "FolioAgent",
+            dependencies: ["FolioConvert", "FolioKit"] + editors.map { .target(name: $0) },
+            swiftSettings: engineSettings
+        ),
+        .target(
+            name: "FolioConvert",
+            dependencies: ["FolioKit", "FolioDocs", "FolioSheets", "FolioCode"],
+            swiftSettings: engineSettings
         ),
         .target(name: "FolioKit", swiftSettings: uiSettings),
         editor("FolioPDF"),
