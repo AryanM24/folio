@@ -3,7 +3,7 @@ import Testing
 
 @testable import FolioAgent
 
-@Suite("CLI")
+@Suite("CLI", .timeLimit(.minutes(1)))
 struct CLITests {
     @Test("Usage errors exit 2")
     func usageErrors() async {

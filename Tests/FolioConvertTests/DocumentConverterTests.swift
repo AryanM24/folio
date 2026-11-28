@@ -64,7 +64,7 @@ final class Listener {
     deinit { close(fd) }
 }
 
-@Suite("Document conversions")
+@Suite("Document conversions", .timeLimit(.minutes(1)))
 struct DocumentConverterTests {
     @Test("Lossless is offered only between text and Markdown")
     func losslessPairs() {

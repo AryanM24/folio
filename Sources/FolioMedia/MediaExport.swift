@@ -193,8 +193,12 @@ nonisolated enum MediaExport {
         let total = duration.seconds
         while let buffer = output.copyNextSampleBuffer() {
             if Task.isCancelled { reader.cancelReading(); writer.cancelWriting(); throw CancellationError() }
-            while !input.isReadyForMoreMediaData { try await Task.sleep(for: .milliseconds(2)) }
-            guard input.append(buffer) else { break }
+            // A failed writer never becomes ready again: stop instead of waiting forever.
+            while !input.isReadyForMoreMediaData {
+                if writer.status != .writing { break }
+                try await Task.sleep(for: .milliseconds(2))
+            }
+            guard writer.status == .writing, input.append(buffer) else { break }
             if total > 0 { progress(min(1, (buffer.presentationTimeStamp - start).seconds / total)) }
         }
         input.markAsFinished()

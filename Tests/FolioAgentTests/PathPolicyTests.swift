@@ -4,7 +4,7 @@ import Testing
 
 @testable import FolioAgent
 
-@Suite("Path policy")
+@Suite("Path policy", .timeLimit(.minutes(1)))
 struct PathPolicyTests {
     func denied(_ policy: PathPolicy, _ path: String, _ access: PathPolicy.Access = .read) -> Bool {
         do {

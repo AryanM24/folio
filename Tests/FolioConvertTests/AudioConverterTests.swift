@@ -56,7 +56,7 @@ enum Fixture {
     }
 }
 
-@Suite("Audio")
+@Suite("Audio", .timeLimit(.minutes(1)))
 struct AudioConverterTests {
     @Test("Targets: lossless where it can be, compress in place only for m4a, never mp3")
     func targets() {

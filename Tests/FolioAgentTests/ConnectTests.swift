@@ -3,7 +3,7 @@ import Testing
 
 @testable import FolioAgent
 
-@Suite("Connect")
+@Suite("Connect", .timeLimit(.minutes(1)))
 struct ConnectTests {
     let binary = "/Applications/Folio.app/Contents/Helpers/folio"
 

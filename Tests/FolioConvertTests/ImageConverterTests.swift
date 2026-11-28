@@ -109,7 +109,7 @@ enum Fixtures {
     }
 }
 
-@Suite("Images")
+@Suite("Images", .timeLimit(.minutes(1)))
 struct ImageConverterTests {
     @Test("Targets: lossless only where it's real, AVIF only when writable")
     func targets() {

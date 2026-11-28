@@ -3,7 +3,7 @@ import Testing
 
 @testable import FolioConvert
 
-@Suite("Engine")
+@Suite("Engine", .timeLimit(.minutes(1)))
 struct EngineTests {
     @Test("Format ids accept common aliases")
     func aliases() {

@@ -4,7 +4,7 @@ import Testing
 
 @testable import FolioAgent
 
-@Suite("MCP server")
+@Suite("MCP server", .timeLimit(.minutes(1)))
 struct MCPTests {
     func request(_ id: Int, _ method: String, _ params: JSONValue = [:]) -> JSONValue {
         ["jsonrpc": "2.0", "id": .int(Int64(id)), "method": .string(method), "params": params]

@@ -71,7 +71,7 @@ extension Fixture {
     }
 }
 
-@Suite("Video")
+@Suite("Video", .timeLimit(.minutes(1)))
 struct VideoConverterTests {
     @Test("Targets: containers, extract audio, GIF; lossless only for container changes and audio")
     func targets() {

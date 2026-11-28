@@ -241,7 +241,12 @@ public nonisolated enum VideoConverter: FamilyConverter {
                 writer.cancelWriting()
                 throw CancellationError()
             }
-            while !input.isReadyForMoreMediaData { try await Task.sleep(for: .milliseconds(2)) }
+            // A failed writer never becomes ready again: stop instead of waiting forever.
+            while !input.isReadyForMoreMediaData {
+                if writer.status != .writing { break }
+                try await Task.sleep(for: .milliseconds(2))
+            }
+            if writer.status != .writing { break }
             if let data = try buffer.dataBuffer?.dataBytes() {
                 hasher.update(data: data)
                 bytes += data.count
@@ -375,6 +380,7 @@ public nonisolated enum VideoConverter: FamilyConverter {
         let progress = job.progress
         let halfSource = 0.5 / sourceFPS
         let cancel = UncheckedSendable(reader)
+        let watched = UncheckedSendable(writer)
         let lastFrame = UncheckedSendable(LastTime())
         // Each pair is used only by its own pump's serial queue from here on.
         let videoIO = UncheckedSendable((videoOut as AVAssetReaderOutput, videoIn))
@@ -382,7 +388,7 @@ public nonisolated enum VideoConverter: FamilyConverter {
         let frames = await withTaskCancellationHandler {
             await withTaskGroup(of: (isVideo: Bool, count: Int).self) { group in
                 group.addTask {
-                    let count = await pump(videoIO, label: "video") { buffer, state in
+                    let count = await pump(videoIO, label: "video", writer: watched, reader: cancel) { buffer, state in
                         let pts = buffer.presentationTimeStamp.seconds
                         // Frame-rate cap: keep a frame once its slot comes up, drop the rest.
                         if interval > 0 {
@@ -395,7 +401,9 @@ public nonisolated enum VideoConverter: FamilyConverter {
                     }
                     return (true, count)
                 }
-                if let audioIO { group.addTask { (false, await pump(audioIO, label: "audio") { _, _ in true }) } }
+                if let audioIO {
+                    group.addTask { (false, await pump(audioIO, label: "audio", writer: watched, reader: cancel) { _, _ in true }) }
+                }
                 var frames = 0
                 for await result in group where result.isVideo { frames = result.count }
                 return frames
@@ -450,36 +458,61 @@ public nonisolated enum VideoConverter: FamilyConverter {
         var next = -Double.infinity
         var appended = 0
         var finished = false
+        private let lock = NSLock()
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        func wait(_ c: CheckedContinuation<Void, Never>) { lock.withLock { continuation = c } }
+        /// Resumes the waiting pump exactly once, from the pump's queue or the watchdog.
+        func finish() {
+            let c: CheckedContinuation<Void, Never>? = lock.withLock {
+                finished = true
+                defer { continuation = nil }
+                return continuation
+            }
+            c?.resume()
+        }
     }
 
     /// Feeds `input` from `output` whenever the writer wants more, until the reader runs dry.
     /// Video and audio pump concurrently: an interleaving writer stalls one input until the other catches up.
     static func pump(
         _ io: UncheckedSendable<(AVAssetReaderOutput, AVAssetWriterInput)>, label: String,
+        writer: UncheckedSendable<AVAssetWriter>, reader: UncheckedSendable<AVAssetReader>,
         keep: @escaping @Sendable (CMSampleBuffer, PumpState) -> Bool
     ) async -> Int {
         let state = PumpState()
         let queue = DispatchQueue(label: "folio.convert.\(label)")
+        // requestMediaDataWhenReady stops calling back once the writer fails (an encoder this Mac
+        // lacks, a full disk), which would leave this pump waiting forever. Watch for that.
+        let watchdog = Task.detached {
+            while !state.finished {
+                if writer.value.status == .failed || writer.value.status == .cancelled || reader.value.status == .failed {
+                    state.finish()
+                    return
+                }
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+        }
         await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            state.wait(done)
             io.value.1.requestMediaDataWhenReady(on: queue) {
                 let (output, input) = io.value
                 while !state.finished, input.isReadyForMoreMediaData {
                     guard let buffer = output.copyNextSampleBuffer() else {
                         input.markAsFinished()
-                        state.finished = true
-                        done.resume()
+                        state.finish()
                         return
                     }
                     guard keep(buffer, state) else { continue }
                     guard input.append(buffer) else {
-                        state.finished = true  // the writer failed; the caller reads its error
-                        done.resume()
+                        state.finish()  // the writer failed; the caller reads its error
                         return
                     }
                     state.appended += 1
                 }
             }
         }
+        watchdog.cancel()
         return state.appended
     }
 

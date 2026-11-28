@@ -4,7 +4,7 @@ import Testing
 
 @testable import FolioConvert
 
-@Suite("Sheet conversions")
+@Suite("Sheet conversions", .timeLimit(.minutes(1)))
 struct SheetConverterTests {
     func write(_ text: String, to url: URL) throws { try Data(text.utf8).write(to: url) }
     func read(_ path: String?) throws -> String { try String(contentsOf: URL(fileURLWithPath: try #require(path)), encoding: .utf8) }

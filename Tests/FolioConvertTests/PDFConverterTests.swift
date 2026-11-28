@@ -4,7 +4,7 @@ import Testing
 
 @testable import FolioConvert
 
-@Suite("PDF")
+@Suite("PDF", .timeLimit(.minutes(1)))
 struct PDFConverterTests {
     @Test("A multi-page PDF becomes a folder of page-001.png…")
     func pagesToFolder() async throws {
