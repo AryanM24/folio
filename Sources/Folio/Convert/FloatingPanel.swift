@@ -48,7 +48,7 @@ final class FloatingPanel: NSPanel {
     }
 
     /// Fades in or out in 150 ms, or at once with Reduce Motion.
-    func fade(in show: Bool, completion: (() -> Void)? = nil) {
+    func fade(in show: Bool, completion: (@MainActor @Sendable () -> Void)? = nil) {
         let instant = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         if show {
             alphaValue = instant ? 1 : 0
@@ -64,6 +64,8 @@ final class FloatingPanel: NSPanel {
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             animator().alphaValue = show ? 1 : 0
         } completionHandler: {
+            // AppKit calls this on the main thread. The completion is main-actor and Sendable,
+            // so the stricter compilers accept capturing it here.
             MainActor.assumeIsolated {
                 if !show { self.orderOut(nil) }
                 completion?()
