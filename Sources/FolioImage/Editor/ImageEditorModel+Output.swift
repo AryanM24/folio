@@ -2,39 +2,86 @@ import AppKit
 import FolioKit
 import UniformTypeIdentifiers
 
-/// Formats offered by Export As.
-nonisolated enum ExportFormat: String, CaseIterable, Identifiable {
-    case png, jpeg, heic, tiff
-    var id: String { rawValue }
-    var title: String { rawValue.uppercased() }
-    var type: UTType {
-        switch self {
-        case .png: .png
-        case .jpeg: .jpeg
-        case .heic: .heic
-        case .tiff: .tiff
-        }
-    }
-    var isLossy: Bool { ImageCodec.isLossy(type) }
-}
-
-/// Getting the edited image out: Export As, Copy, Share, and the color sampler.
+/// Getting the edited image out: Export As, batch export, animation frames, Copy, Share,
+/// and the color sampler.
 extension ImageEditorModel {
     /// File name without extension, for exports.
     var baseName: String {
         fileURL?.deletingPathExtension().lastPathComponent ?? "Image"
     }
 
+    /// The source has more than one frame (GIF, APNG, animated WebP, HEICS).
+    var isAnimated: Bool { source.frameCount > 1 }
+
     func export(_ format: ExportFormat, quality: Double) {
+        export(ExportOptions(format: format, quality: quality))
+    }
+
+    /// Ask where to save, then write the edited image with `options`.
+    func export(_ options: ExportOptions) {
         let source = self.source
         let recipe = document.recipe
         let assets = document.assets
-        let type = format.type
         Task {
-            await Exporter.save(suggestedName: baseName, type: type) {
-                try await Task.detached(priority: .userInitiated) {
-                    try ImageSaver.data(for: source, recipe: recipe, assets: assets, as: type, quality: format.isLossy ? quality : nil)
-                }.value
+            await Exporter.save(suggestedName: baseName, type: options.format.type) {
+                try await offCooperativePool { try ImageSaver.export(source, recipe: recipe, assets: assets, options: options) }
+            }
+        }
+    }
+
+    /// Apply this image’s look (sliders, tone, filter; never geometry, which belongs to the
+    /// photo) and `options` to images the user picks, writing each next to its original.
+    func batchExport(_ options: ExportOptions) {
+        let preset: ImagePreset
+        do {
+            preset = try ImagePreset(name: baseName, recipe: document.recipe, store: document.assets)
+        } catch {
+            show(error, title: "Couldn’t read this image’s look")
+            return
+        }
+        Task {
+            let urls = await Exporter.pick(types: FileKind.image.readableTypes)
+            guard !urls.isEmpty else { return }
+            runBusy("Exporting \(urls.count) images…") {
+                do {
+                    let written = try await ImageToolOps.applyPreset(preset, options: options, to: urls)
+                    self.showToast("Exported \(written.count) \(written.count == 1 ? "image" : "images")")
+                } catch {
+                    self.show(error, title: "Couldn’t export the images")
+                }
+            }
+        }
+    }
+
+    /// Write every frame of an animation, edits applied, as numbered PNGs in a folder the user picks.
+    func exportFrames() {
+        let source = self.source
+        let recipe = document.recipe
+        let assets = document.assets
+        let name = baseName
+        Task {
+            let panel = NSOpenPanel()
+            panel.canChooseFiles = false
+            panel.canChooseDirectories = true
+            panel.canCreateDirectories = true
+            panel.prompt = "Export Frames"
+            let response = await withCheckedContinuation { c in panel.begin { c.resume(returning: $0) } }
+            guard response == .OK, let folder = panel.url else { return }
+            runBusy("Exporting frames…") {
+                do {
+                    let count = try await offCooperativePool {
+                        let animation = try AnimatedImage(data: ImageSaver.data(for: source, recipe: recipe, assets: assets, as: .png))
+                        let files = try animation.frameFiles()
+                        for (index, data) in files.enumerated() {
+                            let url = folder.appending(path: "\(name) frame \(String(format: "%03d", index + 1)).png")
+                            try data.write(to: url, options: .atomic)
+                        }
+                        return files.count
+                    }
+                    self.showToast("Exported \(count) frames")
+                } catch {
+                    self.show(error, title: "Couldn’t export the frames")
+                }
             }
         }
     }

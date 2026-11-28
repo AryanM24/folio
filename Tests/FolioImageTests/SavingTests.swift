@@ -91,7 +91,7 @@ import UniformTypeIdentifiers
 
     @Test func webPIsReadableButNotWritableBySave() {
         #expect(ImageDocument.readableContentTypes.contains(.webP))
-        #expect(ImageDocument.writableContentTypes.allSatisfy(ImageCodec.canWrite))
+        #expect(ImageDocument.writableContentTypes.filter { $0 != .folioImageDocument }.allSatisfy(ImageCodec.canWrite))
     }
 }
 
@@ -137,7 +137,10 @@ import UniformTypeIdentifiers
     }
 
     @Test func toolIDsAreNamespaced() {
-        #expect(ImageTools.all.map(\.id) == ["image.convert", "image.resize", "image.removeBackground", "image.stripMetadata"])
+        #expect(
+            ImageTools.all.map(\.id) == [
+                "image.convert", "image.resize", "image.removeBackground", "image.stripMetadata", "image.export", "image.applyPreset",
+            ])
     }
 
     @Test func convertWritesNextToInput() async throws {

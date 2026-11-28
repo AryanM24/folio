@@ -20,7 +20,8 @@ nonisolated enum ImageCodec {
     }
 
     static func isLossy(_ type: UTType) -> Bool {
-        type.conforms(to: .jpeg) || type.conforms(to: .heic) || type.conforms(to: .webP)
+        type.conforms(to: .jpeg) || type.conforms(to: .heic) || type.conforms(to: .webP) || type.identifier == "public.avif"
+            || type.identifier == "public.jpeg-2000"
     }
 
     /// Whether the format can store transparency.
