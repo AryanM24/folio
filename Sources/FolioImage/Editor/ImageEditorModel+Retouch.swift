@@ -204,10 +204,18 @@ extension ImageEditorModel {
 
     /// The fill for a spot heal or remove stroke: the region around it, rendered,
     /// filled (push-pull for spot heal, PatchMatch for remove) and stored in `assets`.
-    @concurrent
     nonisolated static func computePatch(
         for stroke: RetouchStroke, source: SourceImage, recipe: EditRecipe, layerIndex: Int?, assets: any AssetStore
     ) async throws -> PlacedAsset {
+        try await offCooperativePool {
+            try patch(for: stroke, source: source, recipe: recipe, layerIndex: layerIndex, assets: assets)
+        }
+    }
+
+    /// ``computePatch(for:source:recipe:layerIndex:assets:)``, blocking.
+    nonisolated static func patch(
+        for stroke: RetouchStroke, source: SourceImage, recipe: EditRecipe, layerIndex: Int?, assets: any AssetStore
+    ) throws -> PlacedAsset {
         let full = CGRect(origin: .zero, size: source.pixelSize)
         let area = RetouchRenderer.bounds(of: stroke.area) ?? full
         let remove = stroke.tool == .remove
@@ -252,23 +260,25 @@ extension ImageEditorModel {
         return PlacedAsset(asset: id, rect: placed)
     }
 
-    @concurrent
     nonisolated static func upscaledPNG(
         source: SourceImage, recipe: EditRecipe, assets: any AssetStore, factor: Double
     ) async throws -> Data {
-        let rendered = try RenderPipeline.render(source, recipe: recipe, assets: assets, final: true)
-        return try ImageCodec.encode(try await SuperResolution.upscale(rendered, factor: factor), as: .png)
+        let rendered = try await offCooperativePool { try RenderPipeline.render(source, recipe: recipe, assets: assets, final: true) }
+        let upscaled = try await SuperResolution.upscale(rendered, factor: factor)
+        return try await offCooperativePool { try ImageCodec.encode(upscaled, as: .png) }
     }
 
-    @concurrent
     nonisolated static func detectPupils(in image: CGImage) async throws -> [CGPoint] {
-        try RedEye.pupils(in: image)
+        try await offCooperativePool { try RedEye.pupils(in: image) }
     }
 
     /// Faces, text and barcodes in `image`, as unit rectangles (top-left origin) padded
     /// a little so edges and descenders are covered.
-    @concurrent
     nonisolated static func redactionBoxes(in image: CGImage, faces: Bool, text: Bool, barcodes: Bool) async throws -> [CGRect] {
+        try await offCooperativePool { try detectRedactionBoxes(in: image, faces: faces, text: text, barcodes: barcodes) }
+    }
+
+    private nonisolated static func detectRedactionBoxes(in image: CGImage, faces: Bool, text: Bool, barcodes: Bool) throws -> [CGRect] {
         let faceRequest = VNDetectFaceRectanglesRequest()
         let textRequest = VNRecognizeTextRequest()
         textRequest.recognitionLevel = .accurate

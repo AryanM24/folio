@@ -7,7 +7,7 @@ import Testing
 /// Retouch fills, strokes, red-eye, upscaling and the redaction privacy rule.
 @Suite(.timeLimit(.minutes(1))) struct RetouchTests {
     /// Every pixel of `image` as sRGB RGBA bytes, top row first.
-    struct Pixels {
+    nonisolated struct Pixels {
         let width: Int, height: Int
         let bytes: [UInt8]
 
@@ -26,7 +26,7 @@ import Testing
     }
 
     /// A bitmap from a per-pixel color function (0…255, top-left origin).
-    static func image(width: Int, height: Int, _ color: (Int, Int) -> (UInt8, UInt8, UInt8)) -> CGImage {
+    nonisolated static func image(width: Int, height: Int, _ color: (Int, Int) -> (UInt8, UInt8, UInt8)) -> CGImage {
         var bytes = [UInt8](repeating: 255, count: width * height * 4)
         for y in 0..<height {
             for x in 0..<width {
@@ -42,14 +42,14 @@ import Testing
     }
 
     /// Deterministic noise, so copies and seams are easy to tell apart.
-    static func noise(width: Int, height: Int) -> CGImage {
+    nonisolated static func noise(width: Int, height: Int) -> CGImage {
         image(width: width, height: height) { x, y in
             let h = UInt32(truncatingIfNeeded: (x &* 73_856_093) ^ (y &* 19_349_663)) &* 2_654_435_761
             return (UInt8(h >> 24), UInt8((h >> 16) & 0xFF), UInt8((h >> 8) & 0xFF))
         }
     }
 
-    static func render(_ image: CIImage, size: CGSize) throws -> CGImage {
+    nonisolated static func render(_ image: CIImage, size: CGSize) throws -> CGImage {
         try RenderPipeline.rasterize(
             image, extent: CGRect(origin: .zero, size: size), format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!)
     }
@@ -80,7 +80,8 @@ import Testing
         #expect(worst < 2, "max error \(worst)/255")
     }
 
-    @Test func patchMatchRecoversStripes() throws {
+    // CPU-heavy in debug builds: off the main actor, so other suites' tests aren't held up.
+    @Test nonisolated func patchMatchRecoversStripes() throws {
         let period = 8
         let stripes = Self.image(width: 128, height: 128) { _, y in y % period < period / 2 ? (20, 20, 20) : (230, 230, 230) }
         let hole = Self.image(width: 128, height: 128) { x, y in
@@ -197,7 +198,7 @@ import Testing
         image.applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: 2, kCIInputAspectRatioKey: 1])
     }
 
-    @Test func superResolutionTilesReassembleWithoutSeams() async throws {
+    @Test nonisolated func superResolutionTilesReassembleWithoutSeams() async throws {
         let input = CIImage(cgImage: Self.noise(width: 1000, height: 700))
         let tiled = try await SuperResolution.tiled(input, factor: 2) {
             Self.lanczos($0.clampedToExtent()).cropped(to: CGRect(x: 0, y: 0, width: 1024, height: 1024))

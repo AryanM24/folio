@@ -1,6 +1,7 @@
 import CoreGraphics
 import CoreImage
 import CoreVideo
+import Dispatch
 import FolioKit
 import VideoToolbox
 
@@ -32,9 +33,10 @@ nonisolated enum SuperResolution {
             output = detail(from: learned, onto: output)
         }
         let size = CGRect(x: 0, y: 0, width: (Double(image.width) * factor).rounded(), height: (Double(image.height) * factor).rounded())
-        return try RenderPipeline.rasterize(
-            output.cropped(to: size), extent: size, format: image.bitsPerComponent > 8 ? .RGBA16 : .RGBA8,
-            colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
+        let format: CIFormat = image.bitsPerComponent > 8 ? .RGBA16 : .RGBA8
+        let space = image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!
+        let result = output.cropped(to: size)
+        return try await offCooperativePool { try RenderPipeline.rasterize(result, extent: size, format: format, colorSpace: space) }
     }
 
     /// Lanczos resampling with a light luminance sharpen: the "Standard" method.
@@ -135,7 +137,9 @@ private actor VTScaler {
         let (processor, configuration) = try session(side: side)
         let source = try buffer(side, side, configuration.sourcePixelBufferAttributes)
         let destination = try buffer(2 * side, 2 * side, configuration.destinationPixelBufferAttributes)
-        RenderPipeline.context.render(image, to: source)
+        // Just created, and nothing else touches it until this render returns.
+        nonisolated(unsafe) let target = source
+        try await offCooperativePool { RenderPipeline.context.render(image, to: target) }
         guard let sourceFrame = VTFrameProcessorFrame(buffer: source, presentationTimeStamp: .zero),
             let destinationFrame = VTFrameProcessorFrame(buffer: destination, presentationTimeStamp: .zero)
         else { throw FolioError("Upscaling couldn't prepare its frames.") }
@@ -169,5 +173,13 @@ private actor VTScaler {
         CVBufferSetAttachment(buffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_709_2, .shouldPropagate)
         CVBufferSetAttachment(buffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2, .shouldPropagate)
         return buffer
+    }
+}
+
+/// Runs blocking work (Core Image renders, Vision requests) on a dispatch queue, so it
+/// never holds one of Swift concurrency's few cooperative threads while it waits.
+nonisolated func offCooperativePool<T: Sendable>(_ work: @escaping @Sendable () throws -> T) async throws -> T {
+    try await withCheckedThrowingContinuation { continuation in
+        DispatchQueue.global(qos: .userInitiated).async { continuation.resume(with: Result { try work() }) }
     }
 }
