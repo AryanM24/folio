@@ -12,12 +12,12 @@ import Foundation
 /// Markdown file can't run script or reach `javascript:` / `file:` URLs in the preview.
 ///
 /// Top-level blocks carry `data-line` (zero-based source line) for editor → preview scroll sync.
-nonisolated struct MarkdownRenderer {
+public nonisolated struct MarkdownRenderer {
     struct Reference: Sendable { var url: String; var title: String? }
     var references: [String: Reference] = [:]
 
     /// Renders a whole document to an HTML fragment (no `<html>` wrapper).
-    static func render(_ markdown: String) -> String {
+    public static func render(_ markdown: String) -> String {
         var lines = markdown.components(separatedBy: "\n")
         var renderer = MarkdownRenderer()
         renderer.collectReferences(&lines)

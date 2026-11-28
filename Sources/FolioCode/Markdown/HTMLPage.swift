@@ -5,13 +5,13 @@ import Foundation
 /// The preview and the HTML export share this, so what you export is what you saw. The
 /// Content-Security-Policy forbids scripts and remote loads: the preview never touches the
 /// network, even if a document links remote images.
-nonisolated enum HTMLPage {
-    enum Appearance { case automatic, light }
+public nonisolated enum HTMLPage {
+    public enum Appearance: Sendable { case automatic, light }
 
     /// The id of the element whose contents the preview replaces on each edit.
     static let contentID = "folio-content"
 
-    static func document(body: String, title: String, appearance: Appearance = .automatic) -> String {
+    public static func document(body: String, title: String, appearance: Appearance = .automatic) -> String {
         """
         <!doctype html>
         <html lang="en">

@@ -1,4 +1,4 @@
-import AppKit
+public import AppKit
 import FolioKit
 
 /// Markdown to HTML, PDF and Word.
@@ -49,7 +49,7 @@ enum MarkdownExport {
 }
 
 /// Paginated output through the Cocoa text system: printing, and PDF files.
-enum PrintSupport {
+public enum PrintSupport {
     private static func printInfo(saveTo url: URL? = nil) -> NSPrintInfo {
         let info = NSPrintInfo(dictionary: url.map { [.jobSavingURL: $0] } ?? [:])
         if url != nil { info.jobDisposition = .save }
@@ -82,7 +82,7 @@ enum PrintSupport {
         return view
     }
 
-    static func pdf(from attributed: NSAttributedString, title: String) throws -> Data {
+    public static func pdf(from attributed: NSAttributedString, title: String) throws -> Data {
         let url = FileManager.default.temporaryDirectory.appending(path: "Folio-\(UUID().uuidString).pdf")
         defer { try? FileManager.default.removeItem(at: url) }
         let info = printInfo(saveTo: url)
