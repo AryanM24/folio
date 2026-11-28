@@ -26,7 +26,8 @@ private struct Timeline {
             try a.insertTimeRange(range, of: audioTrack, at: .zero)
             try a.insertTimeRange(range, of: audioTrack, at: range.duration)
             parameters.trackID = a.trackID
-            parameters.setVolumeRamp(fromStartVolume: 1, toEndVolume: 0, timeRange: CMTimeRange(start: range.duration, duration: range.duration))
+            parameters.setVolumeRamp(
+                fromStartVolume: 1, toEndVolume: 0, timeRange: CMTimeRange(start: range.duration, duration: range.duration))
         }
         let mix = AVMutableAudioMix()
         mix.inputParameters = [parameters]
@@ -34,10 +35,13 @@ private struct Timeline {
         video = try await AVVideoComposition.videoComposition(withPropertiesOf: composition)
     }
 
-    func encode(_ settings: EncodeSettings, to url: URL, progress: @escaping @Sendable (Double) -> Void = { _ in }) async throws
+    func encode(
+        _ settings: EncodeSettings, to url: URL, progress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) async throws
         -> EncodeResult
     {
-        try await CompositionEncoder.encode(composition, videoComposition: video, audioMix: mix, settings: settings, to: url, progress: progress)
+        try await CompositionEncoder.encode(
+            composition, videoComposition: video, audioMix: mix, settings: settings, to: url, progress: progress)
     }
 }
 
@@ -144,7 +148,8 @@ struct CompositionEncodeTests {
         _ = try await timeline.encode(EncodeSettings(video: .init(codec: .hevcWithAlpha), fileType: .mov), to: alpha)
         let alphaFormat = try #require(try await format(alpha, .video))
         #expect(CMFormatDescriptionGetMediaSubType(alphaFormat) == kCMVideoCodecType_HEVC)
-        #expect(CMFormatDescriptionGetExtension(alphaFormat, extensionKey: kCMFormatDescriptionExtension_ContainsAlphaChannel) as? Bool == true)
+        #expect(
+            CMFormatDescriptionGetExtension(alphaFormat, extensionKey: kCMFormatDescriptionExtension_ContainsAlphaChannel) as? Bool == true)
 
         let master = dir.appending(path: "master.mov")
         _ = try await timeline.encode(EncodeSettings(video: .init(codec: .proRes422), audio: .pcm, fileType: .mov), to: master)

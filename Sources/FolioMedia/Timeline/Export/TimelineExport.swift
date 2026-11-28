@@ -35,6 +35,11 @@ nonisolated struct TimelineMovie: @unchecked Sendable {
             subtitleLanguage = track.language
         }
     }
+
+    /// What the editor exports: the render engine's output for `project`.
+    init(_ render: TimelineRender, project: Project) {
+        self.init(asset: render.composition, videoComposition: render.videoComposition, audioMix: render.audioMix, project: project)
+    }
 }
 
 /// How to export.
@@ -153,7 +158,8 @@ nonisolated enum TimelineExport {
             try await write(movie, job: job, to: render) { progress($0 * share) }
             if mux {
                 try await SubtitleMux.mux(
-                    render, subtitles: movie.subtitles, language: movie.subtitleLanguage, chapters: movie.chapters, to: temp, fileType: type)
+                    render, subtitles: movie.subtitles, language: movie.subtitleLanguage, chapters: movie.chapters, to: temp, fileType: type
+                )
                 progress(1)
             }
         }
@@ -168,7 +174,9 @@ nonisolated enum TimelineExport {
         }
     }
 
-    private static func write(_ movie: TimelineMovie, job: TimelineExportJob, to url: URL, progress: @escaping @Sendable (Double) -> Void)
+    private static func write(
+        _ movie: TimelineMovie, job: TimelineExportJob, to url: URL, progress: @escaping @Sendable (Double) -> Void
+    )
         async throws
     {
         switch job {
@@ -187,7 +195,9 @@ nonisolated enum TimelineExport {
         }
     }
 
-    private static func encode(_ movie: TimelineMovie, _ settings: EncodeSettings, _ url: URL, _ progress: @escaping @Sendable (Double) -> Void)
+    private static func encode(
+        _ movie: TimelineMovie, _ settings: EncodeSettings, _ url: URL, _ progress: @escaping @Sendable (Double) -> Void
+    )
         async throws -> EncodeResult
     {
         do {
@@ -254,7 +264,9 @@ nonisolated enum TimelineExport {
     }
 
     /// An animated GIF of the timeline (or `movie.timeRange`), timed like `GIFMaker`.
-    private static func gif(_ movie: TimelineMovie, fps: Double, width: Int, to url: URL, progress: @escaping @Sendable (Double) -> Void)
+    private static func gif(
+        _ movie: TimelineMovie, fps: Double, width: Int, to url: URL, progress: @escaping @Sendable (Double) -> Void
+    )
         async throws
     {
         let duration = try await movie.asset.load(.duration)
@@ -326,7 +338,8 @@ nonisolated enum TimelineExport {
             }
             cursor = cursor + range.duration
         }
-        let type: AVFileType = destination.pathExtension.lowercased() == "mp4" ? .mp4 : destination.pathExtension.lowercased() == "m4v" ? .m4v : .mov
+        let type: AVFileType =
+            destination.pathExtension.lowercased() == "mp4" ? .mp4 : destination.pathExtension.lowercased() == "m4v" ? .m4v : .mov
         try await MediaExport.writeAtomically(to: destination) { temp in
             guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
                 throw FolioError("Couldn't start joining the clips.")

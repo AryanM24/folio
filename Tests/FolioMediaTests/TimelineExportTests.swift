@@ -19,7 +19,8 @@ nonisolated private func timeline(in folder: URL, seconds: Double = 2, width: In
     let audio = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)!
     try audio.insertTimeRange(range, of: try await sound.loadTracks(withMediaType: .audio)[0], at: .zero)
     let parameters = AVMutableAudioMixInputParameters(track: audio)
-    parameters.setVolumeRamp(fromStartVolume: 0, toEndVolume: 1, timeRange: CMTimeRange(start: .zero, duration: CMTime(value: 1, timescale: 2)))
+    parameters.setVolumeRamp(
+        fromStartVolume: 0, toEndVolume: 1, timeRange: CMTimeRange(start: .zero, duration: CMTime(value: 1, timescale: 2)))
     let mix = AVMutableAudioMix()
     mix.inputParameters = [parameters]
     let videoComposition = try await AVVideoComposition.videoComposition(withPropertiesOf: composition)
@@ -54,7 +55,8 @@ struct TimelineExportTests {
     }
 
     @Test func parsesRealWorldVTT() throws {
-        let text = "\u{FEFF}WEBVTT - made elsewhere\r\n\r\nNOTE a comment --> not a cue\r\n\r\nintro\r\n00:01.000 --> 00:02.500 align:start line:90%\r\nShort times\r\n\r\n00:00:03.000 --> 00:00:04.000\r\nLast\r\n"
+        let text =
+            "\u{FEFF}WEBVTT - made elsewhere\r\n\r\nNOTE a comment --> not a cue\r\n\r\nintro\r\n00:01.000 --> 00:02.500 align:start line:90%\r\nShort times\r\n\r\n00:00:03.000 --> 00:00:04.000\r\nLast\r\n"
         #expect(try CaptionFiles.parse(text) == [cue(1000, 2500, "Short times"), cue(3000, 4000, "Last")])
         #expect(throws: FolioError.self) { try CaptionFiles.parse("1\n00:00:xx,000 --> 00:00:02,000\nBad\n") }
     }
@@ -165,6 +167,24 @@ struct TimelineExportTests {
         #expect(titles == ["Intro", "Second half"])
         #expect(groups.map { $0.timeRange.start.seconds } == [0, 1])
         #expect(try Set(FileManager.default.contentsOfDirectory(atPath: dir.path)) == ["video.mov", "tone.wav", "final.mp4"])
+    }
+
+    @Test func exportsARealTimelineRender() async throws {
+        let dir = try TestMedia.folder()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = try await TestMedia.video(in: dir, width: 160, height: 90)
+        let source = try MediaSource(
+            url: url, kind: .video, duration: Time(value: 2, timescale: 1), frameRate: .fps30, width: 160, height: 90, hasAudio: false)
+        var project = Project(editing: source)
+        project.markers = [Marker(time: .zero, name: "Start", kind: .chapter)]
+        let render = try await TimelineBuilder.build(project)
+        let out = dir.appending(path: "render.mp4")
+        try await TimelineExport.run(TimelineMovie(render, project: project), job: .encode(EncodeSettings()), to: out)
+        let asset = AVURLAsset(url: out)
+        let track = try #require(try await asset.loadTracks(withMediaType: .video).first)
+        #expect(try await track.load(.naturalSize) == CGSize(width: 160, height: 90))
+        #expect(abs(try await asset.load(.duration).seconds - 2) < 0.1)
+        #expect(try await !asset.load(.availableChapterLocales).isEmpty)
     }
 
     // MARK: Cancellation, stills, GIFs

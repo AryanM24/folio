@@ -124,7 +124,8 @@ public nonisolated enum CompositionEncoder {
     }
 
     private static func write(
-        _ asset: AVAsset, _ composition: AVVideoComposition?, _ audioMix: AVAudioMix?, _ timeRange: CMTimeRange?, _ settings: EncodeSettings,
+        _ asset: AVAsset, _ composition: AVVideoComposition?, _ audioMix: AVAudioMix?, _ timeRange: CMTimeRange?,
+        _ settings: EncodeSettings,
         _ url: URL, _ progress: @escaping @Sendable (Double) -> Void
     ) async throws -> EncodeResult {
         let duration = try await asset.load(.duration)
@@ -152,7 +153,9 @@ public nonisolated enum CompositionEncoder {
             var encoded = pcm
             if case .aac(let rate) = settings.audio {
                 audioBitrate = Double(rate)
-                encoded = [AVFormatIDKey: kAudioFormatMPEG4AAC, AVSampleRateKey: 48_000, AVNumberOfChannelsKey: 2, AVEncoderBitRateKey: rate]
+                encoded = [
+                    AVFormatIDKey: kAudioFormatMPEG4AAC, AVSampleRateKey: 48_000, AVNumberOfChannelsKey: 2, AVEncoderBitRateKey: rate,
+                ]
             } else {
                 audioBitrate = 48_000 * 2 * 16
             }
@@ -225,7 +228,8 @@ public nonisolated enum CompositionEncoder {
             if let hdr = video.hdr {
                 output[AVVideoColorPropertiesKey] = [
                     AVVideoColorPrimariesKey: AVVideoColorPrimaries_ITU_R_2020,
-                    AVVideoTransferFunctionKey: hdr == .hlg ? AVVideoTransferFunction_ITU_R_2100_HLG : AVVideoTransferFunction_SMPTE_ST_2084_PQ,
+                    AVVideoTransferFunctionKey: hdr == .hlg
+                        ? AVVideoTransferFunction_ITU_R_2100_HLG : AVVideoTransferFunction_SMPTE_ST_2084_PQ,
                     AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_2020,
                 ]
             }
@@ -275,7 +279,8 @@ public nonisolated enum CompositionEncoder {
                 }
                 if let audioIO {
                     group.addTask {
-                        let count = await VideoConverter.pump(audioIO, label: "composition.audio", writer: watched, reader: cancel) { buffer, _ in
+                        let count = await VideoConverter.pump(audioIO, label: "composition.audio", writer: watched, reader: cancel) {
+                            buffer, _ in
                             if soundOnly, seconds > 0 { progress(min(1, (buffer.presentationTimeStamp.seconds - start) / seconds)) }
                             return true
                         }
@@ -307,4 +312,194 @@ public nonisolated enum CompositionEncoder {
     }
 
     private static func even(_ value: Double) -> CGFloat { CGFloat(VideoConverter.even(CGFloat(value))) }
+}
+
+/// A run of text on a movie's timeline: a subtitle cue or a chapter title.
+public nonisolated struct TimedText: Sendable, Equatable {
+    public var text: String
+    public var range: CMTimeRange
+
+    public init(text: String, range: CMTimeRange) {
+        self.text = text
+        self.range = range
+    }
+}
+
+extension CompositionEncoder {
+    /// Copies every video and audio track of `movie` sample for sample and adds `subtitles` as a
+    /// tx3g subtitle track (tagged `language`, BCP-47) and `chapters` as a disabled tx3g text
+    /// track tied to the first track by a `chapterList` association. A timed-metadata chapter
+    /// track writes fine but AVFoundation never reads it back (research §3.5).
+    ///
+    /// Texts must be sorted and must not overlap; fill gaps with empty texts so a cue leaves on
+    /// time. Each input pulls on its own queue: one loop feeding them in turn deadlocks on MP4
+    /// interleaving. A failed or cancelled remux removes `output`.
+    public static func addText(
+        to movie: URL, subtitles: [TimedText], chapters: [TimedText], language: String, output: URL, fileType: AVFileType
+    ) async throws {
+        do {
+            try await remux(movie, subtitles, chapters, language, output, fileType)
+        } catch {
+            try? FileManager.default.removeItem(at: output)
+            if Task.isCancelled { throw CancellationError() }
+            throw error
+        }
+    }
+
+    private static func remux(
+        _ movie: URL, _ subtitles: [TimedText], _ chapters: [TimedText], _ language: String, _ output: URL, _ fileType: AVFileType
+    ) async throws {
+        let asset = AVURLAsset(url: movie)
+        let reader = try AVAssetReader(asset: asset)
+        try? FileManager.default.removeItem(at: output)
+        let writer = try AVAssetWriter(outputURL: output, fileType: fileType)
+        var copies: [UncheckedSendable<(AVAssetReaderOutput, AVAssetWriterInput)>] = []
+        for type in [AVMediaType.video, .audio] {
+            for track in try await asset.loadTracks(withMediaType: type) {
+                let (formats, transform) = try await track.load(.formatDescriptions, .preferredTransform)
+                let out = AVAssetReaderTrackOutput(track: track, outputSettings: nil)
+                out.alwaysCopiesSampleData = false
+                let input = AVAssetWriterInput(mediaType: type, outputSettings: nil, sourceFormatHint: formats.first)
+                if type == .video { input.transform = transform }
+                input.expectsMediaDataInRealTime = false
+                guard reader.canAdd(out), writer.canAdd(input) else { throw ConvertError(.internal, "Couldn't copy the movie's tracks.") }
+                reader.add(out)
+                writer.add(input)
+                copies.append(UncheckedSendable((out, input)))
+            }
+        }
+        guard let anchor = copies.first?.value.1 else { throw ConvertError(.unsupportedInput, "The movie has no picture or sound.") }
+
+        let iso639 = Locale.Language(identifier: language).languageCode?.identifier(.alpha3) ?? "und"
+        var texts: [UncheckedSendable<(AVAssetWriterInput, [CMSampleBuffer])>] = []
+        for (type, items) in [(AVMediaType.subtitle, subtitles), (.text, chapters)] where !items.isEmpty {
+            let format = try textFormat(type == .subtitle ? kCMMediaType_Subtitle : kCMMediaType_Text)
+            let input = AVAssetWriterInput(mediaType: type, outputSettings: nil, sourceFormatHint: format)
+            input.languageCode = iso639
+            input.extendedLanguageTag = language
+            input.expectsMediaDataInRealTime = false
+            if type == .text { input.marksOutputTrackAsEnabled = false }
+            guard writer.canAdd(input) else { throw ConvertError(.unsupportedPair, "\(fileType.rawValue) can't hold subtitles.") }
+            writer.add(input)
+            if type == .text { anchor.addTrackAssociation(withTrackOf: input, type: AVAssetTrack.AssociationType.chapterList.rawValue) }
+            texts.append(UncheckedSendable((input, try items.map { try textSample($0, format: format) })))
+        }
+
+        guard reader.startReading(), writer.startWriting() else {
+            throw ConvertError(
+                .internal, "Couldn't remux the movie: \((reader.error ?? writer.error)?.localizedDescription ?? "unknown error")")
+        }
+        writer.startSession(atSourceTime: .zero)
+        let cancel = UncheckedSendable(reader)
+        let watched = UncheckedSendable(writer)
+        await withTaskCancellationHandler {
+            await withTaskGroup(of: Void.self) { group in
+                for (i, io) in copies.enumerated() {
+                    group.addTask { _ = await VideoConverter.pump(io, label: "mux.\(i)", writer: watched, reader: cancel) { _, _ in true } }
+                }
+                for (i, io) in texts.enumerated() {
+                    group.addTask { await feed(io, label: "mux.text.\(i)", writer: watched) }
+                }
+            }
+        } onCancel: {
+            cancel.value.cancelReading()
+        }
+        if Task.isCancelled {
+            writer.cancelWriting()
+            throw CancellationError()
+        }
+        guard reader.status != .failed, writer.status == .writing else {
+            writer.cancelWriting()
+            throw ConvertError(.internal, "The remux stopped: \((reader.error ?? writer.error)?.localizedDescription ?? "unknown error")")
+        }
+        await writer.finishWriting()
+        withExtendedLifetime((copies, texts)) {}  // the writer does not retain its inputs while it finishes
+        guard writer.status == .completed else {
+            throw ConvertError(.internal, "Couldn't finish the movie: \(writer.error?.localizedDescription ?? "unknown error")")
+        }
+    }
+
+    /// Appends prepared samples whenever the input wants them, with the same watchdog as `pump`.
+    private static func feed(
+        _ io: UncheckedSendable<(AVAssetWriterInput, [CMSampleBuffer])>, label: String, writer: UncheckedSendable<AVAssetWriter>
+    ) async {
+        let state = VideoConverter.PumpState()
+        let watchdog = Task.detached {
+            while !state.finished {
+                if writer.value.status == .failed || writer.value.status == .cancelled { return state.finish() }
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+        }
+        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            state.wait(done)
+            io.value.0.requestMediaDataWhenReady(on: DispatchQueue(label: "folio.convert.\(label)")) {
+                let (input, samples) = io.value
+                while !state.finished, input.isReadyForMoreMediaData {
+                    guard state.appended < samples.count else {
+                        input.markAsFinished()
+                        return state.finish()
+                    }
+                    guard input.append(samples[state.appended]) else { return state.finish() }
+                    state.appended += 1
+                }
+            }
+        }
+        watchdog.cancel()
+    }
+
+    /// A tx3g sample: a big-endian 16-bit length, then UTF-8.
+    private static func textSample(_ item: TimedText, format: CMFormatDescription) throws -> CMSampleBuffer {
+        let utf8 = Array(item.text.utf8.prefix(Int(UInt16.max)))
+        let bytes = [UInt8(utf8.count >> 8), UInt8(utf8.count & 0xff)] + utf8
+        var block: CMBlockBuffer?
+        var status = CMBlockBufferCreateWithMemoryBlock(
+            allocator: nil, memoryBlock: nil, blockLength: bytes.count, blockAllocator: nil, customBlockSource: nil, offsetToData: 0,
+            dataLength: bytes.count, flags: kCMBlockBufferAssureMemoryNowFlag, blockBufferOut: &block)
+        guard status == noErr, let block else { throw ConvertError(.internal, "Couldn't build a subtitle sample (\(status)).") }
+        status = bytes.withUnsafeBytes {
+            CMBlockBufferReplaceDataBytes(with: $0.baseAddress!, blockBuffer: block, offsetIntoDestination: 0, dataLength: bytes.count)
+        }
+        var timing = CMSampleTimingInfo(duration: item.range.duration, presentationTimeStamp: item.range.start, decodeTimeStamp: .invalid)
+        var size = bytes.count
+        var sample: CMSampleBuffer?
+        status = CMSampleBufferCreate(
+            allocator: nil, dataBuffer: block, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: format,
+            sampleCount: 1, sampleTimingEntryCount: 1, sampleTimingArray: &timing, sampleSizeEntryCount: 1, sampleSizeArray: &size,
+            sampleBufferOut: &sample)
+        guard status == noErr, let sample else { throw ConvertError(.internal, "Couldn't build a subtitle sample (\(status)).") }
+        return sample
+    }
+
+    /// White sans-serif, bottom centre: what players show when they don't apply their own style.
+    private static func textFormat(_ mediaType: CMMediaType) throws -> CMFormatDescription {
+        let white: [CFString: Any] = [
+            kCMTextFormatDescriptionColor_Red: 255, kCMTextFormatDescriptionColor_Green: 255, kCMTextFormatDescriptionColor_Blue: 255,
+            kCMTextFormatDescriptionColor_Alpha: 255,
+        ]
+        let extensions: [CFString: Any] = [
+            kCMTextFormatDescriptionExtension_DisplayFlags: 0,
+            kCMTextFormatDescriptionExtension_BackgroundColor: [
+                kCMTextFormatDescriptionColor_Red: 0, kCMTextFormatDescriptionColor_Green: 0, kCMTextFormatDescriptionColor_Blue: 0,
+                kCMTextFormatDescriptionColor_Alpha: 255,
+            ],
+            kCMTextFormatDescriptionExtension_DefaultTextBox: [
+                kCMTextFormatDescriptionRect_Top: 0, kCMTextFormatDescriptionRect_Left: 0, kCMTextFormatDescriptionRect_Bottom: 0,
+                kCMTextFormatDescriptionRect_Right: 0,
+            ],
+            kCMTextFormatDescriptionExtension_DefaultStyle: [
+                kCMTextFormatDescriptionStyle_StartChar: 0, kCMTextFormatDescriptionStyle_EndChar: 0, kCMTextFormatDescriptionStyle_Font: 1,
+                kCMTextFormatDescriptionStyle_FontFace: 0, kCMTextFormatDescriptionStyle_FontSize: 24,
+                kCMTextFormatDescriptionStyle_ForegroundColor: white,
+            ],
+            kCMTextFormatDescriptionExtension_HorizontalJustification: 1,
+            kCMTextFormatDescriptionExtension_VerticalJustification: -1,
+            kCMTextFormatDescriptionExtension_FontTable: ["1": "Sans-Serif"],
+        ]
+        var format: CMFormatDescription?
+        let status = CMFormatDescriptionCreate(
+            allocator: nil, mediaType: mediaType, mediaSubType: kCMTextFormatType_3GText, extensions: extensions as CFDictionary,
+            formatDescriptionOut: &format)
+        guard status == noErr, let format else { throw ConvertError(.internal, "Couldn't describe the subtitle track (\(status)).") }
+        return format
+    }
 }
