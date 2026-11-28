@@ -33,12 +33,12 @@ public nonisolated struct PathPolicy: Sendable {
     }
 
     /// The default when the client sends no roots: the working folder, home, external
-    /// volumes, /tmp, plus anything in `FOLIO_ALLOWED_DIRS` (colon-separated).
+    /// volumes, /tmp and this user's temporary folder (`$TMPDIR`), plus anything in `FOLIO_ALLOWED_DIRS` (colon-separated).
     public static func standard(environment: [String: String] = ProcessInfo.processInfo.environment) -> PathPolicy {
         let fm = FileManager.default
         var roots = [
             URL(fileURLWithPath: fm.currentDirectoryPath), fm.homeDirectoryForCurrentUser, URL(fileURLWithPath: "/Volumes"),
-            URL(fileURLWithPath: "/tmp"),
+            URL(fileURLWithPath: "/tmp"), fm.temporaryDirectory,
         ]
         if let extra = environment["FOLIO_ALLOWED_DIRS"] {
             roots += extra.split(separator: ":").map { URL(fileURLWithPath: String($0)) }

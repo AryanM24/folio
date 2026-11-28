@@ -4,7 +4,7 @@ CLT_FRAMEWORKS := /Library/Developer/CommandLineTools/Library/Developer/Framewor
 # Command Line Tools ship Swift Testing outside the default search path; Xcode doesn't need this.
 TEST_FLAGS := $(if $(wildcard $(CLT_FRAMEWORKS)/Testing.framework),-Xswiftc -F$(CLT_FRAMEWORKS) -Xlinker -F$(CLT_FRAMEWORKS) -Xlinker -rpath -Xlinker $(CLT_FRAMEWORKS),)
 
-.PHONY: help build app run test lint clean launch-time mcp-check brand
+.PHONY: help build app run test lint clean launch-time mcp-check bench site-data brand
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -32,6 +32,12 @@ mcp-check: ## Check `folio mcp` answers initialize and tools/list in under 100 m
 	@# Warm-up: macOS scans a freshly linked binary on its first launch, which installed copies never pay.
 	@"$$(swift build --show-bin-path)/folio-cli" --version >/dev/null
 	@python3 -c "$$MCP_CHECK" "$$(swift build --show-bin-path)/folio-cli"
+
+bench: app ## Time Folio against sips, afconvert and avconvert; writes site/bench.json
+	scripts/bench.sh
+
+site-data: app ## Regenerate site/formats.json from `folio formats`
+	scripts/site-data.sh
 
 brand: ## Copy brand/ assets into the website and regenerate the app icon
 	mkdir -p site/brand/assets && cp brand/logo/*.svg brand/document-icon.svg site/brand/assets/

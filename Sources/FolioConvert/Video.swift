@@ -375,6 +375,7 @@ public nonisolated enum VideoConverter: FamilyConverter {
         let progress = job.progress
         let halfSource = 0.5 / sourceFPS
         let cancel = UncheckedSendable(reader)
+        let lastFrame = UncheckedSendable(LastTime())
         // Each pair is used only by its own pump's serial queue from here on.
         let videoIO = UncheckedSendable((videoOut as AVAssetReaderOutput, videoIn))
         let audioIO = audioOut.flatMap { out in audioIn.map { UncheckedSendable((out, $0)) } }
@@ -388,6 +389,7 @@ public nonisolated enum VideoConverter: FamilyConverter {
                             if pts < state.next - halfSource { return false }
                             state.next = (pts > state.next + interval ? pts : state.next) + interval
                         }
+                        lastFrame.value.seconds = pts
                         if duration > 0 { progress(min(1, pts / duration)) }
                         return true
                     }
@@ -405,7 +407,13 @@ public nonisolated enum VideoConverter: FamilyConverter {
             writer.cancelWriting()
             throw CancellationError()
         }
-        if reader.status == .failed || writer.status == .failed {
+        // Videos with a damaged tail are common (an interrupted recording, a cut download):
+        // if decoding fails in the last 2 %, keep everything before it and say so.
+        var warnings: [String] = []
+        if reader.status == .failed, writer.status != .failed, duration > 0, lastFrame.value.seconds / duration >= 0.98 {
+            let missing = max(0.1, duration - lastFrame.value.seconds)
+            warnings.append(String(format: "The last %.1f s couldn't be decoded and were left out.", missing))
+        } else if reader.status == .failed || writer.status == .failed {
             writer.cancelWriting()
             throw ConvertError(
                 .internal, "The re-encode stopped: \((reader.error ?? writer.error)?.localizedDescription ?? "unknown error")")
@@ -427,10 +435,14 @@ public nonisolated enum VideoConverter: FamilyConverter {
             verification = try await MediaVerify.transcode(
                 job.output, duration: duration, width: width, height: height, tracks: info.tracks, frame: 1 / fps)
         }
-        var warnings: [String] = []
         if interval > 0 { warnings.append("frame rate capped at \(Int(fps)) fps") }
         return Outcome(
             fidelity: .lossy, method: "transcode", details: details, dropped: ["metadata"], warnings: warnings, verification: verification)
+    }
+
+    /// The last video frame's time, written by the video pump and read after it finishes.
+    final class LastTime: @unchecked Sendable {
+        var seconds = 0.0
     }
 
     /// Mutable per-pump state, touched only on that pump's serial queue.

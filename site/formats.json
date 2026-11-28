@@ -1,5 +1,5 @@
 {
- "version": "placeholder",
+ "version": "0.1.0",
  "pairs": [
   {
    "from": "pdf",
@@ -15,13 +15,41 @@
      "to": "png",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "text layer",
+      "links",
+      "vector art"
+     ]
     },
     {
      "to": "jpeg",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "text layer",
+      "links",
+      "vector art"
+     ]
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": [
+      "text layer",
+      "links",
+      "vector art"
+     ]
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": [
+      "text layer",
+      "links",
+      "vector art"
+     ]
     },
     {
      "to": "txt",
@@ -29,7 +57,8 @@
      "lossless_available": false,
      "drops": [
       "page layout",
-      "images"
+      "images",
+      "formatting"
      ]
     },
     {
@@ -38,11 +67,21 @@
      "lossless_available": false,
      "drops": [
       "page layout",
-      "images"
+      "images",
+      "formatting"
      ]
     },
     {
      "to": "docx",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "page layout",
+      "images"
+     ]
+    },
+    {
+     "to": "rtf",
      "fidelity": "content_only",
      "lossless_available": false,
      "drops": [
@@ -60,7 +99,12 @@
      "to": "pdf",
      "fidelity": "visually_lossless",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments",
+      "tracked changes"
+     ]
     },
     {
      "to": "rtf",
@@ -69,7 +113,8 @@
      "drops": [
       "headers and footers",
       "footnotes",
-      "comments"
+      "comments",
+      "tracked changes"
      ]
     },
     {
@@ -79,7 +124,8 @@
      "drops": [
       "headers and footers",
       "footnotes",
-      "comments"
+      "comments",
+      "tracked changes"
      ]
     },
     {
@@ -89,7 +135,8 @@
      "drops": [
       "headers and footers",
       "footnotes",
-      "comments"
+      "comments",
+      "tracked changes"
      ]
     },
     {
@@ -98,14 +145,26 @@
      "lossless_available": false,
      "drops": [
       "page layout",
-      "fonts"
+      "fonts",
+      "colours",
+      "headers and footers",
+      "footnotes",
+      "comments",
+      "tracked changes"
      ]
     },
     {
      "to": "txt",
      "fidelity": "content_only",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "formatting",
+      "images",
+      "headers and footers",
+      "footnotes",
+      "comments",
+      "tracked changes"
+     ]
     }
    ]
   },
@@ -143,14 +202,18 @@
      "lossless_available": false,
      "drops": [
       "page layout",
-      "fonts"
+      "fonts",
+      "colours"
      ]
     },
     {
      "to": "txt",
      "fidelity": "content_only",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "formatting",
+      "images"
+     ]
     }
    ]
   },
@@ -162,7 +225,12 @@
      "to": "pdf",
      "fidelity": "visually_lossless",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "headers and footers",
+      "footnotes",
+      "comments",
+      "tracked changes"
+     ]
     },
     {
      "to": "docx",
@@ -171,7 +239,8 @@
      "drops": [
       "headers and footers",
       "footnotes",
-      "comments"
+      "comments",
+      "tracked changes"
      ]
     },
     {
@@ -181,7 +250,8 @@
      "drops": [
       "headers and footers",
       "footnotes",
-      "comments"
+      "comments",
+      "tracked changes"
      ]
     },
     {
@@ -191,7 +261,8 @@
      "drops": [
       "headers and footers",
       "footnotes",
-      "comments"
+      "comments",
+      "tracked changes"
      ]
     },
     {
@@ -200,14 +271,26 @@
      "lossless_available": false,
      "drops": [
       "page layout",
-      "fonts"
+      "fonts",
+      "colours",
+      "headers and footers",
+      "footnotes",
+      "comments",
+      "tracked changes"
      ]
     },
     {
      "to": "txt",
      "fidelity": "content_only",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "formatting",
+      "images",
+      "headers and footers",
+      "footnotes",
+      "comments",
+      "tracked changes"
+     ]
     }
    ]
   },
@@ -219,25 +302,37 @@
      "to": "pdf",
      "fidelity": "visually_lossless",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "scripts",
+      "remote images"
+     ]
     },
     {
      "to": "docx",
      "fidelity": "visually_lossless",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "scripts",
+      "remote images"
+     ]
     },
     {
      "to": "rtf",
      "fidelity": "visually_lossless",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "scripts",
+      "remote images"
+     ]
     },
     {
      "to": "odt",
      "fidelity": "visually_lossless",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "scripts",
+      "remote images"
+     ]
     },
     {
      "to": "md",
@@ -245,14 +340,22 @@
      "lossless_available": false,
      "drops": [
       "page layout",
-      "fonts"
+      "fonts",
+      "colours",
+      "scripts",
+      "remote images"
      ]
     },
     {
      "to": "txt",
      "fidelity": "content_only",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "formatting",
+      "images",
+      "scripts",
+      "remote images"
+     ]
     }
    ]
   },
@@ -294,7 +397,9 @@
      "to": "txt",
      "fidelity": "content_only",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "Markdown formatting"
+     ]
     }
    ]
   },
@@ -334,12 +439,9 @@
     },
     {
      "to": "md",
-     "fidelity": "content_only",
+     "fidelity": "lossless",
      "lossless_available": true,
-     "drops": [
-      "page layout",
-      "fonts"
-     ]
+     "drops": []
     }
    ]
   },
@@ -351,7 +453,11 @@
      "to": "ods",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "charts",
+      "images",
+      "comments"
+     ]
     },
     {
      "to": "csv",
@@ -373,6 +479,24 @@
     },
     {
      "to": "json",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "html",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "md",
      "fidelity": "content_only",
      "lossless_available": false,
      "drops": [
@@ -390,7 +514,11 @@
      "to": "xlsx",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "charts",
+      "images",
+      "comments"
+     ]
     },
     {
      "to": "csv",
@@ -412,6 +540,24 @@
     },
     {
      "to": "json",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "html",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": [
+      "formulas",
+      "formatting"
+     ]
+    },
+    {
+     "to": "md",
      "fidelity": "content_only",
      "lossless_available": false,
      "drops": [
@@ -450,10 +596,19 @@
      "to": "json",
      "fidelity": "content_only",
      "lossless_available": false,
-     "drops": [
-      "formulas",
-      "formatting"
-     ]
+     "drops": []
+    },
+    {
+     "to": "html",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
     }
    ]
   },
@@ -490,6 +645,82 @@
       "formulas",
       "formatting"
      ]
+    },
+    {
+     "to": "html",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "md",
+     "fidelity": "content_only",
+     "lossless_available": false,
+     "drops": []
+    }
+   ]
+  },
+  {
+   "from": "heic",
+   "family": "image",
+   "targets": [
+    {
+     "to": "png",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jpeg",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": [
+      "transparency"
+     ]
+    },
+    {
+     "to": "heic",
+     "fidelity": "lossy",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "avif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
+    },
+    {
+     "to": "tiff",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "gif",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "pdf",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": []
     }
    ]
   },
@@ -507,7 +738,9 @@
      "to": "jpeg",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "transparency"
+     ]
     },
     {
      "to": "heic",
@@ -531,6 +764,20 @@
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
      "drops": []
     },
     {
@@ -554,8 +801,10 @@
     {
      "to": "jpeg",
      "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
+     "lossless_available": true,
+     "drops": [
+      "transparency"
+     ]
     },
     {
      "to": "heic",
@@ -579,60 +828,26 @@
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
      "drops": []
     },
     {
      "to": "pdf",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
-    }
-   ]
-  },
-  {
-   "from": "heic",
-   "family": "image",
-   "targets": [
-    {
-     "to": "png",
-     "fidelity": "lossless",
-     "lossless_available": true,
-     "drops": []
-    },
-    {
-     "to": "jpeg",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
-    },
-    {
-     "to": "heic",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
-    },
-    {
-     "to": "avif",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
-    },
-    {
-     "to": "tiff",
-     "fidelity": "lossless",
-     "lossless_available": true,
-     "drops": []
-    },
-    {
-     "to": "gif",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
-    },
-    {
-     "to": "pdf",
-     "fidelity": "lossless",
-     "lossless_available": false,
      "drops": []
     }
    ]
@@ -651,7 +866,9 @@
      "to": "jpeg",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "transparency"
+     ]
     },
     {
      "to": "heic",
@@ -662,7 +879,7 @@
     {
      "to": "avif",
      "fidelity": "lossy",
-     "lossless_available": false,
+     "lossless_available": true,
      "drops": []
     },
     {
@@ -675,11 +892,25 @@
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
      "drops": []
     },
     {
      "to": "pdf",
-     "fidelity": "lossless",
+     "fidelity": "lossy",
      "lossless_available": false,
      "drops": []
     }
@@ -699,7 +930,9 @@
      "to": "jpeg",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "transparency"
+     ]
     },
     {
      "to": "heic",
@@ -723,11 +956,25 @@
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
      "drops": []
     },
     {
      "to": "pdf",
-     "fidelity": "lossless",
+     "fidelity": "lossy",
      "lossless_available": false,
      "drops": []
     }
@@ -741,43 +988,74 @@
      "to": "png",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "animation"
+     ]
     },
     {
      "to": "jpeg",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "animation",
+      "transparency"
+     ]
     },
     {
      "to": "heic",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "animation"
+     ]
     },
     {
      "to": "avif",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "animation"
+     ]
     },
     {
      "to": "tiff",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "animation"
+     ]
     },
     {
      "to": "gif",
      "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
+     "lossless_available": true,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": [
+      "animation"
+     ]
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
+     "drops": [
+      "animation"
+     ]
     },
     {
      "to": "pdf",
-     "fidelity": "lossless",
+     "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "animation"
+     ]
     }
    ]
   },
@@ -795,7 +1073,9 @@
      "to": "jpeg",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "transparency"
+     ]
     },
     {
      "to": "heic",
@@ -819,11 +1099,25 @@
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
+     "drops": [
+      "colours beyond 256"
+     ]
+    },
+    {
+     "to": "bmp",
+     "fidelity": "lossless",
+     "lossless_available": true,
+     "drops": []
+    },
+    {
+     "to": "jp2",
+     "fidelity": "lossy",
+     "lossless_available": true,
      "drops": []
     },
     {
      "to": "pdf",
-     "fidelity": "lossless",
+     "fidelity": "lossy",
      "lossless_available": false,
      "drops": []
     }
@@ -834,28 +1128,36 @@
    "family": "audio",
    "targets": [
     {
+     "to": "m4a",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "tags and artwork"
+     ]
+    },
+    {
      "to": "alac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "flac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "aiff",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
-    },
-    {
-     "to": "m4a",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     }
    ]
   },
@@ -864,28 +1166,36 @@
    "family": "audio",
    "targets": [
     {
+     "to": "m4a",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "tags and artwork"
+     ]
+    },
+    {
      "to": "alac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "wav",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "aiff",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
-    },
-    {
-     "to": "m4a",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     }
    ]
   },
@@ -894,34 +1204,44 @@
    "family": "audio",
    "targets": [
     {
+     "to": "m4a",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "tags and artwork"
+     ]
+    },
+    {
      "to": "alac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "flac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "wav",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "aiff",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
-    },
-    {
-     "to": "m4a",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     }
    ]
   },
@@ -930,34 +1250,44 @@
    "family": "audio",
    "targets": [
     {
+     "to": "m4a",
+     "fidelity": "visually_lossless",
+     "lossless_available": false,
+     "drops": [
+      "tags and artwork"
+     ]
+    },
+    {
      "to": "alac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "flac",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "wav",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     },
     {
      "to": "aiff",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
-    },
-    {
-     "to": "m4a",
-     "fidelity": "lossy",
-     "lossless_available": false,
-     "drops": []
+     "drops": [
+      "tags and artwork"
+     ]
     }
    ]
   },
@@ -966,34 +1296,49 @@
    "family": "video",
    "targets": [
     {
+     "to": "mov",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": [
+      "metadata"
+     ]
+    },
+    {
      "to": "mp4",
      "fidelity": "lossless",
      "lossless_available": true,
      "drops": []
     },
     {
-     "to": "mov",
-     "fidelity": "lossy",
-     "lossless_available": false,
+     "to": "m4v",
+     "fidelity": "lossless",
+     "lossless_available": true,
      "drops": []
     },
     {
      "to": "m4a",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "video"
+     ]
     },
     {
      "to": "wav",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "video"
+     ]
     },
     {
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "audio",
+      "anything after 10 s"
+     ]
     }
    ]
   },
@@ -1002,34 +1347,49 @@
    "family": "video",
    "targets": [
     {
+     "to": "mp4",
+     "fidelity": "lossy",
+     "lossless_available": false,
+     "drops": [
+      "metadata"
+     ]
+    },
+    {
      "to": "mov",
      "fidelity": "lossless",
      "lossless_available": true,
      "drops": []
     },
     {
-     "to": "mp4",
-     "fidelity": "lossy",
-     "lossless_available": false,
+     "to": "m4v",
+     "fidelity": "lossless",
+     "lossless_available": true,
      "drops": []
     },
     {
      "to": "m4a",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "video"
+     ]
     },
     {
      "to": "wav",
      "fidelity": "lossless",
      "lossless_available": true,
-     "drops": []
+     "drops": [
+      "video"
+     ]
     },
     {
      "to": "gif",
      "fidelity": "lossy",
      "lossless_available": false,
-     "drops": []
+     "drops": [
+      "audio",
+      "anything after 10 s"
+     ]
     }
    ]
   }

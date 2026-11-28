@@ -1,8 +1,23 @@
 {
-  "machine": "an M4 Mac (placeholder numbers from research, regenerate with make bench)",
+  "machine": "an Apple M4 Mac, macOS 27.0.1",
   "rows": [
-    { "task": "Convert 40 photos, JPEG to JPEG", "folio_ms": 1100, "other_ms": 5240, "other": "sips, one by one" },
-    { "task": "Change a 30 s 4K clip from MOV to MP4", "folio_ms": 60, "other_ms": 6690, "other": "avconvert preset" },
-    { "task": "One HEIC photo to JPEG", "folio_ms": 137, "other_ms": 149, "other": "sips" }
+    {
+      "task": "Convert 40 12-megapixel HEIC images to JPEG",
+      "folio_ms": 264,
+      "other_ms": 2951,
+      "other": "sips, one by one"
+    },
+    {
+      "task": "Shrink 10 s of 4K slow-motion video to share",
+      "folio_ms": 8997,
+      "other_ms": 13067,
+      "other": "avconvert, HEVC 1080p"
+    },
+    {
+      "task": "Five minutes of audio, WAV to AAC",
+      "folio_ms": 1003,
+      "other_ms": 1223,
+      "other": "afconvert"
+    }
   ]
 }
