@@ -29,8 +29,18 @@ jobs:
           key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
       - name: Build
         run: swift build
+      - name: Build tests
+        run: swift build --build-tests
+      # One process per test target. Together in one process on the 3-core runner the
+      # suites starve Swift's shared thread pool and the run stalls; each alone is quick.
       - name: Test
-        run: swift test
+        run: |
+          set -euo pipefail
+          for target in $(ls Tests); do
+            echo "::group::$target"
+            swift test --skip-build --filter "$target"
+            echo "::endgroup::"
+          done
       - name: Lint
         run: swift format lint --recursive --strict Sources Tests Package.swift
       - name: Bundle the app
