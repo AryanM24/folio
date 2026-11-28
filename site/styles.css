@@ -320,19 +320,14 @@ button { font: inherit; color: inherit; }
 .cta-inner > p { max-width: 30rem; font-size: 17px; color: var(--muted-on-bg); }
 .cta-inner .actions { margin-top: 8px; }
 
-/* A soft sky behind the glass, so the Dock has something to blur. Sizes are in cqw, so the
-   whole Dock scales as one picture from a phone to the desktop column. */
+/* The Dock sits straight on the page: no panel behind it. Sizes are in cqw, so it scales
+   as one picture from a phone to the desktop column. */
 .dock-stage {
   container-type: inline-size;
-  width: 100%; margin-top: 48px; border-radius: 28px; overflow: hidden;
-  display: grid; place-items: center; padding: 9cqw 0 4cqw;
-  background:
-    radial-gradient(60% 90% at 20% 0%, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0) 70%),
-    linear-gradient(180deg, #C9DCF4 0%, #DCE6F3 45%, #EEE7F1 100%);
+  width: 100%; margin-top: 40px;
+  display: grid; place-items: center; padding: 6cqw 0 2cqw;
   user-select: none;
 }
-:root[data-theme="dark"] .dock-stage { background: radial-gradient(60% 90% at 20% 0%, rgb(80 110 180 / 0.35), transparent 70%), linear-gradient(180deg, #121A2C 0%, #161B29 50%, #1C1824 100%); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dock-stage { background: radial-gradient(60% 90% at 20% 0%, rgb(80 110 180 / 0.35), transparent 70%), linear-gradient(180deg, #121A2C 0%, #161B29 50%, #1C1824 100%); } }
 
 /* The shelf: frosted glass, lit from above, with a bright top edge and a soft shadow. */
 .dock {
@@ -340,12 +335,12 @@ button { font: inherit; color: inherit; }
   display: flex; align-items: flex-end; gap: 0.5cqw;
   padding: 0.55cqw 0.9cqw 0.75cqw;
   border-radius: 2.4cqw;
-  background: rgb(255 255 255 / 0.38);
+  background: rgb(255 255 255 / 0.72);
   backdrop-filter: blur(24px) saturate(1.8); -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.75), inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 1.6cqw 4cqw rgb(31 41 66 / 0.18);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(0 0 0 / 0.06), 0 1.2cqw 3.2cqw rgb(31 41 66 / 0.14);
 }
-:root[data-theme="dark"] .dock { background: rgb(40 40 46 / 0.5); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 1.6cqw 4cqw rgb(0 0 0 / 0.45); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dock { background: rgb(40 40 46 / 0.5); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 1.6cqw 4cqw rgb(0 0 0 / 0.45); } }
+:root[data-theme="dark"] .dock { background: rgb(40 40 46 / 0.72); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 1.6cqw 4cqw rgb(0 0 0 / 0.45); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dock { background: rgb(40 40 46 / 0.72); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 1.6cqw 4cqw rgb(0 0 0 / 0.45); } }
 @media (prefers-reduced-transparency: reduce) { .dock { background: var(--surface); backdrop-filter: none; } }
 
 .slot { position: relative; width: var(--slot); height: var(--slot); flex: none; display: grid; place-items: center; }
@@ -413,7 +408,7 @@ button { font: inherit; color: inherit; }
   .convert-panel { width: 100%; }
   .result-card { position: static; width: 100%; }
   .shelf { margin: 6px auto 0; }
-  .dock-stage { border-radius: 20px; padding-top: 14cqw; }
+  .dock-stage { padding-top: 12cqw; }
   .footer-inner { justify-content: center; text-align: center; }
   .footer-inner nav { justify-content: center; }
 }
