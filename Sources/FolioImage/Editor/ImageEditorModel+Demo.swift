@@ -2,7 +2,7 @@
     import SwiftUI
 
     extension ImageEditorModel {
-        /// Development aid for `scripts/snapshot.sh`: `FOLIO_IMAGE_DEMO=crop|filters|markup|edited`
+        /// Development aid for `scripts/snapshot.sh`: `FOLIO_IMAGE_DEMO=crop|filters|markup|edited|layers|selection|tone`
         /// puts the editor in that state so each screen can be checked without a mouse.
         func applyDemoStateIfRequested() {
             guard let demo = ProcessInfo.processInfo.environment["FOLIO_IMAGE_DEMO"] else { return }
@@ -50,6 +50,35 @@
                     {
                         try? png.write(to: URL(fileURLWithPath: dir).appending(path: "popover-\(name)-\(dark ? "dark" : "light").png"))
                     }
+                }
+            case "layers":
+                tab = .layer
+                let shape = Layer(
+                    name: "Badge",
+                    content: .shape(
+                        ShapeSpec(
+                            geometry: .ellipse(CGRect(x: w * 0.08, y: h * 0.1, width: w * 0.22, height: w * 0.22)),
+                            fill: .solid(RGBA(red: 0.02, green: 0.52, blue: 0.97)))))
+                var text = Layer(
+                    name: "Title",
+                    content: .text(TextSpec(runs: [TextRun(text: "Folio", fontName: "Helvetica-Bold", size: w / 9, color: .white)])))
+                text.transform = CGAffineTransform(translationX: w * 0.5, y: h * 0.62)
+                var glow = Layer(name: "Warm light", content: .fill(.solid(RGBA(red: 1, green: 0.6, blue: 0.2))))
+                glow.blend = .softLight
+                glow.opacity = 0.45
+                commit("Demo") { $0.layers = [glow, shape, text]; $0.guides = [Guide(axis: .horizontal, position: h * 0.62)] }
+                layerState.selectedID = text.id
+                showRulers = true
+            case "selection":
+                tool = .select
+                selectionState.spec = SelectionSpec(.ellipse(CGRect(x: w * 0.25, y: h * 0.2, width: w * 0.5, height: h * 0.6)))
+                    .adding(.rect(CGRect(x: w * 0.05, y: h * 0.05, width: w * 0.2, height: h * 0.2)))
+            case "tone":
+                tab = .tone
+                tool = .eyedropper
+                commit("Demo") {
+                    $0.tone.curves.rgb = [CGPoint(x: 0.25, y: 0.2), CGPoint(x: 0.75, y: 0.82)]
+                    $0.tone.hsl[.blue] = HSLShift(hue: 0, saturation: 30, luminance: -10)
                 }
             case "cutout":
                 toggleRemoveBackground()

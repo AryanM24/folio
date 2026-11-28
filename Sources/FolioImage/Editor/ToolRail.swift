@@ -1,3 +1,4 @@
+import FolioKit
 import SwiftUI
 
 /// The tools in the left rail. Single-key shortcuts as in Photoshop and Pixelmator.
@@ -54,9 +55,73 @@ enum ImageTool: String, CaseIterable, Identifiable {
     }
 }
 
-// Phase 0 stub: the signature is the contract; WP5 fills in the body.
+/// The vertical tool pill at the canvas's left edge. Click a tool or press its key;
+/// pressing the key again cycles its variants (selection shapes, retouch tools, shapes).
 struct ToolRail: View {
     let model: ImageEditorModel
 
-    var body: some View { EmptyView() }
+    /// Tools in rail order, grouped by dividers.
+    static let groups: [[ImageTool]] = [[.move, .select, .crop], [.retouch, .brush, .eraser], [.text, .shape, .gradient], [.eyedropper, .hand, .zoom]]
+
+    var body: some View {
+        HeroToolbar(.vertical) {
+            ForEach(Array(Self.groups.enumerated()), id: \.offset) { index, group in
+                if index > 0 { HeroToolbarDivider(.vertical) }
+                ForEach(group) { tool in button(tool) }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Tools")
+    }
+
+    private func button(_ tool: ImageTool) -> some View {
+        let selected = model.tool == tool
+        return Button {
+            model.tool = tool
+        } label: {
+            Label(tool.title, systemImage: symbol(tool))
+        }
+        .buttonStyle(.hero(.ghost, size: .sm, iconOnly: true, isSelected: selected))
+        .help("\(variantTitle(tool) ?? tool.title) (\(tool.shortcut.uppercased()))")
+        .accessibilityLabel(variantTitle(tool).map { "\(tool.title), \($0)" } ?? tool.title)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .contextMenu { variants(tool) }
+    }
+
+    /// The rail shows the active variant's symbol, as Photoshop's flyouts do.
+    private func symbol(_ tool: ImageTool) -> String {
+        switch tool {
+        case .select: model.selectionState.tool.symbol
+        case .retouch: model.retouchState.tool.symbol
+        case .shape: model.options.shape.symbol
+        default: tool.symbol
+        }
+    }
+
+    private func variantTitle(_ tool: ImageTool) -> String? {
+        switch tool {
+        case .select: model.selectionState.tool.title
+        case .retouch: model.retouchState.tool.title
+        case .shape: model.options.shape.title
+        default: nil
+        }
+    }
+
+    @ViewBuilder private func variants(_ tool: ImageTool) -> some View {
+        switch tool {
+        case .select:
+            ForEach(SelectionTool.allCases) { v in
+                Button(v.title, systemImage: v.symbol) { model.selectionState.tool = v; model.tool = .select }
+            }
+        case .retouch:
+            ForEach(RetouchStroke.Tool.allCases) { v in
+                Button(v.title, systemImage: v.symbol) { model.retouchState.tool = v; model.tool = .retouch }
+            }
+        case .shape:
+            ForEach(ShapeKind.allCases) { v in
+                Button(v.title, systemImage: v.symbol) { model.options.shape = v; model.tool = .shape }
+            }
+        default: EmptyView()
+        }
+    }
 }
