@@ -106,7 +106,8 @@ public nonisolated enum Engine {
         let converter = converter(for: format)
         do {
             let meta = try await converter.inspect(url, format: format)
-            return FileInfo(path: url.path, kind: format.family, format: format, bytes: bytes, meta: meta, targets: converter.targets(from: format))
+            return FileInfo(
+                path: url.path, kind: format.family, format: format, bytes: bytes, meta: meta, targets: converter.targets(from: format))
         } catch {
             return FileInfo(
                 path: url.path, kind: format.family, format: format, bytes: bytes, meta: [:], targets: converter.targets(from: format),
@@ -176,21 +177,26 @@ public nonisolated enum Engine {
             let message =
                 target == source
                 ? "Folio can't compress \(source.title) files in place." : "Folio can't turn \(source.title) into \(target.title)."
-            return fail(ConvertError(.unsupportedPair, message, hint: "Call folio_inspect to see the formats this file can become.", alternatives: targets))
+            return fail(
+                ConvertError(
+                    .unsupportedPair, message, hint: "Call folio_inspect to see the formats this file can become.", alternatives: targets))
         }
         if request.quality == .lossless && !pair.losslessAvailable {
             let lossless = targets.filter(\.losslessAvailable)
             return fail(
                 ConvertError(
                     .losslessUnavailable, "\(target.title) can't hold \(source.title) without loss.",
-                    hint: lossless.isEmpty ? "Use quality balanced." : "Lossless targets: \(lossless.map(\.to.rawValue).joined(separator: ", ")).",
+                    hint: lossless.isEmpty
+                        ? "Use quality balanced." : "Lossless targets: \(lossless.map(\.to.rawValue).joined(separator: ", ")).",
                     alternatives: lossless))
         }
 
         let folder = request.outputDirectory ?? input.deletingLastPathComponent()
         let baseName = input.deletingPathExtension().lastPathComponent
         let planned = folder.appending(path: "\(baseName).\(target.fileExtension)")
-        let existsAlready = FileManager.default.fileExists(atPath: planned.path(percentEncoded: false)) && planned.standardizedFileURL != input.standardizedFileURL
+        let existsAlready =
+            FileManager.default.fileExists(atPath: planned.path(percentEncoded: false))
+            && planned.standardizedFileURL != input.standardizedFileURL
         if existsAlready, request.onConflict == .skip {
             result.status = .skipped
             result.output = planned.path
@@ -199,7 +205,8 @@ public nonisolated enum Engine {
             return result
         }
         if existsAlready, request.onConflict == .fail {
-            return fail(ConvertError(.outputExists, "\(planned.lastPathComponent) already exists.", hint: "Pass on_conflict rename or skip."))
+            return fail(
+                ConvertError(.outputExists, "\(planned.lastPathComponent) already exists.", hint: "Pass on_conflict rename or skip."))
         }
 
         if request.dryRun {
@@ -231,7 +238,8 @@ public nonisolated enum Engine {
             let bytesOut = outcome.isDirectory ? directorySize(temp) : fileSize(temp)
             if let maxBytes = request.maxBytes, !outcome.isDirectory, bytesOut > maxBytes {
                 throw ConvertError(
-                    .sizeUnreachable, "The smallest Folio could make was \(ByteCountFormatter.string(fromByteCount: bytesOut, countStyle: .file)).",
+                    .sizeUnreachable,
+                    "The smallest Folio could make was \(ByteCountFormatter.string(fromByteCount: bytesOut, countStyle: .file)).",
                     hint: "Raise max_bytes, lower max_dimension or pick a smaller format.")
             }
             result.fidelity = outcome.fidelity

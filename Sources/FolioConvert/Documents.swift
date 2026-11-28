@@ -186,12 +186,15 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
         options: [.caseInsensitive])
     static let remoteAttribute = try! NSRegularExpression(
         pattern: #"\b(src|href|srcset|data|poster|background|lowsrc|dynsrc)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)"#, options: [.caseInsensitive])
-    static let cssURL = try! NSRegularExpression(pattern: #"url\(\s*(['"]?)(.*?)\1\s*\)"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let cssURL = try! NSRegularExpression(
+        pattern: #"url\(\s*(['"]?)(.*?)\1\s*\)"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
     static let cssString = try! NSRegularExpression(pattern: #""[^"]*"|'[^']*'"#)
     static let cssImport = try! NSRegularExpression(pattern: #"@import\b[^;]*;?"#, options: [.caseInsensitive])
     static let cssBlock = try! NSRegularExpression(
-        pattern: #"(<style\b[^>]*>)(.*?)(</style\s*>)|(\bstyle\s*=\s*)("[^"]*"|'[^']*'|[^\s>]+)"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
-    static let entity = try! NSRegularExpression(pattern: #"&(#x[0-9a-f]+|#[0-9]+|colon|tab|newline|sol|period|quot|apos|amp|lpar|rpar|bsol|lt|gt);?"#, options: [.caseInsensitive])
+        pattern: #"(<style\b[^>]*>)(.*?)(</style\s*>)|(\bstyle\s*=\s*)("[^"]*"|'[^']*'|[^\s>]+)"#,
+        options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let entity = try! NSRegularExpression(
+        pattern: #"&(#x[0-9a-f]+|#[0-9]+|colon|tab|newline|sol|period|quot|apos|amp|lpar|rpar|bsol|lt|gt);?"#, options: [.caseInsensitive])
     static let cssEscape = try! NSRegularExpression(pattern: #"\\([0-9a-fA-F]{1,6})\s?|\\(.)"#)
 
     /// The HTML with every resource URL that could reach the network blanked, so importing or
@@ -225,7 +228,8 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
         }
         func isSafe(_ raw: String) -> Bool {
             // Browsers ignore tabs, newlines and other controls inside URLs, so ignore them too.
-            let v = String(decodeEntities(raw).unicodeScalars.filter { $0.value > 0x20 && $0 != "\u{7F}" && $0 != "\"" && $0 != "'" }).lowercased()
+            let v = String(decodeEntities(raw).unicodeScalars.filter { $0.value > 0x20 && $0 != "\u{7F}" && $0 != "\"" && $0 != "'" })
+                .lowercased()
             if v.isEmpty || v.hasPrefix("#") || v.hasPrefix("data:") { return true }
             if v.hasPrefix("//") || v.hasPrefix("\\\\") { return false }
             // Anything with a scheme before the first path, query or fragment character is out.
@@ -233,12 +237,16 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
             return !head.contains(":")
         }
         func isSafeSrcset(_ raw: String) -> Bool {
-            decodeEntities(raw).split(separator: ",").allSatisfy { isSafe(String($0.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: " ").first ?? "")) }
+            decodeEntities(raw).split(separator: ",").allSatisfy {
+                isSafe(String($0.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: " ").first ?? ""))
+            }
         }
         func safeCSS(_ css: String) -> String {
             let unescaped = replacing(cssEscape, in: decodeEntities(css)) { match, ns in
                 if match.range(at: 1).location != NSNotFound {
-                    return UInt32(ns.substring(with: match.range(at: 1)), radix: 16).flatMap(Unicode.Scalar.init).map { String(Character($0)) } ?? ""
+                    return UInt32(ns.substring(with: match.range(at: 1)), radix: 16).flatMap(Unicode.Scalar.init).map {
+                        String(Character($0))
+                    } ?? ""
                 }
                 return ns.substring(with: match.range(at: 2))
             }
@@ -263,7 +271,8 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
         }
         return replacing(cssBlock, in: tagsDone) { match, ns in
             if match.range(at: 2).location != NSNotFound {
-                return ns.substring(with: match.range(at: 1)) + safeCSS(ns.substring(with: match.range(at: 2))) + ns.substring(with: match.range(at: 3))
+                return ns.substring(with: match.range(at: 1)) + safeCSS(ns.substring(with: match.range(at: 2)))
+                    + ns.substring(with: match.range(at: 3))
             }
             let value = ns.substring(with: match.range(at: 5))
             let isQuoted = value.hasPrefix("\"") || value.hasPrefix("'")
@@ -280,7 +289,9 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
             + withoutRemoteResources(html)
     }
 
-    static func replacing(_ regex: NSRegularExpression, in string: String, with transform: (NSTextCheckingResult, NSString) -> String) -> String {
+    static func replacing(
+        _ regex: NSRegularExpression, in string: String, with transform: (NSTextCheckingResult, NSString) -> String
+    ) -> String {
         let ns = string as NSString
         var out = ""
         var last = 0

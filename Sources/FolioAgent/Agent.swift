@@ -324,4 +324,3 @@ public nonisolated enum Agent {
         return Int(d.components.seconds * 1000 + d.components.attoseconds / 1_000_000_000_000_000)
     }
 }
-
