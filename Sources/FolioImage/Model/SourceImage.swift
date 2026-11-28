@@ -2,7 +2,7 @@ import AppKit
 import CoreGraphics
 import CoreImage
 import FolioKit
-import Foundation
+public import Foundation
 import ImageIO
 import Synchronization
 import UniformTypeIdentifiers
@@ -20,7 +20,7 @@ import UniformTypeIdentifiers
 /// `@unchecked Sendable`: every stored property is an immutable `let` (ImageIO and
 /// Core Graphics objects here are immutable once made) except the caches, which are
 /// guarded by `Mutex`.
-nonisolated final class SourceImage: @unchecked Sendable {
+public nonisolated final class SourceImage: @unchecked Sendable {
     /// The file bytes, exactly as read. Saved back untouched when nothing changed.
     let data: Data
     let type: UTType
@@ -197,12 +197,12 @@ nonisolated final class SourceImage: @unchecked Sendable {
     // MARK: SVG
 
     /// True when the bytes are an SVG document (ImageIO can not decode those).
-    static func isSVG(_ data: Data) -> Bool {
+    public static func isSVG(_ data: Data) -> Bool {
         String(decoding: data.prefix(4096), as: UTF8.self).range(of: "<svg", options: .caseInsensitive) != nil
     }
 
     /// Draw the SVG with the AppKit SVG renderer so its long edge is `longEdge` pixels, as PNG.
-    static func rasterizedSVG(_ data: Data, longEdge: Int) throws -> Data {
+    public static func rasterizedSVG(_ data: Data, longEdge: Int) throws -> Data {
         guard let image = NSImage(data: data), image.size.width > 0, image.size.height > 0 else {
             throw FolioError("This SVG couldn’t be drawn. It may use features macOS doesn’t support.")
         }

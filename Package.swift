@@ -71,7 +71,7 @@ let package = Package(
         ),
         .target(
             name: "FolioConvert",
-            dependencies: ["FolioKit", "FolioDocs", "FolioSheets", "FolioCode", "CArchive"],
+            dependencies: ["FolioKit", "FolioDocs", "FolioSheets", "FolioCode", "FolioImage", "CArchive"],
             swiftSettings: engineSettings
         ),
         .target(name: "FolioKit", swiftSettings: uiSettings),
@@ -82,7 +82,7 @@ let package = Package(
         editor("FolioCode"),
         editor("FolioMedia", dependencies: ["FolioConvert"]),
         editor("FolioArchive", dependencies: ["CArchive"]),
-        editor("FolioPreview"),
+        editor("FolioPreview", dependencies: ["FolioConvert"]),
         // The system libarchive (/usr/lib/libarchive.2.dylib). The SDK ships no headers, so
         // `shim.h` declares only the functions Folio calls.
         .systemLibrary(name: "CArchive"),

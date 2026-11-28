@@ -12,13 +12,19 @@ public nonisolated enum PDFConverter: FamilyConverter {
     public static let family: Format.Family = .pdf
 
     public static func targets(from source: Format) -> [Target] {
-        guard source == .pdf else { return [] }
+        guard source == .pdf || source == .ai else { return [] }
         let raster = ["text layer", "links", "vector art"]
         let text = ["page layout", "images"]
-        return [
-            Target(
+        let pdf =
+            source == .ai
+            ? Target(
+                to: .pdf, fidelity: .lossless, losslessAvailable: true, drops: ["Illustrator editing data"],
+                notes: "The PDF pages a PDF-compatible .ai carries, copied as they are.")
+            : Target(
                 to: .pdf, fidelity: .lossy, losslessAvailable: true,
-                notes: "Compress: images are recompressed as JPEG, text and vectors stay sharp. Lossless only rewrites the file."),
+                notes: "Compress: images are recompressed as JPEG, text and vectors stay sharp. Lossless only rewrites the file.")
+        return [
+            pdf,
             Target(to: .png, fidelity: .lossless, losslessAvailable: true, drops: raster, notes: "One image per page."),
             Target(to: .jpeg, fidelity: .lossy, losslessAvailable: false, drops: raster, notes: "One image per page."),
             Target(to: .heic, fidelity: .lossy, losslessAvailable: false, drops: raster, notes: "One image per page."),
@@ -36,7 +42,7 @@ public nonisolated enum PDFConverter: FamilyConverter {
             throw ConvertError(.encrypted, "\(job.input.lastPathComponent) is password-protected; rewriting it would drop the protection.")
         }
         switch job.target {
-        case .pdf: return try job.quality == .lossless ? rewrite(document, job: job) : compress(document, job: job)
+        case .pdf: return try job.quality == .lossless || job.source == .ai ? rewrite(document, job: job) : compress(document, job: job)
         case .png, .jpeg, .heic, .tiff: return try await rasterize(job: job, pages: document.pageCount)
         case .txt, .md:
             let text = try await extract(document, url: job.input, as: job.target == .md ? .markdown : .text, pages: nil)
