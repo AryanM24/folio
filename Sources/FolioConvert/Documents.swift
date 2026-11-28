@@ -186,41 +186,88 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
         options: [.caseInsensitive])
     static let remoteAttribute = try! NSRegularExpression(
         pattern: #"\b(src|href|srcset|data|poster|background|lowsrc|dynsrc)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)"#, options: [.caseInsensitive])
-    static let remoteCSS = try! NSRegularExpression(
-        pattern: #"(@import\s+)?url\(\s*['"]?\s*(?:https?:)?//[^)]*\)|@import\s+['"]\s*(?:https?:)?//[^'"]*['"]"#,
-        options: [.caseInsensitive])
+    static let cssURL = try! NSRegularExpression(pattern: #"url\(\s*(['"]?)(.*?)\1\s*\)"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let cssImport = try! NSRegularExpression(pattern: #"@import\b[^;]*;?"#, options: [.caseInsensitive])
+    static let cssBlock = try! NSRegularExpression(
+        pattern: #"(<style\b[^>]*>)(.*?)(</style\s*>)|(\bstyle\s*=\s*)("[^"]*"|'[^']*')"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let entity = try! NSRegularExpression(pattern: #"&(#x[0-9a-f]+|#[0-9]+|colon|tab|newline|sol|period);?"#, options: [.caseInsensitive])
+    static let cssEscape = try! NSRegularExpression(pattern: #"\\([0-9a-fA-F]{1,6})\s?|\\(.)"#)
 
-    /// The HTML with every `http(s)` and protocol-relative resource URL blanked, so importing
-    /// or rendering it never touches the network. Links (`<a href>`) are kept: they aren't loaded.
+    /// The HTML with every resource URL that could reach the network blanked, so importing or
+    /// rendering it never fetches anything. Links (`<a href>`) are kept: they aren't loaded.
+    ///
+    /// An allowlist, not a blocklist: after decoding entities and CSS escapes, a resource URL
+    /// survives only if it's relative, a fragment or `data:`. Every `@import` goes.
     static func withoutRemoteResources(_ html: String) -> String {
-        func isRemote(_ value: String) -> Bool {
-            let v = value.trimmingCharacters(in: CharacterSet(charactersIn: "\"' \t\n\r")).lowercased()
-            // srcset lists several URLs; any remote one blanks the attribute.
-            return v.hasPrefix("//") || v.hasPrefix("http:") || v.hasPrefix("https:") || v.contains(" http:") || v.contains(" https:")
-                || v.contains(",http") || v.contains(", http") || v.contains(" //")
-        }
-        func replacing(
-            _ regex: NSRegularExpression, in string: String, with transform: (NSTextCheckingResult, NSString) -> String
-        ) -> String {
-            let ns = string as NSString
-            var out = ""
-            var last = 0
-            for match in regex.matches(in: string, range: NSRange(location: 0, length: ns.length)) {
-                out += ns.substring(with: NSRange(location: last, length: match.range.location - last))
-                out += transform(match, ns)
-                last = match.range.location + match.range.length
+        func decodeEntities(_ s: String) -> String {
+            replacing(entity, in: s) { match, ns in
+                let token = ns.substring(with: match.range(at: 1)).lowercased()
+                switch token {
+                case "colon": return ":"
+                case "tab", "newline": return ""
+                case "sol": return "/"
+                case "period": return "."
+                default:
+                    let hex = token.hasPrefix("#x")
+                    let digits = token.dropFirst(hex ? 2 : 1)
+                    return UInt32(digits, radix: hex ? 16 : 10).flatMap(Unicode.Scalar.init).map { String(Character($0)) } ?? ""
+                }
             }
-            return out + ns.substring(from: last)
+        }
+        func isSafe(_ raw: String) -> Bool {
+            // Browsers ignore tabs, newlines and other controls inside URLs, so ignore them too.
+            let v = String(decodeEntities(raw).unicodeScalars.filter { $0.value > 0x20 && $0 != "\u{7F}" && $0 != "\"" && $0 != "'" }).lowercased()
+            if v.isEmpty || v.hasPrefix("#") || v.hasPrefix("data:") { return true }
+            if v.hasPrefix("//") || v.hasPrefix("\\\\") { return false }
+            // Anything with a scheme before the first path, query or fragment character is out.
+            let head = v.prefix { !"/?#".contains($0) }
+            return !head.contains(":")
+        }
+        func isSafeSrcset(_ raw: String) -> Bool {
+            decodeEntities(raw).split(separator: ",").allSatisfy { isSafe(String($0.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: " ").first ?? "")) }
+        }
+        func safeCSS(_ css: String) -> String {
+            let unescaped = replacing(cssEscape, in: decodeEntities(css)) { match, ns in
+                if match.range(at: 1).location != NSNotFound {
+                    return UInt32(ns.substring(with: match.range(at: 1)), radix: 16).flatMap(Unicode.Scalar.init).map { String(Character($0)) } ?? ""
+                }
+                return ns.substring(with: match.range(at: 2))
+            }
+            let noImports = replacing(cssImport, in: unescaped) { _, _ in "" }
+            return replacing(cssURL, in: noImports) { match, ns in
+                isSafe(ns.substring(with: match.range(at: 2))) ? ns.substring(with: match.range) : "none"
+            }
         }
         let tagsDone = replacing(loadingTag, in: html) { match, ns in
             let tag = ns.substring(with: match.range)
             return replacing(remoteAttribute, in: tag) { attribute, tagNS in
                 let name = tagNS.substring(with: attribute.range(at: 1))
                 let value = tagNS.substring(with: attribute.range(at: 2))
-                return isRemote(value) ? "\(name)=\"\"" : tagNS.substring(with: attribute.range)
+                let safe = name.lowercased() == "srcset" ? isSafeSrcset(value) : isSafe(value)
+                return safe ? tagNS.substring(with: attribute.range) : "\(name)=\"\""
             }
         }
-        return replacing(remoteCSS, in: tagsDone) { _, _ in "none" }
+        return replacing(cssBlock, in: tagsDone) { match, ns in
+            if match.range(at: 2).location != NSNotFound {
+                return ns.substring(with: match.range(at: 1)) + safeCSS(ns.substring(with: match.range(at: 2))) + ns.substring(with: match.range(at: 3))
+            }
+            let quoted = ns.substring(with: match.range(at: 5))
+            let quote = quoted.prefix(1)
+            let inner = safeCSS(String(quoted.dropFirst().dropLast())).replacingOccurrences(of: String(quote), with: "")
+            return ns.substring(with: match.range(at: 4)) + quote + inner + quote
+        }
+    }
+
+    static func replacing(_ regex: NSRegularExpression, in string: String, with transform: (NSTextCheckingResult, NSString) -> String) -> String {
+        let ns = string as NSString
+        var out = ""
+        var last = 0
+        for match in regex.matches(in: string, range: NSRange(location: 0, length: ns.length)) {
+            out += ns.substring(with: NSRange(location: last, length: match.range.location - last))
+            out += transform(match, ns)
+            last = match.range.location + match.range.length
+        }
+        return out + ns.substring(from: last)
     }
 
     // MARK: Verification

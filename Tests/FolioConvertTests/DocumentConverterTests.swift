@@ -164,6 +164,32 @@ struct DocumentConverterTests {
         #expect(safe.contains("src=\"local.png\""))
     }
 
+    @Test(
+        "Encoded and obfuscated resource URLs are blanked too",
+        arguments: [
+            #"<img src="&#104;ttps://evil.example/x.png">"#,
+            #"<img src="ht&#x09;tp://evil.example/x.png">"#,
+            #"<img src="https&colon;//evil.example/x.png">"#,
+            #"<img src="  //evil.example/x.png">"#,
+            #"<img src="javascript:fetch('//evil.example')">"#,
+            #"<img srcset="a.png 1x, https://evil.example/x.png 2x">"#,
+            #"<p style="background: u\72l(https://evil.example/x.png)">x</p>"#,
+            #"<style>@import 'https://evil.example/a.css';</style>"#,
+            #"<style>p { background: url(&quot;https://evil.example/x.png&quot;) }</style>"#,
+        ])
+    func obfuscatedURLs(html: String) {
+        #expect(!DocumentFamilyConverter.withoutRemoteResources(html).contains("evil.example"))
+    }
+
+    @Test("Relative, fragment and data URLs survive")
+    func safeURLsKept() {
+        let html = #"<img src="images/a.png"><img src="data:image/png;base64,AAAA"><style>p { background: url(bg.png) }</style>"#
+        let safe = DocumentFamilyConverter.withoutRemoteResources(html)
+        #expect(safe.contains("images/a.png"))
+        #expect(safe.contains("data:image/png;base64,AAAA"))
+        #expect(safe.contains("url(bg.png)"))
+    }
+
     @Test("Converting HTML or Markdown never fetches a remote image")
     func noFetch() async throws {
         let listener = Listener()
