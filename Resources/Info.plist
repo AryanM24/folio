@@ -38,6 +38,9 @@
 				<string>public.html</string>
 				<string>com.apple.webarchive</string>
 				<string>com.microsoft.word.doc</string>
+				<string>org.idpf.epub-container</string>
+				<string>com.apple.mail.email</string>
+				<string>org.ietf.mbox</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
 			<string>app.folio.editing</string>
@@ -55,6 +58,10 @@
 				<string>public.comma-separated-values-text</string>
 				<string>public.tab-separated-values-text</string>
 				<string>org.oasis-open.opendocument.spreadsheet</string>
+				<string>com.microsoft.excel.xls</string>
+				<string>org.sqlite.sqlite3</string>
+				<string>com.apple.ical.ics</string>
+				<string>public.vcard</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
 			<string>app.folio.editing</string>
@@ -75,6 +82,16 @@
 				<string>com.compuserve.gif</string>
 				<string>com.microsoft.bmp</string>
 				<string>org.webmproject.webp</string>
+				<string>public.camera-raw-image</string>
+				<string>com.adobe.photoshop-image</string>
+				<string>com.microsoft.ico</string>
+				<string>com.apple.icns</string>
+				<string>com.ilm.openexr-image</string>
+				<string>public.radiance</string>
+				<string>com.truevision.tga-image</string>
+				<string>public.pbm</string>
+				<string>public.heics</string>
+				<string>org.libpng.apng</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
 			<string>app.folio.editing</string>
@@ -100,6 +117,12 @@
 				<string>com.netscape.javascript-source</string>
 				<string>public.swift-source</string>
 				<string>public.python-script</string>
+				<string>com.subrip.srt</string>
+				<string>org.w3.webvtt</string>
+				<string>org.aegisub.ass</string>
+				<string>io.toml</string>
+				<string>org.json5.json5</string>
+				<string>org.jsonlines.jsonl</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
 			<string>app.folio.editing</string>
@@ -122,6 +145,90 @@
 				<string>com.microsoft.waveform-audio</string>
 				<string>public.mpeg-4-audio</string>
 			</array>
+			<key>NSUbiquitousDocumentUserActivityType</key>
+			<string>app.folio.editing</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.zip-archive</string>
+				<string>public.tar-archive</string>
+				<string>org.gnu.gnu-zip-archive</string>
+				<string>public.bzip2-archive</string>
+				<string>org.tukaani.xz-archive</string>
+				<string>org.tukaani.tar-xz-archive</string>
+				<string>org.7-zip.7-zip-archive</string>
+				<string>com.rarlab.rar-archive</string>
+				<string>public.iso-image</string>
+				<string>public.cpio-archive</string>
+				<string>com.apple.xar-archive</string>
+			</array>
+			<key>NSUbiquitousDocumentUserActivityType</key>
+			<string>app.folio.editing</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Preview</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.iwork.pages.sffpages</string>
+				<string>com.apple.iwork.pages.pages</string>
+				<string>com.apple.iwork.numbers.sffnumbers</string>
+				<string>com.apple.iwork.numbers.numbers</string>
+				<string>com.apple.iwork.keynote.sffkey</string>
+				<string>com.apple.iwork.keynote.key</string>
+				<string>org.openxmlformats.presentationml.presentation</string>
+				<string>com.microsoft.powerpoint.ppt</string>
+				<string>org.oasis-open.opendocument.presentation</string>
+				<string>public.font</string>
+				<string>com.pixar.universal-scene-description-mobile</string>
+				<string>com.pixar.universal-scene-description</string>
+				<string>public.geometry-definition-format</string>
+				<string>public.standard-tesselated-geometry-format</string>
+				<string>public.polygon-file-format</string>
+				<string>com.adobe.illustrator.ai-image</string>
+				<string>com.adobe.encapsulated-postscript</string>
+			</array>
+			<key>NSUbiquitousDocumentUserActivityType</key>
+			<string>app.folio.editing</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Folio Video Project</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>app.folio.video-project</string>
+			</array>
+			<key>NSUbiquitousDocumentUserActivityType</key>
+			<string>app.folio.editing</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Folio Image</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>app.folio.image-document</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<true/>
 			<key>NSUbiquitousDocumentUserActivityType</key>
 			<string>app.folio.editing</string>
 		</dict>
@@ -158,5 +265,314 @@
 	<true/>
 	<key>NSSupportsSuddenTermination</key>
 	<false/>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.json</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Folio Video Project</string>
+			<key>UTTypeIdentifier</key>
+			<string>app.folio.video-project</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>folio-video</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Folio Image</string>
+			<key>UTTypeIdentifier</key>
+			<string>app.folio.image-document</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>folioimage</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.movie</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Matroska video</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.matroska.mkv</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mkv</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>video/x-matroska</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>SubRip subtitles</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.subrip.srt</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>srt</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/x-subrip</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Advanced SubStation Alpha subtitles</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.aegisub.ass</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>ass</string>
+					<string>ssa</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TOML document</string>
+			<key>UTTypeIdentifier</key>
+			<string>io.toml</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>toml</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/toml</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>JSON5 document</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.json5.json5</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>json5</string>
+					<string>jsonc</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>JSON Lines</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.jsonlines.jsonl</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>jsonl</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/jsonl</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>GPS Exchange Format</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.topografix.gpx</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>gpx</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/gpx+xml</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>KML document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.google.earth.kml</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>kml</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/vnd.google-earth.kml+xml</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.font</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>WOFF font</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.w3.woff</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>woff</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>font/woff</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.font</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>WOFF2 font</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.w3.woff2</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>woff2</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>font/woff2</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Mailbox</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.ietf.mbox</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mbox</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/mbox</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.archive</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>RAR archive</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.rarlab.rar-archive</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>rar</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/vnd.rar</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.database</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>SQLite database</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.sqlite.sqlite3</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>sqlite</string>
+					<string>sqlite3</string>
+					<string>db</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/vnd.sqlite3</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.png</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Animated PNG image</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.libpng.apng</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>apng</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>image/apng</string>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

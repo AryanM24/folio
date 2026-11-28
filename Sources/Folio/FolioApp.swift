@@ -1,9 +1,11 @@
+import FolioArchive
 import FolioCode
 import FolioDocs
 import FolioImage
 import FolioKit
 import FolioMedia
 import FolioPDF
+import FolioPreview
 import FolioSheets
 import SwiftUI
 
@@ -80,6 +82,15 @@ struct FolioApp: App {
         }
         .commands { MediaCommands() }
         .defaultSize(width: 1240, height: 820)
+        // Archives and previews are read-only too. Both hold nothing, so opening is instant.
+        DocumentGroup(viewing: ArchiveDocument.self) { file in
+            ArchiveView(document: file.document)
+        }
+        .defaultSize(width: 900, height: 640)
+        DocumentGroup(viewing: PreviewDocument.self) { file in
+            PreviewView(document: file.document)
+        }
+        .defaultSize(width: 1100, height: 760)
 
         Settings { SettingsView() }
     }

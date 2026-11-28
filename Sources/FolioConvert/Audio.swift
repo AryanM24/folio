@@ -12,8 +12,11 @@ public nonisolated enum AudioConverter: FamilyConverter {
 
     static let losslessTargets: [Format] = [.alac, .flac, .wav, .aiff]
 
+    /// Sources with targets so far; ogg, opus, caf, aac, ac3, w64, m4b and mid join in 0.3.
+    static let sources: Set<Format> = [.m4a, .alac, .flac, .wav, .aiff, .mp3]
+
     public static func targets(from source: Format) -> [Target] {
-        guard source.family == .audio else { return [] }
+        guard sources.contains(source) else { return [] }
         // An .m4a may hold AAC or ALAC; the codec is only known once the file is open.
         let maybeLossy = source == .m4a || source == .mp3
         let aac = Target(

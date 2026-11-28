@@ -16,8 +16,14 @@ public nonisolated enum VideoConverter: FamilyConverter {
 
     static let containers: [Format] = [.mp4, .mov, .m4v]
 
+    /// Sources AVFoundation can't open: their own converter demuxes them.
+    static func delegate(_ format: Format) -> (any FamilyConverter.Type)? {
+        [.mkv, .webm].contains(format) ? MatroskaConverter.self : nil
+    }
+
     public static func targets(from source: Format) -> [Target] {
-        guard source.family == .video else { return [] }
+        if let delegate = delegate(source) { return delegate.targets(from: source) }
+        guard containers.contains(source) else { return [] }
         let compress = Target(
             to: source, fidelity: .lossy, losslessAvailable: false, drops: ["metadata"],
             notes: "Re-encodes with hardware HEVC; a file that's already compact is kept as is.")
@@ -38,6 +44,7 @@ public nonisolated enum VideoConverter: FamilyConverter {
     }
 
     public static func convert(_ job: Job) async throws -> Outcome {
+        if let delegate = delegate(job.source) { return try await delegate.convert(job) }
         let asset = AVURLAsset(url: job.input)
         let info = try await Info.load(asset)
         switch job.target {
@@ -63,6 +70,7 @@ public nonisolated enum VideoConverter: FamilyConverter {
     }
 
     public static func inspect(_ url: URL, format: Format) async throws -> [String: JSONValue] {
+        if let delegate = delegate(format) { return try await delegate.inspect(url, format: format) }
         let info = try await Info.load(AVURLAsset(url: url))
         var meta: [String: JSONValue] = [
             "duration_s": .double((info.duration * 1000).rounded() / 1000), "has_audio": .bool(info.audio != nil),
@@ -79,7 +87,8 @@ public nonisolated enum VideoConverter: FamilyConverter {
     }
 
     public static func resource(for job: Job) -> Resource {
-        switch job.target {
+        if let delegate = delegate(job.source) { return delegate.resource(for: job) }
+        return switch job.target {
         case .m4a, .wav: .io
         case .gif: .videoEncode
         default:
