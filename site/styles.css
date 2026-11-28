@@ -312,70 +312,70 @@ button { font: inherit; color: inherit; }
 .bench .bar.us { background: var(--accent); }
 .bench-note { font-size: 12px; color: var(--muted); }
 
-/* ---------- CTA: a Mac desktop ---------- */
+/* ---------- CTA: the Dock ---------- */
 
-.cta { padding-bottom: 96px; }
-.desktop {
-  position: relative; overflow: hidden; border-radius: 28px; min-height: 620px;
-  display: flex; flex-direction: column; align-items: center; color: #fff;
-  /* An original wallpaper: Folio Blue light over deep ink, nothing borrowed. */
+.cta { padding: 32px 0 112px; }
+.cta-inner { display: grid; justify-items: center; gap: 16px; text-align: center; }
+.cta-inner h2 { font: 600 clamp(36px, 5vw, 56px)/1.05 var(--display); letter-spacing: -0.03em; text-wrap: balance; }
+.cta-inner > p { max-width: 30rem; font-size: 17px; color: var(--muted-on-bg); }
+.cta-inner .actions { margin-top: 8px; }
+
+/* A soft sky behind the glass, so the Dock has something to blur. Sizes are in cqw, so the
+   whole Dock scales as one picture from a phone to the desktop column. */
+.dock-stage {
+  container-type: inline-size;
+  width: 100%; margin-top: 48px; border-radius: 28px; overflow: hidden;
+  display: grid; place-items: center; padding: 9cqw 0 4cqw;
   background:
-    radial-gradient(120% 90% at 85% 110%, #0485F7 0%, rgb(4 133 247 / 0) 55%),
-    radial-gradient(90% 80% at 10% 0%, #4F3BB8 0%, rgb(79 59 184 / 0) 60%),
-    radial-gradient(70% 60% at 60% 40%, #1B2A6B 0%, rgb(27 42 107 / 0) 70%),
-    #0B1026;
-  box-shadow: var(--shadow-window);
+    radial-gradient(60% 90% at 20% 0%, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0) 70%),
+    linear-gradient(180deg, #C9DCF4 0%, #DCE6F3 45%, #EEE7F1 100%);
+  user-select: none;
 }
-.desk-menubar { align-self: stretch; display: flex; justify-content: space-between; align-items: center; height: 30px; padding: 0 16px; background: rgb(255 255 255 / 0.12); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); font-size: 13px; }
-.desk-app { display: flex; gap: 18px; } .desk-app b { font-weight: 700; }
-.desk-status { display: flex; align-items: center; gap: 14px; font-weight: 500; }
-.desk-status .icon { width: 14px; height: 14px; stroke-width: 2; }
-.cta-copy { display: grid; justify-items: center; gap: 16px; text-align: center; margin: auto 0; padding: 64px 24px 160px; }
-.cta-copy h2 { font: 600 clamp(36px, 5vw, 60px)/1.05 var(--display); letter-spacing: -0.03em; text-wrap: balance; }
-.cta-copy p { max-width: 30rem; font-size: 17px; color: rgb(255 255 255 / 0.78); }
-.cta-copy .actions { margin-top: 8px; }
-.cta .btn-primary { background: #fff; color: #18181B; }
-.cta .btn-primary:hover { background: #EDEDF0; }
+:root[data-theme="dark"] .dock-stage { background: radial-gradient(60% 90% at 20% 0%, rgb(80 110 180 / 0.35), transparent 70%), linear-gradient(180deg, #121A2C 0%, #161B29 50%, #1C1824 100%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dock-stage { background: radial-gradient(60% 90% at 20% 0%, rgb(80 110 180 / 0.35), transparent 70%), linear-gradient(180deg, #121A2C 0%, #161B29 50%, #1C1824 100%); } }
 
-/* The Dock: frosted glass, 64 px icons, running dots, Folio lifted under the pointer. */
-.dock-wrap { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; }
+/* The shelf: frosted glass, lit from above, with a bright top edge and a soft shadow. */
 .dock {
-  display: flex; align-items: flex-end; gap: 8px; height: 82px; padding: 8px 10px;
-  border-radius: 26px; background: rgb(255 255 255 / 0.16);
-  backdrop-filter: blur(30px) saturate(1.6); -webkit-backdrop-filter: blur(30px) saturate(1.6);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28), 0 10px 30px rgb(0 0 0 / 0.25);
+  --slot: 5.4cqw;
+  display: flex; align-items: flex-end; gap: 0.5cqw;
+  padding: 0.55cqw 0.9cqw 0.75cqw;
+  border-radius: 2.4cqw;
+  background: rgb(255 255 255 / 0.38);
+  backdrop-filter: blur(24px) saturate(1.8); -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.75), inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 1.6cqw 4cqw rgb(31 41 66 / 0.18);
 }
-.app {
-  position: relative; width: 64px; height: 64px; flex: none; border-radius: 15px;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.3), inset 0 0 0 0.5px rgb(255 255 255 / 0.25);
-  display: grid; place-items: center; transition: transform 200ms var(--ease);
+:root[data-theme="dark"] .dock { background: rgb(40 40 46 / 0.5); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 1.6cqw 4cqw rgb(0 0 0 / 0.45); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dock { background: rgb(40 40 46 / 0.5); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 1.6cqw 4cqw rgb(0 0 0 / 0.45); } }
+@media (prefers-reduced-transparency: reduce) { .dock { background: var(--surface); backdrop-filter: none; } }
+
+.slot { position: relative; width: var(--slot); height: var(--slot); flex: none; display: grid; place-items: center; }
+/* The system icons carry macOS's own padding and shadow, so they fill the slot as they are. */
+.slot > img { width: 100%; height: 100%; }
+/* Full-bleed artwork sits on the same 80 % grid, rounded and shadowed the way the Dock draws it. */
+.dock-tile { position: relative; width: 80%; height: 80%; border-radius: 22.5%; overflow: hidden; box-shadow: 0 0.25cqw 0.6cqw rgb(0 0 0 / 0.22); }
+.dock-tile img { width: 100%; height: 100%; }
+/* macOS lights a Dock icon from above: a sheen down the tile and a rim brightest on top. */
+.sheen { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.03) 45%, rgb(0 0 0 / 0.12)); box-shadow: inset 0 0.08cqw 0 rgb(255 255 255 / 0.22), inset 0 0 0 0.05cqw rgb(255 255 255 / 0.1); }
+.running::after { content: ""; position: absolute; left: 50%; bottom: -0.55cqw; width: 0.3cqw; height: 0.3cqw; margin-left: -0.15cqw; border-radius: 50%; background: rgb(29 29 31 / 0.6); }
+:root[data-theme="dark"] .running::after { background: rgb(255 255 255 / 0.7); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .running::after { background: rgb(255 255 255 / 0.7); } }
+
+/* Folio, raised the way the Dock lifts an app you point at, with its name above it. */
+.is-folio { transform: translateY(-1.3cqw); }
+.is-folio .dock-tile { box-shadow: 0 0.9cqw 1.6cqw rgb(0 0 0 / 0.26), 0 0.2cqw 0.5cqw rgb(0 0 0 / 0.18); }
+.is-folio.running::after { bottom: -1.85cqw; }
+.dock-label {
+  position: absolute; bottom: calc(100% + 0.9cqw); left: 50%; transform: translateX(-50%);
+  padding: 0.25cqw 0.8cqw; border-radius: 0.55cqw; white-space: nowrap;
+  font: 500 max(11px, 1.05cqw)/1.35 var(--font); color: #1D1D1F;
+  background: rgb(246 246 248 / 0.86); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 0.3cqw 1cqw rgb(0 0 0 / 0.14);
 }
-.app > i { display: block; width: 60%; height: 60%; background: center / contain no-repeat; }
-.a-files { background: linear-gradient(#5AC8FA, #1E7BE0); }
-.a-files > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E"); }
-.a-web { background: linear-gradient(#F4F4F6, #D9DCE2); }
-.a-web > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232D7FF9' stroke-width='1.6'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'/%3E%3C/svg%3E"); }
-.a-mail { background: linear-gradient(#64B5FF, #2F80ED); }
-.a-mail > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.6' stroke-linejoin='round'%3E%3Crect x='3' y='6' width='18' height='13' rx='2'/%3E%3Cpath d='m3 7 9 6 9-6'/%3E%3C/svg%3E"); }
-.a-notes { background: linear-gradient(#FFFFFF, #F1F1F1); }
-.a-notes > i { width: 100%; height: 100%; border-radius: 15px; background: linear-gradient(#FFD43B 0 24%, transparent 24%), repeating-linear-gradient(transparent 0 9px, #E3E3E3 9px 10px) 0 22px / 100% calc(100% - 22px) no-repeat; }
-.a-cal { background: #fff; display: flex; flex-direction: column; justify-content: center; gap: 0; color: #18181B; }
-.a-cal b { font-size: 11px; font-weight: 600; color: #FF3B30; line-height: 1; }
-.a-cal i { font-style: normal; font-size: 30px; font-weight: 400; line-height: 1.05; letter-spacing: -0.02em; }
-.a-folio { background: transparent; box-shadow: 0 2px 8px rgb(0 0 0 / 0.35); transform: translateY(-14px) scale(1.22); transform-origin: bottom; z-index: 1; }
-.a-folio img { width: 100%; height: 100%; border-radius: 15px; }
-.a-folio em { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) scale(0.82); padding: 3px 10px; border-radius: 6px; background: rgb(40 40 44 / 0.85); color: #fff; font: 500 13px/1.4 var(--font); white-space: nowrap; box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.2); }
-.a-music { background: linear-gradient(#FF6B8A, #F5344F); }
-.a-music > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 18.5a2.5 2.5 0 1 1-2-2.45V6l11-2v11.5a2.5 2.5 0 1 1-2-2.45V7.3L9 8.6z'/%3E%3C/svg%3E"); }
-.a-term { background: linear-gradient(#3A3A3E, #1C1C1F); }
-.a-term > i { width: auto; height: auto; font: 600 18px/1 var(--mono); font-style: normal; color: #E8E8EA; align-self: start; justify-self: start; margin: 10px 0 0 10px; }
-.a-downloads { background: linear-gradient(#8EC5FF, #4A90E2); }
-.a-downloads > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14'/%3E%3C/svg%3E"); }
-.a-trash { background: linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.3)); }
-.a-trash > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5F5F7' stroke-width='1.5' stroke-linejoin='round'%3E%3Cpath d='M5 7h14l-1.2 13H6.2z'/%3E%3Cpath d='M9 10v7M12 10v7M15 10v7M4 7h16'/%3E%3C/svg%3E"); }
-.app.is-active::after, .a-files::after, .a-web::after, .a-term::after { content: ""; position: absolute; bottom: -7px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: rgb(255 255 255 / 0.85); }
-.a-folio::after { bottom: -12px !important; }
-.dock-sep { width: 1px; height: 54px; margin: 0 4px; align-self: center; background: rgb(255 255 255 / 0.3); }
+:root[data-theme="dark"] .dock-label { color: #F5F5F7; background: rgb(48 48 52 / 0.86); box-shadow: 0 0 0 0.5px rgb(255 255 255 / 0.16), 0 0.3cqw 1cqw rgb(0 0 0 / 0.4); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dock-label { color: #F5F5F7; background: rgb(48 48 52 / 0.86); box-shadow: 0 0 0 0.5px rgb(255 255 255 / 0.16), 0 0.3cqw 1cqw rgb(0 0 0 / 0.4); } }
+.divider { width: 1px; height: calc(var(--slot) * 0.8); margin: 0 0.4cqw; align-self: center; background: rgb(0 0 0 / 0.14); }
+:root[data-theme="dark"] .divider { background: rgb(255 255 255 / 0.18); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .divider { background: rgb(255 255 255 / 0.18); } }
 
 /* ---------- Footer: one line ---------- */
 
@@ -392,7 +392,6 @@ button { font: inherit; color: inherit; }
   .hero-copy > :nth-child(2) { animation-delay: 60ms; } .hero-copy > :nth-child(3) { animation-delay: 120ms; }
   .hero-copy > :nth-child(4) { animation-delay: 180ms; } .hero-copy > :nth-child(5) { animation-delay: 240ms; }
   .hero-shot { animation: rise 700ms var(--ease) 300ms both; }
-  .app:not(.a-folio):hover { transform: translateY(-6px) scale(1.08); }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .caret { animation: none; } }
@@ -414,14 +413,7 @@ button { font: inherit; color: inherit; }
   .convert-panel { width: 100%; }
   .result-card { position: static; width: 100%; }
   .shelf { margin: 6px auto 0; }
-  .desktop { min-height: 560px; border-radius: 20px; }
-  .desk-app span { display: none; }
-  .cta-copy { padding-bottom: 140px; }
-  .dock { gap: 6px; height: 60px; padding: 6px 8px; border-radius: 18px; }
-  .app { width: 46px; height: 46px; border-radius: 11px; }
-  .a-folio img { border-radius: 11px; }
-  .a-mail, .a-notes, .a-music, .a-downloads { display: none; }
-  .a-cal i { font-size: 22px; } .a-cal b { font-size: 9px; }
+  .dock-stage { border-radius: 20px; padding-top: 14cqw; }
   .footer-inner { justify-content: center; text-align: center; }
   .footer-inner nav { justify-content: center; }
 }

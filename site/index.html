@@ -243,36 +243,36 @@
       </div>
     </section>
 
-    <!-- CTA: a Mac desktop with Folio in the Dock. Every icon is drawn here; none is Apple's. -->
+    <!-- CTA: a macOS Dock with Folio in it. The other icons are the real ones, taken from the apps' own bundles. -->
     <section class="cta" aria-labelledby="cta-title">
-      <div class="container">
-        <div class="desktop">
-          <div class="desk-menubar" aria-hidden="true">
-            <span class="desk-app"><b>Folio</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span></span>
-            <span class="desk-status"><svg class="mb-glyph"><use href="#glyph"/></svg><svg class="icon"><use href="#i-search"/></svg><span>Thu 27 Nov 9:41</span></span>
-          </div>
-          <div class="cta-copy">
-            <h2 id="cta-title">Put every file in one place</h2>
-            <p>Free and open source. Drag Folio to Applications and it's in your Dock.</p>
-            <div class="actions">
-              <a class="btn btn-primary btn-lg" href="https://github.com/AryanM24/folio/releases/latest/download/Folio.dmg"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Download for Mac</a>
-              <a class="btn btn-glass btn-lg" href="https://github.com/AryanM24/folio#build-from-source">Build from source</a>
-            </div>
-          </div>
-          <div class="dock-wrap" aria-hidden="true">
-            <div class="dock">
-              <span class="app a-files"><i></i></span>
-              <span class="app a-web"><i></i></span>
-              <span class="app a-mail"><i></i></span>
-              <span class="app a-notes"><i></i></span>
-              <span class="app a-cal"><b>Nov</b><i>27</i></span>
-              <span class="app a-folio is-active"><img src="favicon.svg" alt=""><em>Folio</em></span>
-              <span class="app a-music"><i></i></span>
-              <span class="app a-term"><i>&gt;_</i></span>
-              <span class="dock-sep"></span>
-              <span class="app a-downloads"><i></i></span>
-              <span class="app a-trash"><i></i></span>
-            </div>
+      <div class="container cta-inner">
+        <h2 id="cta-title">Put every file in one place</h2>
+        <p>Free and open source. Drag Folio to Applications and it's in your Dock.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="https://github.com/AryanM24/folio/releases/latest/download/Folio.dmg"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Download for Mac</a>
+          <a class="btn btn-secondary btn-lg" href="https://github.com/AryanM24/folio#build-from-source">Build from source</a>
+        </div>
+        <div class="dock-stage" role="img" aria-label="The macOS Dock with Folio raised between Calendar and Claude">
+          <div class="dock">
+            <span class="slot running"><img src="assets/dock/finder.png" alt=""></span>
+            <span class="slot"><img src="assets/dock/apps.png" alt=""></span>
+            <span class="slot running"><img src="assets/dock/safari.png" alt=""></span>
+            <span class="slot"><img src="assets/dock/messages.png" alt=""></span>
+            <span class="slot running"><img src="assets/dock/mail.png" alt=""></span>
+            <span class="slot"><img src="assets/dock/photos.png" alt=""></span>
+            <span class="slot"><img src="assets/dock/notes.png" alt=""></span>
+            <span class="slot"><img src="assets/dock/calendar.png" alt=""></span>
+            <span class="slot running is-folio">
+              <span class="dock-label">Folio</span>
+              <span class="dock-tile"><img src="favicon.svg" alt=""><i class="sheen"></i></span>
+            </span>
+            <span class="slot running"><img src="assets/dock/claude.png" alt=""></span>
+            <span class="slot"><span class="dock-tile"><img src="assets/dock/chatgpt-app.png" alt=""></span></span>
+            <span class="slot running"><span class="dock-tile"><img src="assets/dock/cursor-app.png" alt=""></span></span>
+            <span class="slot running"><img src="assets/dock/terminal.png" alt=""></span>
+            <span class="divider"></span>
+            <span class="slot"><img src="assets/dock/downloads.png" alt=""></span>
+            <span class="slot"><img src="assets/dock/trash.png" alt=""></span>
           </div>
         </div>
       </div>
