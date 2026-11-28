@@ -470,7 +470,14 @@ public nonisolated enum VideoConverter: FamilyConverter {
         private let lock = NSLock()
         private var continuation: CheckedContinuation<Void, Never>?
 
-        func wait(_ c: CheckedContinuation<Void, Never>) { lock.withLock { continuation = c } }
+        /// Registers the pump's continuation; resumes it at once if `finish()` already ran.
+        func wait(_ c: CheckedContinuation<Void, Never>) {
+            let done = lock.withLock {
+                if !finished { continuation = c }
+                return finished
+            }
+            if done { c.resume() }
+        }
         /// Resumes the waiting pump exactly once, from the pump's queue or the watchdog.
         func finish() {
             let c: CheckedContinuation<Void, Never>? = lock.withLock {
