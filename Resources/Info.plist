@@ -251,6 +251,12 @@
 	<string>$(BUILD)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Folio transcribes your videos on this Mac to make captions and text-based edits. Audio never leaves your computer.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Folio records voice-overs for your video projects.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Folio records camera clips for your video projects.</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>15.0</string>
 	<key>NSHighResolutionCapable</key>
