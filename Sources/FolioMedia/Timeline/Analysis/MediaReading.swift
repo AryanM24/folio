@@ -49,7 +49,8 @@ nonisolated enum AudioReader {
         let expected = max(1, (range?.duration ?? duration).seconds * sampleRate * Double(channels))
         var read = 0
         var copy: [Float] = []
-        while let buffer = output.copyNextSampleBuffer() {
+        let pull = UncheckedSendable(output)
+        while let buffer = try await offPool({ UncheckedSendable(pull.value.copyNextSampleBuffer()) }).value {
             if Task.isCancelled {
                 reader.cancelReading()
                 throw CancellationError()
@@ -129,7 +130,8 @@ nonisolated enum VideoFrameReader {
             throw FolioError("Couldn't read the video: \(reader.error?.localizedDescription ?? "unknown error")")
         }
         let span = range ?? CMTimeRange(start: .zero, duration: info.duration)
-        while let sample = output.copyNextSampleBuffer() {
+        let pull = UncheckedSendable(output)
+        while let sample = try await offPool({ UncheckedSendable(pull.value.copyNextSampleBuffer()) }).value {
             if Task.isCancelled {
                 reader.cancelReading()
                 throw CancellationError()
@@ -156,4 +158,13 @@ nonisolated enum VideoFrameReader {
         default: .up
         }
     }
+}
+
+/// Runs a blocking call (a decoder read, a Vision request) on a GCD thread and waits for it
+/// without holding one of the few threads Swift concurrency shares between every task.
+nonisolated func offPool<T>(_ work: @escaping @Sendable () throws -> T) async throws -> T {
+    let result: UncheckedSendable<Result<T, any Error>> = await withCheckedContinuation { continuation in
+        DispatchQueue.global(qos: .userInitiated).async { continuation.resume(returning: UncheckedSendable(Result { try work() })) }
+    }
+    return try result.value.get()
 }

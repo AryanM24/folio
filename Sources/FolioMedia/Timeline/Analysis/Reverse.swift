@@ -46,7 +46,11 @@ nonisolated enum Reverse {
     private static func writeVideo(_ url: URL, maxDimension: Int, to output: URL, progress: AnalysisProgress?) async throws {
         let (asset, track, info) = try await VideoFrameReader.info(url, maxDimension: maxDimension)
         let (trackRange, minFrame) = try await track.load(.timeRange, .minFrameDuration)
-        let timings = try frameTimings(asset: asset, track: track, end: trackRange.end, minFrameDuration: minFrame)
+        try Task.checkCancellation()
+        let job = UncheckedSendable((asset, track))
+        let timings = try await offPool {
+            try frameTimings(asset: job.value.0, track: job.value.1, end: trackRange.end, minFrameDuration: minFrame)
+        }
         guard let last = timings.last else { throw FolioError("This video has no frames.") }
         let end = last.start + last.duration
 

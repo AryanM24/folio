@@ -81,7 +81,12 @@ nonisolated enum Stabilizer {
             try await VideoFrameReader.read(url, maxDimension: analysisDimension, progress: progress) { time, pixels in
                 guard let t = Time(time) else { return }
                 motion.times.append(t)
-                motion.steps.append(try previous.map { try Self.step(from: $0, to: pixels, orientation: orientation) } ?? .zero)
+                var step = Vec2.zero
+                if let previous {
+                    let pair = UncheckedSendable((previous, pixels))
+                    step = try await offPool { try Self.step(from: pair.value.0, to: pair.value.1, orientation: orientation) }
+                }
+                motion.steps.append(step)
                 previous = pixels
             }
             return motion

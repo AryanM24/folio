@@ -110,7 +110,11 @@ nonisolated enum Segmentation {
                     started = true
                 }
                 current.withUnsafeMutableBufferPointer { $0.update(repeating: 0) }
-                if let mask = try Self.mask(for: pixels, orientation: info.orientation, parameters: parameters) {
+                let frame = UncheckedSendable(pixels)
+                let found = try await offPool {
+                    UncheckedSendable(try Self.mask(for: frame.value, orientation: info.orientation, parameters: parameters))
+                }
+                if let mask = found.value {
                     let scaled = mask.transformed(
                         by: CGAffineTransform(scaleX: CGFloat(width) / mask.extent.width, y: CGFloat(height) / mask.extent.height))
                     context.render(
@@ -158,4 +162,10 @@ nonisolated enum Segmentation {
         memset(chroma, 128, CVPixelBufferGetBytesPerRowOfPlane(buffer, 1) * CVPixelBufferGetHeightOfPlane(buffer, 1))
         return buffer
     }
+}
+
+/// A Vision request run off the cooperative pool: Vision blocks while the Neural Engine works.
+nonisolated func perform(_ handler: VNImageRequestHandler, _ requests: [VNRequest]) async throws {
+    let job = UncheckedSendable((handler, requests))
+    try await offPool { try job.value.0.perform(job.value.1) }
 }

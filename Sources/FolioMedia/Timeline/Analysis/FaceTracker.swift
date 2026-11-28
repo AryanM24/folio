@@ -48,7 +48,7 @@ nonisolated enum FaceTracker {
                 let handler = VNImageRequestHandler(cvPixelBuffer: pixels, orientation: orientation)
                 if parameters.targets.contains(.faces) {
                     let request = VNDetectFaceRectanglesRequest()
-                    try handler.perform([request])
+                    try await perform(handler, [request])
                     detections.append((.faces, t, (request.results ?? []).map { padded(rect(of: $0.boundingBox), parameters.padding) }))
                 }
                 // Text recognition costs more; plates move slowly, so look every third sample.
@@ -58,7 +58,7 @@ nonisolated enum FaceTracker {
                     let request = VNRecognizeTextRequest()
                     request.recognitionLevel = .fast
                     request.usesLanguageCorrection = false
-                    try handler.perform([request])
+                    try await perform(handler, [request])
                     let aspect = Double(CVPixelBufferGetWidth(pixels)) / Double(max(1, CVPixelBufferGetHeight(pixels)))
                     let plates = (request.results ?? []).filter { observation in
                         guard let text = observation.topCandidates(1).first?.string else { return false }
