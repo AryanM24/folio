@@ -1,0 +1,15 @@
+{
+  "name": "folio",
+  "description": "Folio: convert, compress, preview and read files on your Mac from Claude Code",
+  "owner": {
+    "name": "Folio contributors",
+    "url": "https://github.com/AryanM24"
+  },
+  "plugins": [
+    {
+      "name": "folio",
+      "source": "./plugins/folio",
+      "description": "Connects Claude Code to the Folio app's local MCP server and teaches it when to use Folio for file conversions"
+    }
+  ]
+}
