@@ -256,7 +256,8 @@ private nonisolated struct Document {
         var m: CIImage
         switch mask.source {
         case .selection(let spec):
-            let selected = (try? SelectionRenderer.mask(spec, size: sourceSize, scale: scale, pixels: below)) ?? CIImage(color: .white)
+            let selected =
+                (try? SelectionRenderer.mask(spec, size: sourceSize, scale: scale, pixels: below, assets: assets)) ?? CIImage(color: .white)
             m = Self.encoded(selected.transformed(by: CGAffineTransform(translationX: rect.minX, y: rect.minY)), over: black)
         case .pixels(let id):
             guard let image = LayerCompositor.decoded(id, assets: assets) else { return nil }
