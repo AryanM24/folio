@@ -22,6 +22,9 @@ Sources/
   FolioImage/     Image editor (Core Image) and image tools
   FolioCode/      Plain text, Markdown and source code editor
   FolioMedia/     Audio and video player, trimming and export (AVFoundation)
+  FolioArchive/   Archive viewer: browse and extract zip, tar, 7z, rar, iso (libarchive)
+  FolioPreview/   Read-only Quick Look window for files Folio can't edit (iWork, PowerPoint, fonts, 3D)
+  CArchive/       Module map and hand-written header for the system libarchive (the SDK has no headers)
   FolioConvert/   The conversion engine: one converter per file family, no UI
   FolioAgent/     The `folio` CLI, the MCP server, path policy and agent setup
   FolioCLI/       `main.swift` for the `folio` binary (bundled as Contents/Helpers/folio)
@@ -31,6 +34,8 @@ scripts/          bundle.sh, make-icon.swift, snapshot.sh, launch-time.sh
 site/             Landing page deployed to Vercel
 docs/             This folder
 ```
+
+`FileKind` (FolioKit) lists the content types each editor opens; `Resources/Info.plist` declares the same ones (and imports the types macOS leaves dynamic, like `.mkv` and `.srt`). `make check-plist` fails when the two drift.
 
 Each editor is its own module so it can be built, tested and reviewed alone. Editor modules depend only on `FolioKit`, never on each other. `FolioConvert` reuses the document, spreadsheet and Markdown codecs; `FolioAgent` and the app sit on top of everything.
 
@@ -121,6 +126,7 @@ Tools never modify their inputs. They write new files next to the first input wi
 
 - **Contract** (`Model.swift`, `Engine.swift`, `Format.swift`). A request names inputs, a target `Format` and a `Quality` (`lossless`, `balanced` or `small`), plus an optional size budget, maximum dimension and output folder. Every input gets a `ConvertResult` with sizes, time, a `Fidelity` label, what was dropped, a verification and a stable error code. The same structs are the CLI's `--json` and the MCP `structuredContent`.
 - **The engine owns the rules.** It routes by source family, refuses `lossless` when the pair can't be (`LOSSLESS_UNAVAILABLE`, with lossless alternatives), writes to a temporary file in the destination, moves it into a free Finder-style name (never overwriting), throws away compressed copies that aren't at least 2 % smaller, and enforces size budgets.
+- **Every family has a converter.** `Engine.converter(for:)` throws `UNSUPPORTED_INPUT` rather than trapping. Formats that need their own reader route from their family's converter to a file of their own (`Video+Matroska.swift`, `Documents+Ebook.swift`, `Sheets+Import.swift`…), so each can grow without touching the shared files.
 - **Converters own the craft.** One `FamilyConverter` per family: `ImageConverter` (ImageIO, re-encoding straight from the source, thumbnail decoding for downscales), `PDFConverter` (Quartz filters per quality, parallel page rendering), `DocumentFamilyConverter` (the Cocoa text system and Folio's Markdown renderer), `SheetConverter` (Folio's spreadsheet codecs), `AudioConverter` (AVAudioFile) and `VideoConverter` (passthrough first, then hardware HEVC with decode-time scaling and a frame-rate cap).
 - **Verification.** Lossless results are checked after writing: decoded pixels, audio samples (or a hash of what was written, since AAC decoding isn't deterministic), compressed video samples, cell values and text.
 - **Scheduling.** A small actor limits work per resource: one job per core for CPU codecs, three for the hardware HEIC encoder, one video encode at a time, eight passthrough jobs.

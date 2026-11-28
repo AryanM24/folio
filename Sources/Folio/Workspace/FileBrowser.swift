@@ -261,6 +261,8 @@ extension FileKind {
         case .image: Color(hex: 0x8E4EC6).opacity(0.85)
         case .code: Hero.muted
         case .media: Color(hex: 0xF76B15).opacity(0.85)
+        case .archive: Color(hex: 0xA18072).opacity(0.85)
+        case .preview: Hero.muted
         }
     }
 }

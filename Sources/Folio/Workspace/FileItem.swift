@@ -81,6 +81,8 @@ nonisolated extension FileKind {
         case .image: "Images"
         case .code: "Text & Code"
         case .media: "Audio & Video"
+        case .archive: "Archives"
+        case .preview: "Previews"
         }
     }
 }

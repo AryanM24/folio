@@ -4,7 +4,7 @@ CLT_FRAMEWORKS := /Library/Developer/CommandLineTools/Library/Developer/Framewor
 # Command Line Tools ship Swift Testing outside the default search path; Xcode doesn't need this.
 TEST_FLAGS := $(if $(wildcard $(CLT_FRAMEWORKS)/Testing.framework),-Xswiftc -F$(CLT_FRAMEWORKS) -Xlinker -F$(CLT_FRAMEWORKS) -Xlinker -rpath -Xlinker $(CLT_FRAMEWORKS),)
 
-.PHONY: help build app run test lint clean launch-time mcp-check bench site-data brand
+.PHONY: help build app run test lint check-plist clean launch-time mcp-check bench site-data brand
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -23,6 +23,9 @@ test: ## Run every test suite
 
 lint: ## Check formatting (needs swift-format, bundled with Swift 6)
 	swift format lint --recursive --strict Sources Tests Package.swift
+
+check-plist: ## Check Info.plist declares exactly the content types FileKind opens
+	swift test $(TEST_FLAGS) --filter FileKindTests
 
 launch-time: app ## Measure cold launch to first window
 	scripts/launch-time.sh

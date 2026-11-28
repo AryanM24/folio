@@ -25,6 +25,13 @@ public nonisolated extension FamilyConverter {
     static func resource(for job: Job) -> Resource { .cpu }
 }
 
+public nonisolated extension ConvertError {
+    /// What a 0.3 stub throws until its work package fills it in.
+    static func notYet(_ job: Job) -> ConvertError {
+        ConvertError(.unsupportedPair, "\(job.source.title) → \(job.target.title) is coming in Folio 0.3.")
+    }
+}
+
 public nonisolated enum ExtractKind: String, Codable, Sendable { case markdown, text }
 
 public nonisolated struct ExtractOptions: Sendable {
@@ -74,21 +81,28 @@ public nonisolated struct FileInfo: Codable, Sendable {
 public nonisolated enum Engine {
     public static let converters: [any FamilyConverter.Type] = [
         ImageConverter.self, PDFConverter.self, DocumentFamilyConverter.self, SheetConverter.self,
-        AudioConverter.self, VideoConverter.self,
+        AudioConverter.self, VideoConverter.self, ArchiveConverter.self, FontConverter.self, SubtitleConverter.self,
+        ModelConverter.self, DataConverter.self,
     ]
 
-    static func converter(for format: Format) -> any FamilyConverter.Type {
-        converters.first { $0.family == format.family }!
+    static func converter(for format: Format) throws -> any FamilyConverter.Type {
+        guard let converter = converters.first(where: { $0.family == format.family }) else {
+            throw ConvertError(.unsupportedInput, "Folio can't convert \(format.title) files yet.")
+        }
+        return converter
     }
 
     /// Every supported pair, for `folio formats`, docs and the Quick Action menus.
     public static func formats() -> [(from: Format, targets: [Target])] {
-        Format.allCases.map { ($0, converter(for: $0).targets(from: $0)) }.filter { !$0.targets.isEmpty }
+        Format.allCases.map { ($0, targets(from: $0)) }.filter { !$0.targets.isEmpty }
     }
 
     public static func targets(for url: URL) -> [Target] {
-        guard let format = Format.detect(url) else { return [] }
-        return converter(for: format).targets(from: format)
+        Format.detect(url).map(targets(from:)) ?? []
+    }
+
+    static func targets(from format: Format) -> [Target] {
+        (try? converter(for: format))?.targets(from: format) ?? []
     }
 
     // MARK: Inspect and extract
@@ -103,14 +117,12 @@ public nonisolated enum Engine {
                 path: url.path, bytes: bytes, meta: [:], targets: [],
                 error: ConvertError(.unsupportedInput, "Folio doesn't know “.\(url.pathExtension)” files."))
         }
-        let converter = converter(for: format)
         do {
-            let meta = try await converter.inspect(url, format: format)
-            return FileInfo(
-                path: url.path, kind: format.family, format: format, bytes: bytes, meta: meta, targets: converter.targets(from: format))
+            let meta = try await converter(for: format).inspect(url, format: format)
+            return FileInfo(path: url.path, kind: format.family, format: format, bytes: bytes, meta: meta, targets: targets(from: format))
         } catch {
             return FileInfo(
-                path: url.path, kind: format.family, format: format, bytes: bytes, meta: [:], targets: converter.targets(from: format),
+                path: url.path, kind: format.family, format: format, bytes: bytes, meta: [:], targets: targets(from: format),
                 error: wrap(error))
         }
     }
@@ -171,7 +183,8 @@ public nonisolated enum Engine {
             return fail(ConvertError(.unsupportedInput, "Folio doesn't know “.\(input.pathExtension)” files."))
         }
         let target = request.target ?? source
-        let converter = converter(for: source)
+        let converter: any FamilyConverter.Type
+        do { converter = try Self.converter(for: source) } catch { return fail(error) }
         let targets = converter.targets(from: source)
         guard let pair = targets.first(where: { $0.to == target }) else {
             let message =
@@ -192,7 +205,7 @@ public nonisolated enum Engine {
         }
 
         let folder = request.outputDirectory ?? input.deletingLastPathComponent()
-        let baseName = input.deletingPathExtension().lastPathComponent
+        let baseName = Format.stem(of: input)
         let planned = folder.appending(path: "\(baseName).\(target.fileExtension)")
         let existsAlready =
             FileManager.default.fileExists(atPath: planned.path(percentEncoded: false))

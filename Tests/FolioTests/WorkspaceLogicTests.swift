@@ -150,7 +150,7 @@ struct LibraryTests {
         defer { try? FileManager.default.removeItem(at: dir) }
         try Data().write(to: dir.appending(path: "notes.md"))
         try Data().write(to: dir.appending(path: ".secret.md"))
-        try Data().write(to: dir.appending(path: "archive.zip"))
+        try Data().write(to: dir.appending(path: "setup.exe"))
         try FileManager.default.createDirectory(at: dir.appending(path: "Sub"), withIntermediateDirectories: true)
         let names = Set(FileItem.list(folder: dir).map(\.name))
         #expect(names == ["notes.md", "Sub"])

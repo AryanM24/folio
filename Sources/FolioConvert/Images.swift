@@ -10,7 +10,11 @@ public nonisolated enum ImageConverter: FamilyConverter {
     public static let family: Format.Family = .image
 
     /// What ImageIO reads on every supported macOS.
-    static let readable: Set<Format> = [.png, .jpeg, .heic, .avif, .tiff, .gif, .bmp, .jp2, .webp, .jxl]
+    static let readable: Set<Format> = [
+        .png, .jpeg, .heic, .avif, .tiff, .gif, .bmp, .jp2, .webp, .jxl, .raw, .psd, .ico, .icns, .exr, .hdr, .tga, .pbm, .apng, .heics,
+    ]
+    /// Readable formats that don't offer targets yet (0.3 adds them with their tests).
+    static let pending: Set<Format> = [.raw, .psd, .ico, .icns, .exr, .hdr, .tga, .pbm, .apng, .heics]
 
     /// Probed once: codec lists change between macOS releases (AVIF write especially).
     static let writable: Set<Format> = {
@@ -22,7 +26,7 @@ public nonisolated enum ImageConverter: FamilyConverter {
     static let losslessCodecs: Set<Format> = [.png, .tiff, .bmp, .jp2]
 
     public static func targets(from source: Format) -> [Target] {
-        guard readable.contains(source) else { return [] }
+        guard readable.contains(source), !pending.contains(source) else { return [] }
         let images = Format.allCases.filter { writable.contains($0) }.map { to -> Target in
             var drops: [String] = []
             if source == .gif && to != .gif { drops.append("animation") }

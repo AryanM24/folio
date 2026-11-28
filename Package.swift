@@ -21,7 +21,7 @@ let engineSettings: [SwiftSetting] = [
     .enableUpcomingFeature("InternalImportsByDefault"),
 ]
 
-let editors = ["FolioPDF", "FolioDocs", "FolioSheets", "FolioImage", "FolioCode", "FolioMedia"]
+let editors = ["FolioPDF", "FolioDocs", "FolioSheets", "FolioImage", "FolioCode", "FolioMedia", "FolioArchive", "FolioPreview"]
 
 func editor(_ name: String, dependencies extra: [Target.Dependency] = []) -> Target {
     .target(
@@ -35,7 +35,9 @@ func editor(_ name: String, dependencies extra: [Target.Dependency] = []) -> Tar
 /// sorting, search, naming), which `@testable import Folio` reaches.
 let testTargets: [Target] =
     (["FolioKit"] + editors + ["Folio"]).map { name in
-        .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: uiSettings)
+        .testTarget(
+            name: "\(name)Tests", dependencies: [.target(name: name)] + (name == "FolioArchive" ? ["CArchive"] : []),
+            swiftSettings: uiSettings)
     }
     + ["FolioConvert", "FolioAgent"].map { name in
         .testTarget(name: "\(name)Tests", dependencies: [.target(name: name)], swiftSettings: engineSettings)
@@ -69,7 +71,7 @@ let package = Package(
         ),
         .target(
             name: "FolioConvert",
-            dependencies: ["FolioKit", "FolioDocs", "FolioSheets", "FolioCode"],
+            dependencies: ["FolioKit", "FolioDocs", "FolioSheets", "FolioCode", "CArchive"],
             swiftSettings: engineSettings
         ),
         .target(name: "FolioKit", swiftSettings: uiSettings),
@@ -79,6 +81,11 @@ let package = Package(
         editor("FolioImage"),
         editor("FolioCode"),
         editor("FolioMedia", dependencies: ["FolioConvert"]),
+        editor("FolioArchive", dependencies: ["CArchive"]),
+        editor("FolioPreview"),
+        // The system libarchive (/usr/lib/libarchive.2.dylib). The SDK ships no headers, so
+        // `shim.h` declares only the functions Folio calls.
+        .systemLibrary(name: "CArchive"),
     ]
         + testTargets
 )

@@ -130,6 +130,7 @@ public nonisolated enum SheetConverter: FamilyConverter {
     // MARK: Reading
 
     static func read(_ url: URL, as format: Format) throws -> Workbook {
+        if SheetImport.formats.contains(format) { return try SheetImport.workbook(url, as: format) }
         let data: Data
         do { data = try Data(contentsOf: url, options: .mappedIfSafe) } catch {
             throw ConvertError(.notFound, "Couldn't read \(url.lastPathComponent).")

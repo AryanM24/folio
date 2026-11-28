@@ -16,7 +16,18 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
     /// What the Cocoa text system doesn't read from Word and OpenDocument files.
     static let wordDrops = ["headers and footers", "footnotes", "comments", "tracked changes"]
 
+    /// Formats the Cocoa text system can't read or write: their own converters handle them.
+    static func delegate(_ format: Format) -> (any FamilyConverter.Type)? {
+        switch format {
+        case .epub: EbookConverter.self
+        case .eml, .mbox: MailConverter.self
+        case .pptx: SlidesConverter.self
+        default: nil
+        }
+    }
+
     public static func targets(from source: Format) -> [Target] {
+        if let delegate = delegate(source) { return delegate.targets(from: source) }
         guard sources.contains(source) else { return [] }
         return outputs.filter { $0 != source }.map { target(from: source, to: $0) }
     }
@@ -45,6 +56,7 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
     }
 
     public static func convert(_ job: Job) async throws -> Outcome {
+        if let delegate = delegate(job.source) ?? delegate(job.target) { return try await delegate.convert(job) }
         let pair = target(from: job.source, to: job.target)
         // Text is already Markdown, and lossless Markdown → text means "keep the source".
         if (job.source, job.target) == (.txt, .md) || ((job.source, job.target) == (.md, .txt) && job.quality == .lossless) {
@@ -78,6 +90,7 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
     }
 
     public static func inspect(_ url: URL, format: Format) async throws -> [String: JSONValue] {
+        if let delegate = delegate(format) { return try await delegate.inspect(url, format: format) }
         let data = try readInput(url)
         return try await onMain(format == .html) {
             let (text, attributes) = try read(data, as: format)
@@ -96,6 +109,7 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
     }
 
     public static func extract(_ url: URL, format: Format, as kind: ExtractKind, options: ExtractOptions) async throws -> String {
+        if let delegate = delegate(format) { return try await delegate.extract(url, format: format, as: kind, options: options) }
         let data = try readInput(url)
         if format == .md || format == .txt { return decode(data) }
         return try await onMain(format == .html) {
@@ -104,7 +118,7 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
         }
     }
 
-    public static func resource(for job: Job) -> Resource { .cpu }
+    public static func resource(for job: Job) -> Resource { (delegate(job.source) ?? delegate(job.target))?.resource(for: job) ?? .cpu }
 
     // MARK: Producing
 
