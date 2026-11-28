@@ -170,7 +170,7 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
             throw ConvertError(.unsupportedInput, "Folio can't read \(format.title) files as documents.")
         }
         do {
-            return try DocumentCodec.read(format == .html ? Data(withoutRemoteResources(decode(data)).utf8) : data, as: docFormat)
+            return try DocumentCodec.read(format == .html ? Data(lockedDown(decode(data)).utf8) : data, as: docFormat)
         } catch {
             throw ConvertError(.corruptInput, error.localizedDescription)
         }
@@ -187,10 +187,11 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
     static let remoteAttribute = try! NSRegularExpression(
         pattern: #"\b(src|href|srcset|data|poster|background|lowsrc|dynsrc)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)"#, options: [.caseInsensitive])
     static let cssURL = try! NSRegularExpression(pattern: #"url\(\s*(['"]?)(.*?)\1\s*\)"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let cssString = try! NSRegularExpression(pattern: #""[^"]*"|'[^']*'"#)
     static let cssImport = try! NSRegularExpression(pattern: #"@import\b[^;]*;?"#, options: [.caseInsensitive])
     static let cssBlock = try! NSRegularExpression(
-        pattern: #"(<style\b[^>]*>)(.*?)(</style\s*>)|(\bstyle\s*=\s*)("[^"]*"|'[^']*')"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
-    static let entity = try! NSRegularExpression(pattern: #"&(#x[0-9a-f]+|#[0-9]+|colon|tab|newline|sol|period);?"#, options: [.caseInsensitive])
+        pattern: #"(<style\b[^>]*>)(.*?)(</style\s*>)|(\bstyle\s*=\s*)("[^"]*"|'[^']*'|[^\s>]+)"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
+    static let entity = try! NSRegularExpression(pattern: #"&(#x[0-9a-f]+|#[0-9]+|colon|tab|newline|sol|period|quot|apos|amp|lpar|rpar|bsol|lt|gt);?"#, options: [.caseInsensitive])
     static let cssEscape = try! NSRegularExpression(pattern: #"\\([0-9a-fA-F]{1,6})\s?|\\(.)"#)
 
     /// The HTML with every resource URL that could reach the network blanked, so importing or
@@ -207,6 +208,14 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
                 case "tab", "newline": return ""
                 case "sol": return "/"
                 case "period": return "."
+                case "quot": return "\""
+                case "apos": return "'"
+                case "amp": return "&"
+                case "lpar": return "("
+                case "rpar": return ")"
+                case "bsol": return "\\"
+                case "lt": return "<"
+                case "gt": return ">"
                 default:
                     let hex = token.hasPrefix("#x")
                     let digits = token.dropFirst(hex ? 2 : 1)
@@ -234,8 +243,13 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
                 return ns.substring(with: match.range(at: 2))
             }
             let noImports = replacing(cssImport, in: unescaped) { _, _ in "" }
-            return replacing(cssURL, in: noImports) { match, ns in
+            let noURLs = replacing(cssURL, in: noImports) { match, ns in
                 isSafe(ns.substring(with: match.range(at: 2))) ? ns.substring(with: match.range) : "none"
+            }
+            // image-set(), cross-fade() and friends take bare strings as URLs: blank any unsafe one.
+            return replacing(cssString, in: noURLs) { match, ns in
+                let quoted = ns.substring(with: match.range)
+                return isSafe(String(quoted.dropFirst().dropLast())) ? quoted : "\"\""
             }
         }
         let tagsDone = replacing(loadingTag, in: html) { match, ns in
@@ -251,11 +265,19 @@ public nonisolated enum DocumentFamilyConverter: FamilyConverter {
             if match.range(at: 2).location != NSNotFound {
                 return ns.substring(with: match.range(at: 1)) + safeCSS(ns.substring(with: match.range(at: 2))) + ns.substring(with: match.range(at: 3))
             }
-            let quoted = ns.substring(with: match.range(at: 5))
-            let quote = quoted.prefix(1)
-            let inner = safeCSS(String(quoted.dropFirst().dropLast())).replacingOccurrences(of: String(quote), with: "")
-            return ns.substring(with: match.range(at: 4)) + quote + inner + quote
+            let value = ns.substring(with: match.range(at: 5))
+            let isQuoted = value.hasPrefix("\"") || value.hasPrefix("'")
+            let inner = safeCSS(isQuoted ? String(value.dropFirst().dropLast()) : value)
+            // Re-quote with double quotes; any quote inside would end the attribute early.
+            return ns.substring(with: match.range(at: 4)) + "\"" + inner.replacingOccurrences(of: "\"", with: "'") + "\""
         }
+    }
+
+    /// Sanitized HTML with a Content-Security-Policy in front that forbids every load except
+    /// inline styles and `data:` images: a second wall in case something slips past the regexes.
+    static func lockedDown(_ html: String) -> String {
+        #"<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:">"#
+            + withoutRemoteResources(html)
     }
 
     static func replacing(_ regex: NSRegularExpression, in string: String, with transform: (NSTextCheckingResult, NSString) -> String) -> String {

@@ -176,6 +176,8 @@ struct DocumentConverterTests {
             #"<p style="background: u\72l(https://evil.example/x.png)">x</p>"#,
             #"<style>@import 'https://evil.example/a.css';</style>"#,
             #"<style>p { background: url(&quot;https://evil.example/x.png&quot;) }</style>"#,
+            #"<style>p { background: image-set("https://evil.example/x.png" 1x) }</style>"#,
+            #"<p style=background:url(https://evil.example/x.png)>x</p>"#,
         ])
     func obfuscatedURLs(html: String) {
         #expect(!DocumentFamilyConverter.withoutRemoteResources(html).contains("evil.example"))
