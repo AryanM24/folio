@@ -234,7 +234,9 @@ extension ImageEditorModel {
         var hard = stroke
         hard.hardness = 1
         hard.opacity = 1
-        guard let area = RetouchRenderer.mask(for: hard, in: space, pixels: below) else { throw FolioError("That spot is empty.") }
+        guard let area = RetouchRenderer.mask(for: hard, in: space, pixels: below, assets: assets) else {
+            throw FolioError("That spot is empty.")
+        }
         // A pixel of slack, so the soft edge of the brush blends into filled pixels.
         let toOrigin = CGAffineTransform(translationX: -rect.minX, y: -rect.minY)
         let hole = area.applyingFilter("CIMorphologyMaximum", parameters: [kCIInputRadiusKey: 2]).cropped(to: rect).transformed(

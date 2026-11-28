@@ -18,7 +18,7 @@ nonisolated enum RetouchRenderer {
         for stroke in strokes {
             // shortcut: clone and heal always sample the composite below (`sampleAllLayers`
             // = false needs the base alone, which the compositor doesn't pass in).
-            guard let mask = mask(for: stroke, in: space, pixels: image) else { continue }
+            guard let mask = mask(for: stroke, in: space, pixels: image, assets: assets) else { continue }
             let effect = effect(of: stroke, on: image, mask: mask, space: space, assets: assets)
             image = effect.applyingFilter(
                 "CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: image, kCIInputMaskImageKey: mask]
@@ -122,7 +122,7 @@ nonisolated enum RetouchRenderer {
 
     /// Where `stroke` applies (white), already scaled by its opacity. Redaction is always
     /// hard-edged and fully opaque: a soft or partial redaction would leak what it hides.
-    static func mask(for stroke: RetouchStroke, in space: Space, pixels: CIImage? = nil) -> CIImage? {
+    static func mask(for stroke: RetouchStroke, in space: Space, pixels: CIImage? = nil, assets: (any AssetStore)? = nil) -> CIImage? {
         let redact = stroke.tool == .redact
         let hardness = redact ? 1 : min(1, max(0, stroke.hardness))
         let opacity = redact ? 1 : min(1, max(0, stroke.opacity))
@@ -144,7 +144,9 @@ nonisolated enum RetouchRenderer {
                     sigma: feather)
             }
         case .selection(let spec):
-            guard let selected = try? SelectionRenderer.mask(spec, size: space.sourceSize, scale: space.scale, pixels: pixels) else {
+            guard
+                let selected = try? SelectionRenderer.mask(spec, size: space.sourceSize, scale: space.scale, pixels: pixels, assets: assets)
+            else {
                 return nil
             }
             mask = selected.transformed(by: CGAffineTransform(translationX: space.extent.minX, y: space.extent.minY))
