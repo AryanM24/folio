@@ -1,0 +1,14 @@
+{
+  "name": "folio",
+  "displayName": "Folio",
+  "version": "0.2.0",
+  "description": "Convert, compress, preview and read local documents, spreadsheets, images, PDFs, audio and video with the Folio Mac app. Needs Folio in /Applications.",
+  "author": {
+    "name": "Folio contributors",
+    "url": "https://github.com/AryanM24"
+  },
+  "homepage": "https://github.com/AryanM24/folio/blob/main/docs/AGENTS.md",
+  "repository": "https://github.com/AryanM24/folio",
+  "license": "MIT",
+  "keywords": ["macos", "convert", "pdf", "images", "video", "documents", "mcp"]
+}

@@ -8,6 +8,7 @@ struct SettingsView: View {
         TabView {
             Tab("General", systemImage: "gearshape") { GeneralSettings() }
             Tab("Editor", systemImage: "chevron.left.forwardslash.chevron.right") { CodeSettings() }
+            Tab("Agents", systemImage: "sparkles") { AgentsSettings() }
         }
         .frame(width: 460)
         .scenePadding()

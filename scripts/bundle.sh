@@ -14,11 +14,16 @@ BUILD="$(git -C "$ROOT" rev-list --count HEAD 2>/dev/null || echo 1)"
 APP="$ROOT/build/Folio.app"
 
 swift build --package-path "$ROOT" -c "$CONFIG" --product Folio
-BIN="$(swift build --package-path "$ROOT" -c "$CONFIG" --show-bin-path)/Folio"
+swift build --package-path "$ROOT" -c "$CONFIG" --product folio-cli
+BIN_DIR="$(swift build --package-path "$ROOT" -c "$CONFIG" --show-bin-path)"
+BIN="$BIN_DIR/Folio"
 
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Helpers" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Folio"
+# The `folio` command and MCP server. Helpers/, not MacOS/: `folio` and `Folio` would be
+# the same file on a case-insensitive volume.
+cp "$BIN_DIR/folio-cli" "$APP/Contents/Helpers/folio"
 sed -e "s/\$(VERSION)/$VERSION/" -e "s/\$(BUILD)/$BUILD/" "$ROOT/Resources/Info.plist" > "$APP/Contents/Info.plist"
 
 # Finder Quick Actions / Services, generated from the tool catalog in code.
@@ -39,5 +44,8 @@ if [[ ! -f "$ROOT/build/AppIcon.icns" || "$ROOT/scripts/make-icon.swift" -nt "$R
 fi
 cp "$ROOT/build/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 
+# Sign inside out: the helper first, then the app that seals it.
+codesign --force --options runtime --identifier app.folio.Folio.cli --sign - "$APP/Contents/Helpers/folio" 2>/dev/null
 codesign --force --options runtime --entitlements "$ROOT/Resources/Folio.entitlements" --sign - "$APP" 2>/dev/null
+codesign --verify --deep --strict "$APP"
 echo "Built $APP ($VERSION, build $BUILD, $CONFIG)"
