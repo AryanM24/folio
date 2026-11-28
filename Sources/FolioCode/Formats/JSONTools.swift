@@ -5,22 +5,22 @@ import Foundation
 /// `JSONSerialization` would reorder keys and rewrite numbers (`1.0` → `1`), which is
 /// not what anyone wants from "Format". This is a small strict parser (RFC 8259) that copies
 /// strings and numbers through byte for byte and only changes whitespace.
-nonisolated enum JSONTools {
+public nonisolated enum JSONTools {
     /// Where and why the JSON is invalid. Lines and columns start at 1.
-    struct Issue: Error, Equatable, Sendable, CustomStringConvertible {
+    public struct Issue: Error, Equatable, Sendable, CustomStringConvertible {
         let line: Int
         let column: Int
         let message: String
         /// UTF-8 byte offset, for jumping to the spot.
         let offset: Int
-        var description: String { "Line \(line), column \(column): \(message)" }
+        public var description: String { "Line \(line), column \(column): \(message)" }
     }
 
     static func validate(_ text: String) -> Issue? {
         do { _ = try run(text, style: .validate); return nil } catch { return error }
     }
 
-    static func format(_ text: String, indent: String = "  ") throws(Issue) -> String {
+    public static func format(_ text: String, indent: String = "  ") throws(Issue) -> String {
         try run(text, style: .pretty(indent))
     }
 

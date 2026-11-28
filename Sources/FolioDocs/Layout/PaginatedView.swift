@@ -1,4 +1,4 @@
-import AppKit
+public import AppKit
 import FolioKit
 
 /// The document laid out on real pages, for Print and PDF export.
@@ -80,8 +80,8 @@ final class PaginatedView: NSView {
 
 /// Paginated PDF output through the print system (`NSPrintOperation`), so the PDF
 /// matches what Print produces, with the document's own paper and margins.
-enum PDFRenderer {
-    static func pdf(_ text: NSAttributedString, page: PageSetup) throws -> Data {
+public enum PDFRenderer {
+    public static func pdf(_ text: NSAttributedString, page: PageSetup) throws -> Data {
         let view = PaginatedView(text: text, page: page)
         // `pdfOperation(with:inside:to:)` renders one tall page; a print job saved to
         // a file uses the view's pagination (`knowsPageRange`/`rectForPage`).
