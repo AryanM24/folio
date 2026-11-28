@@ -408,7 +408,17 @@ button { font: inherit; color: inherit; }
   .convert-panel { width: 100%; }
   .result-card { position: static; width: 100%; }
   .shelf { margin: 6px auto 0; }
-  .dock-stage { padding-top: 12cqw; }
+  /* On a phone the whole Dock would be tiny, so zoom in on Folio: scale the Dock about
+     Folio's centre (55.8 % across: 8 slots and gaps in, of about 91 cqw), shift Folio to
+     the middle, and let the neighbours run off both edges into a fade. */
+  .dock-stage {
+    overflow: hidden; padding: 24cqw 0 6cqw; margin-top: 24px;
+    mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+  }
+  .dock { transform-origin: 55.8% 60%; transform: translateX(-5.25cqw) scale(2.6); }
+  /* Pre-scale size, so the label lands at the Dock's real 13 px. */
+  .dock-label { font-size: 1.35cqw; }
   .footer-inner { justify-content: center; text-align: center; }
   .footer-inner nav { justify-content: center; }
 }
