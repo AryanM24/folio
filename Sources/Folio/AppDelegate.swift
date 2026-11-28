@@ -2,8 +2,8 @@ import AppKit
 import FolioKit
 import Quartz
 
-/// App-level hooks SwiftUI doesn't expose: autosave timing, Finder Quick Actions, and the
-/// Quick Look panel's data source for the workspace.
+/// App-level hooks SwiftUI doesn't expose: autosave timing, Finder Quick Actions, Dock drops,
+/// the menu-bar Drop Shelf, and the Quick Look panel's data source for the workspace.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let log = Log.make("App")
 
@@ -20,6 +20,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.servicesProvider = self
         NSUpdateDynamicServices()
         MenuVisibility.install()
+        ShelfController.shared.update()
+    }
+
+    /// Files dropped on the Dock icon (or opened from Finder). Holding ⌥ converts instead.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        let files = urls.filter(\.isFileURL)
+        switch DockDrop.route(NSEvent.modifierFlags) {
+        case .convert: ConvertFlow.present(files)
+        case .open: files.forEach(WorkspaceModel.shared.openFile)
+        }
     }
 
     /// Quit fast: documents are already saved as you type, so there is nothing to wait for
@@ -48,5 +58,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
         ToolRunner.shared.start(tool, inputs: urls)
+    }
+
+    /// Finder › Quick Actions › Convert with Folio…
+    @objc func convertFiles(_ pasteboard: NSPasteboard, userData: String, error: AutoreleasingUnsafeMutablePointer<NSString?>) {
+        ConvertFlow.present(Self.fileURLs(pasteboard))
+    }
+
+    /// Finder › Quick Actions › Compress with Folio: same format, balanced, straight to the result card.
+    @objc func compressFiles(_ pasteboard: NSPasteboard, userData: String, error: AutoreleasingUnsafeMutablePointer<NSString?>) {
+        ConvertFlow.compress(Self.fileURLs(pasteboard))
+    }
+
+    private static func fileURLs(_ pasteboard: NSPasteboard) -> [URL] {
+        pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
     }
 }

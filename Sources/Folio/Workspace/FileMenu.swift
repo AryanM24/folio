@@ -48,6 +48,9 @@ struct FileMenu: View {
         }
         Divider()
         ShareLink("Share…", items: items.map(\.url))
+        if !files.isEmpty, files.count == items.count {
+            Button("Convert…") { ConvertFlow.present(files.map(\.url)) }
+        }
         let tools = model.tools(for: files)
         if !tools.isEmpty, files.count == items.count {
             Menu("Tools") {
