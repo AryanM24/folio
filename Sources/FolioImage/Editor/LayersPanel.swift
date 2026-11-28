@@ -172,7 +172,7 @@ private struct LayerRow: View {
         HStack(spacing: 8) {
             LayerThumbnail(model: model, layer: layer, mask: false)
             if layer.mask != nil { LayerThumbnail(model: model, layer: layer, mask: true) }
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(layer.name)
                     .font(.system(size: 13))
                     .foregroundStyle(selected ? Hero.accentSoftForeground : Hero.foreground)
@@ -250,7 +250,7 @@ private struct BackgroundRow: View {
                     .frame(width: 32, height: 32)
                     .background(Hero.surfaceSecondary)
                     .clipShape(.rect(cornerRadius: Hero.Radius.sm))
-                    .overlay(RoundedRectangle(cornerRadius: Hero.Radius.sm).strokeBorder(Hero.border, lineWidth: 1))
+                    .imageOutline(cornerRadius: Hero.Radius.sm)
                 Text("Photo")
                     .font(.system(size: 13))
                     .foregroundStyle(selected ? Hero.accentSoftForeground : Hero.foreground)
@@ -288,7 +288,7 @@ private struct LayerThumbnail: View {
         }
         .frame(width: 32, height: 32)
         .clipShape(.rect(cornerRadius: Hero.Radius.sm))
-        .overlay(RoundedRectangle(cornerRadius: Hero.Radius.sm).strokeBorder(Hero.border, lineWidth: 1))
+        .imageOutline(cornerRadius: Hero.Radius.sm)
         .task(id: Key(layer: layer, mask: mask)) {
             let (source, recipe, assets) = (model.source, model.recipe, model.document.assets)
             let layer = layer, mask = mask
@@ -342,5 +342,21 @@ private struct LayerThumbnail: View {
         }
         guard let image else { return nil }
         return RenderPipeline.context.createCGImage(image.cropped(to: extent), from: extent)
+    }
+}
+
+extension View {
+    /// A 1 pt outline for pictures: black at 10 % in light mode, white at 10 % in dark,
+    /// never a tinted gray that would pick up the surface behind it.
+    func imageOutline(cornerRadius: CGFloat) -> some View { modifier(ImageOutline(cornerRadius: cornerRadius)) }
+}
+
+private struct ImageOutline: ViewModifier {
+    let cornerRadius: CGFloat
+    @Environment(\.colorScheme) private var scheme
+    func body(content: Content) -> some View {
+        content.overlay {
+            RoundedRectangle(cornerRadius: cornerRadius).strokeBorder((scheme == .dark ? Color.white : .black).opacity(0.1), lineWidth: 1)
+        }
     }
 }

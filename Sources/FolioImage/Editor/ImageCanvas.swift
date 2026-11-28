@@ -135,9 +135,9 @@ final class CanvasMetalView: MTKView, MTKViewDelegate {
 
     private var monitor: Any?
     private var outputSpace = CGColorSpace(name: CGColorSpace.displayP3)!
-    /// `scripts/snapshot.sh` draws views into a bitmap, which skips Metal; then this view
-    /// draws itself with Core Graphics instead.
-    private static let drawsForSnapshots = ProcessInfo.processInfo.environment["FOLIO_SNAPSHOT_DIR"] != nil
+    /// `scripts/snapshot.sh` draws views into a bitmap, which skips Metal, so the canvas
+    /// shows the preview bitmap instead in that mode.
+    static let skippedBySnapshots = ProcessInfo.processInfo.environment["FOLIO_SNAPSHOT_DIR"] != nil
 
     init() {
         super.init(frame: .zero, device: CanvasRenderer.device)
@@ -196,16 +196,6 @@ final class CanvasMetalView: MTKView, MTKViewDelegate {
         }
         buffer.present(drawable)
         buffer.commit()
-    }
-
-    override func draw(_ dirtyRect: NSRect) {
-        guard Self.drawsForSnapshots else { return super.draw(dirtyRect) }
-        let scale = window?.backingScaleFactor ?? 2
-        let size = CGSize(width: bounds.width * scale, height: bounds.height * scale)
-        guard let image = composed(size: size), let ctx = NSGraphicsContext.current?.cgContext,
-            let cg = RenderPipeline.context.createCGImage(image, from: CGRect(origin: .zero, size: size))
-        else { return }
-        ctx.draw(cg, in: bounds)
     }
 
     private func composed(size: CGSize) -> CIImage? {
@@ -328,17 +318,30 @@ struct ImageCanvas: View {
         GeometryReader { geo in
             let viewport = model.viewport
             let picture = viewport.pictureFrame
+            // Only the visible part of the picture, so its shadow and outline stay cheap at any zoom.
+            let backdrop = picture.intersection(CGRect(origin: .zero, size: geo.size).insetBy(dx: -24, dy: -24))
             let panning = model.spacePanning || model.tool == .hand || model.tool == .zoom
             ZStack(alignment: .topLeading) {
                 if shownFrame != nil {
-                    // Only the visible part of the frame, so the shadow stays cheap at any zoom.
                     Rectangle().fill(Hero.surface)
-                        .frame(width: max(0, visibleBackdrop(picture, geo.size).width), height: max(0, visibleBackdrop(picture, geo.size).height))
-                        .offset(x: visibleBackdrop(picture, geo.size).minX, y: visibleBackdrop(picture, geo.size).minY)
+                        .frame(width: max(0, backdrop.width), height: max(0, backdrop.height))
                         .modifier(PictureShadow())
+                        .offset(x: backdrop.minX, y: backdrop.minY)
+                }
+                if CanvasMetalView.skippedBySnapshots, let preview = model.preview, !model.comparing {
+                    Image(decorative: preview, scale: 1).resizable()
+                        .frame(width: picture.width, height: picture.height)
+                        .offset(x: picture.minX, y: picture.minY)
                 }
                 MetalCanvas(model: model, frame: shownFrame, viewport: viewport, hasAlpha: hasAlpha, handlesMouse: panning)
                     .accessibilityHidden(true)
+                if shownFrame != nil {
+                    Color.clear
+                        .frame(width: max(0, backdrop.width), height: max(0, backdrop.height))
+                        .imageOutline(cornerRadius: 0)
+                        .offset(x: backdrop.minX, y: backdrop.minY)
+                        .allowsHitTesting(false)
+                }
                 if shownFrame == nil {
                     ProgressView().controlSize(.small).frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -372,10 +375,6 @@ struct ImageCanvas: View {
         guard model.comparing else { return model.frame }
         let image = model.source.proxyImage
         return CanvasFrame(image: image, extent: image.extent)
-    }
-
-    private func visibleBackdrop(_ picture: CGRect, _ size: CGSize) -> CGRect {
-        picture.intersection(CGRect(origin: .zero, size: size).insetBy(dx: -24, dy: -24))
     }
 
     private var accessibilityValue: String {

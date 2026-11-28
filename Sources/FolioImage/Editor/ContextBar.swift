@@ -235,11 +235,11 @@ struct ContextBar: View {
             HStack(spacing: 6) {
                 Image(systemName: symbol)
                 Text(current)
-                Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
+                Image(systemName: "chevron.down").font(.system(size: 9, weight: .medium))
             }
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(Hero.foreground)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 12)
             .frame(height: 32)
             .contentShape(.rect)
         }
@@ -278,7 +278,7 @@ private struct OptionsButton<Content: View>: View {
         } label: {
             HStack(spacing: 6) {
                 Text(summary).monospacedDigit()
-                Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold)).foregroundStyle(Hero.muted)
+                Image(systemName: "chevron.down").font(.system(size: 9, weight: .medium)).foregroundStyle(Hero.muted)
             }
         }
         .buttonStyle(.hero(.ghost, size: .sm, isSelected: shown))

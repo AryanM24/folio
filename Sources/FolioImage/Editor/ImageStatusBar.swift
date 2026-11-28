@@ -43,7 +43,7 @@ private struct CursorReadout: View {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color(cgColor: color.cgColor))
                         .frame(width: 10, height: 10)
-                        .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(Hero.border, lineWidth: 1))
+                        .imageOutline(cornerRadius: 2)
                     Text(color.hex)
                 }
             }
