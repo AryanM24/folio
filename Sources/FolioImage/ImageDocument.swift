@@ -22,6 +22,7 @@ public final class ImageDocument: ReferenceFileDocument {
     public struct Snapshot: Sendable {
         let source: SourceImage
         let recipe: EditRecipe
+        let assets: any AssetStore
         let session: SessionKey
     }
 
@@ -35,6 +36,8 @@ public final class ImageDocument: ReferenceFileDocument {
     private let storage: Mutex<EditRecipe>
     /// The original as opened (or restored from an edit session).
     let source: SourceImage
+    /// Pixel blobs the recipe's layers refer to (pasted images, fills, LUTs).
+    let assets: any AssetStore = InMemoryAssetStore()
     /// The key of the last edit session written for this document.
     let session: SessionKey
 
@@ -66,12 +69,12 @@ public final class ImageDocument: ReferenceFileDocument {
     }
 
     public nonisolated func snapshot(contentType: UTType) throws -> Snapshot {
-        readDuringSave { Snapshot(source: source, recipe: recipe, session: session) }
+        readDuringSave { Snapshot(source: source, recipe: recipe, assets: assets, session: session) }
     }
 
     public nonisolated func fileWrapper(snapshot: Snapshot, configuration: WriteConfiguration) throws -> FileWrapper {
         let type = configuration.contentType
-        let data = try ImageSaver.data(for: snapshot.source, recipe: snapshot.recipe, as: type)
+        let data = try ImageSaver.data(for: snapshot.source, recipe: snapshot.recipe, assets: snapshot.assets, as: type)
         Self.updateSession(snapshot: snapshot, output: data)
         return FileWrapper(regularFileWithContents: data)
     }

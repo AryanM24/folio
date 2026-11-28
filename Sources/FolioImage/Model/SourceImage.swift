@@ -104,6 +104,10 @@ nonisolated final class SourceImage: @unchecked Sendable {
         return mask
     }
 
+    /// The RAW development of this file at `scale` (`CIRAWFilter`), or `nil` when it isn't
+    /// a RAW file, so the pipeline uses the normal decode. Phase 0 stub; WP6 fills it.
+    func developed(_ raw: RAWSettings, scale: Double) throws -> CIImage? { nil }
+
     /// The cached subject mask, if it was already computed.
     var cachedSubjectMask: CIImage? { foregroundMask.withLock { $0 } }
 }

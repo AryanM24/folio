@@ -72,7 +72,7 @@ nonisolated struct EditSessionStore: Sendable {
         let key = Self.key(for: fileData)
         guard let json = try? Data(contentsOf: sessions.appending(path: "\(key).json")),
             let session = try? JSONDecoder().decode(Session.self, from: json),
-            session.version == EditRecipe.version,
+            session.version <= EditRecipe.version,
             let original = try? Data(contentsOf: originals.appending(path: session.originalKey)),
             Self.key(for: original) == session.originalKey
         else { return nil }

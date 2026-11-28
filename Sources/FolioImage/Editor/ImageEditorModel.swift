@@ -98,6 +98,13 @@ final class ImageEditorModel {
     // Crop
     var cropAspect: CropAspect = .free
 
+    // 0.3 tools. Each work package keeps its editing state in its own class (extensions
+    // can't add stored properties), declared next to its commands.
+    var tool: ImageTool = .move
+    let layerState = LayerEditingState()
+    let selectionState = SelectionState()
+    let retouchState = RetouchState()
+
     // Smart features
     var liveTextEnabled = false
     private(set) var filterThumbnails: [FilterPreset: CGImage] = [:]
@@ -355,7 +362,7 @@ final class ImageEditorModel {
             while let next = pendingRender {
                 pendingRender = nil
                 let source = self.source
-                let result = await Self.renderPreview(source: source, request: next)
+                let result = await Self.renderPreview(source: source, assets: document.assets, request: next)
                 switch result {
                 case .success(let image):
                     preview = image
@@ -386,12 +393,13 @@ final class ImageEditorModel {
         base.markup = []
         base.resize = nil
         let source = self.source
+        let assets = document.assets
         let longEdge = max(geometry.croppedSize.width, geometry.croppedSize.height)
         let scale = min(source.proxyScale, 180 / max(1.0, Double(longEdge)))
         thumbnailTask = Task {
             try? await Task.sleep(for: .milliseconds(120))
             guard !Task.isCancelled else { return }
-            let rendered = await Self.renderFilterThumbnails(source: source, recipe: base, scale: scale)
+            let rendered = await Self.renderFilterThumbnails(source: source, assets: assets, recipe: base, scale: scale)
             guard !Task.isCancelled else { return }
             filterBase = rendered.0
             filterThumbnails = rendered.1
@@ -401,8 +409,12 @@ final class ImageEditorModel {
     /// Renders one preview frame off the main actor (see `renderFilterThumbnails` for why
     /// this is a `@concurrent` function rather than a detached closure).
     @concurrent
-    nonisolated private static func renderPreview(source: SourceImage, request: RenderRequest) async -> sending Result<CGImage, any Error> {
-        Result { try RenderPipeline.render(source, recipe: request.recipe, scale: request.scale, cropped: !request.canvas) }
+    nonisolated private static func renderPreview(
+        source: SourceImage, assets: any AssetStore, request: RenderRequest
+    ) async -> sending Result<CGImage, any Error> {
+        Result {
+            try RenderPipeline.render(source, recipe: request.recipe, assets: assets, scale: request.scale, cropped: !request.canvas)
+        }
     }
 
     /// Renders the filter-picker thumbnails off the main actor.
@@ -413,9 +425,9 @@ final class ImageEditorModel {
     /// `sending`, so nothing is shared while it runs.
     @concurrent
     nonisolated private static func renderFilterThumbnails(
-        source: SourceImage, recipe: EditRecipe, scale: Double
+        source: SourceImage, assets: any AssetStore, recipe: EditRecipe, scale: Double
     ) async -> sending (CGImage?, [FilterPreset: CGImage]) {
-        guard let image = try? RenderPipeline.render(source, recipe: recipe, scale: scale) else { return (nil, [:]) }
+        guard let image = try? RenderPipeline.render(source, recipe: recipe, assets: assets, scale: scale) else { return (nil, [:]) }
         var out: [FilterPreset: CGImage] = [:]
         let ci = CIImage(cgImage: image)
         for preset in FilterPreset.allCases {

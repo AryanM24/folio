@@ -11,9 +11,10 @@ import Foundation
 ///
 /// The recipe is a value type, so undo is "put the previous recipe back".
 nonisolated struct EditRecipe: Codable, Equatable, Sendable {
-    /// Bumped when the encoding changes incompatibly; stored sessions with another
-    /// version are ignored (the file itself is still opened as-is).
-    static let version = 1
+    /// Bumped when the encoding changes. Older sessions decode with defaults for the
+    /// fields they lack; sessions from a newer Folio are ignored (the file itself still
+    /// opens as-is). 2 = 0.3: tone, layers, guides, RAW, HDR, perspective.
+    static let version = 2
 
     // MARK: Geometry
 
@@ -44,6 +45,22 @@ nonisolated struct EditRecipe: Codable, Equatable, Sendable {
     var removeBackground = false
     var markup: [MarkupItem] = []
 
+    // MARK: 0.3 (version 2)
+
+    /// Curves, levels, HSL, color balance, LUT… on the base image, after `adjustments`.
+    var tone = ToneSpec()
+    /// Above the developed original, bottom → top, in source pixels. Rendered before
+    /// geometry, so crop and rotation apply to the whole document.
+    var layers: [Layer] = []
+    /// Ruler guides. They don't change pixels.
+    var guides: [Guide] = []
+    /// Camera RAW development, or `nil` for the file's default rendering.
+    var raw: RAWSettings?
+    var hdr: HDRPolicy = .keepIfPresent
+    /// Perspective correction: these corners (unit coordinates of the oriented source,
+    /// top-left origin) become the canvas rectangle. Applied before flips and turns.
+    var perspective: Quad?
+
     // MARK: Saving
 
     /// Drop EXIF, GPS, IPTC and XMP when writing the file.
@@ -54,10 +71,11 @@ nonisolated struct EditRecipe: Codable, Equatable, Sendable {
     /// True when saving would produce the original file unchanged.
     var isIdentity: Bool { self == EditRecipe() }
 
-    /// True when only geometry-free, pixel-free settings differ (nothing to render).
+    /// False when only pixel-free settings (metadata stripping, guides) differ.
     var changesPixels: Bool {
         var copy = self
         copy.stripMetadata = false
+        copy.guides = []
         return copy != EditRecipe()
     }
 
@@ -77,6 +95,40 @@ nonisolated struct EditRecipe: Codable, Equatable, Sendable {
         filterStrength = min(1, max(0, filterStrength))
         crop = crop.standardized.intersection(Self.fullCrop)
         if crop.isNull || crop.width <= 0 || crop.height <= 0 { crop = Self.fullCrop }
+        tone.normalize()
+    }
+}
+
+// MARK: - Decoding older sessions
+
+nonisolated extension EditRecipe {
+    /// Every field is optional on decode, so a version 1 session (no tone, layers…)
+    /// opens with defaults for what it lacks.
+    init(from decoder: any Decoder) throws {
+        self.init()
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        func value<T: Decodable>(_ key: CodingKeys, _ fallback: T) throws -> T {
+            try c.decodeIfPresent(T.self, forKey: key) ?? fallback
+        }
+        crop = try value(.crop, crop)
+        quarterTurns = try value(.quarterTurns, quarterTurns)
+        straighten = try value(.straighten, straighten)
+        flipHorizontal = try value(.flipHorizontal, flipHorizontal)
+        flipVertical = try value(.flipVertical, flipVertical)
+        resize = try c.decodeIfPresent(PixelSize.self, forKey: .resize)
+        adjustments = try value(.adjustments, adjustments)
+        autoEnhance = try c.decodeIfPresent([FilterSpec].self, forKey: .autoEnhance)
+        filter = try c.decodeIfPresent(FilterPreset.self, forKey: .filter)
+        filterStrength = try value(.filterStrength, filterStrength)
+        removeBackground = try value(.removeBackground, removeBackground)
+        markup = try value(.markup, markup)
+        stripMetadata = try value(.stripMetadata, stripMetadata)
+        tone = try value(.tone, tone)
+        layers = try value(.layers, layers)
+        guides = try value(.guides, guides)
+        raw = try c.decodeIfPresent(RAWSettings.self, forKey: .raw)
+        hdr = try value(.hdr, hdr)
+        perspective = try c.decodeIfPresent(Quad.self, forKey: .perspective)
     }
 }
 
@@ -146,4 +198,46 @@ nonisolated struct FilterSpec: Codable, Equatable, Sendable {
     var name: String
     var numbers: [String: Double] = [:]
     var vectors: [String: [Double]] = [:]
+}
+
+/// A ruler guide at `position` source pixels from the top (horizontal) or left (vertical).
+nonisolated struct Guide: Codable, Equatable, Sendable, Identifiable {
+    nonisolated enum Axis: String, Codable, Sendable, CaseIterable { case horizontal, vertical }
+    var id = UUID()
+    var axis: Axis
+    var position: Double
+}
+
+/// What to do with an HDR (gain-map or EDR) source when rendering and saving.
+nonisolated enum HDRPolicy: String, Codable, Sendable, CaseIterable {
+    /// Keep the extended range (gain map on save) when the source has it.
+    case keepIfPresent
+    /// Tone-map to SDR.
+    case toneMapToSDR
+}
+
+/// `CIRAWFilter` settings. `nil` means the camera's default; controls the file doesn't
+/// support (`is…Supported`) are ignored.
+nonisolated struct RAWSettings: Codable, Equatable, Sendable {
+    /// Pinned on first develop so an OS update never changes the rendering.
+    var decoderVersion: String?
+    /// EV, −4…4.
+    var exposure = 0.0
+    /// Kelvin and tint of the scene's neutral; `nil` = as shot.
+    var temperature: Double?
+    var tint: Double?
+    /// 0…1: the camera's tone curve ("boost").
+    var boost = 1.0
+    var shadowBoost: Double?
+    var contrast: Double?
+    var detail: Double?
+    var sharpness: Double?
+    var localToneMap: Double?
+    var luminanceNoiseReduction: Double?
+    var colorNoiseReduction: Double?
+    var moireReduction: Double?
+    /// 0…2: how much of the sensor's headroom becomes HDR.
+    var extendedDynamicRange = 0.0
+    var highlightRecovery: Bool?
+    var lensCorrection: Bool?
 }
