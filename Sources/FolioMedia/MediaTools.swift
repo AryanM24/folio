@@ -1,4 +1,5 @@
 import AVFoundation
+import FolioConvert
 public import FolioKit
 import UniformTypeIdentifiers
 
@@ -36,6 +37,9 @@ public enum MediaTools {
         }
     }
 
+    /// Goes through the conversion engine: hardware HEVC at a constant quality, with a
+    /// frame-rate cap, and the original kept when the copy wouldn't be smaller. Fixed-bitrate
+    /// export presets could make a well-compressed clip several times bigger.
     nonisolated static let compress = FolioTool(
         id: "media.compress",
         title: "Compress Video",
@@ -44,18 +48,17 @@ public enum MediaTools {
         inputTypes: [.movie],
         options: [
             .init(
-                id: "preset", label: "Size",
+                id: "quality", label: "Size",
                 choices: [
-                    (ExportFormat.hevc1080p.rawValue, "1080p HEVC (best quality per MB)"),
-                    (ExportFormat.h264_720p.rawValue, "720p H.264"),
-                    (ExportFormat.h264_480p.rawValue, "480p H.264 (smallest)"),
-                ], defaultValue: ExportFormat.hevc1080p.rawValue)
+                    (Quality.balanced.rawValue, "Smaller, same resolution"),
+                    (Quality.small.rawValue, "Smallest, up to 1080p"),
+                ], defaultValue: Quality.balanced.rawValue)
         ]
     ) { inputs, options in
-        let format = options["preset"].flatMap(ExportFormat.init(rawValue:)) ?? .hevc1080p
-        return try await each(inputs) { url in
-            try await export(url, format: format, name: url.deletingPathExtension().lastPathComponent + " compressed", ext: "mp4")
-        }
+        let quality = options["quality"].flatMap(Quality.init(rawValue:)) ?? .balanced
+        let report = await Engine.run(ConvertRequest(inputs: inputs, target: nil, quality: quality))
+        if report.summary.ok == 0, let error = report.results.compactMap(\.error).first { throw error }
+        return report.results.filter { $0.status == .ok }.compactMap { $0.output.map(URL.init(fileURLWithPath:)) }
     }
 
     nonisolated static let makeGIF = FolioTool(

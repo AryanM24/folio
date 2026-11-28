@@ -22,6 +22,9 @@ Sources/
   FolioImage/     Image editor (Core Image) and image tools
   FolioCode/      Plain text, Markdown and source code editor
   FolioMedia/     Audio and video player, trimming and export (AVFoundation)
+  FolioConvert/   The conversion engine: one converter per file family, no UI
+  FolioAgent/     The `folio` CLI, the MCP server, path policy and agent setup
+  FolioCLI/       `main.swift` for the `folio` binary (bundled as Contents/Helpers/folio)
 Tests/<Module>Tests/   Swift Testing suites, one per module
 Resources/        Info.plist (document types, Services), entitlements
 scripts/          bundle.sh, make-icon.swift, snapshot.sh, launch-time.sh
@@ -29,7 +32,7 @@ site/             Landing page deployed to Vercel
 docs/             This folder
 ```
 
-Each editor is its own module so it can be built, tested and reviewed alone. Editor modules depend only on `FolioKit`, never on each other. The `Folio` app target is the only place that knows about every editor.
+Each editor is its own module so it can be built, tested and reviewed alone. Editor modules depend only on `FolioKit`, never on each other. `FolioConvert` reuses the document, spreadsheet and Markdown codecs; `FolioAgent` and the app sit on top of everything.
 
 ## The document model
 
@@ -111,6 +114,22 @@ A `FolioTool` (FolioKit) is a one-shot operation such as combining PDFs or conve
 - Finder › Quick Actions and the Services menu. `scripts/bundle.sh` runs `Folio --services-json` and writes one `NSServices` entry per tool into the built app's Info.plist, so adding a tool to `XTools.all` is all it takes. `NSUserData` is the tool's `id`, and `AppDelegate.runTool` dispatches it.
 
 Tools never modify their inputs. They write new files next to the first input with `FolioTool.outputURL(nextTo:name:ext:)` and return the URLs. Folio then reveals them in Finder.
+
+## The conversion engine
+
+`FolioConvert` turns one file into another, for the Convert panel, the menu-bar shelf, Finder's Quick Actions, the `folio` CLI and the MCP server alike. Nothing in it touches UI, and nothing defaults to the main actor.
+
+- **Contract** (`Model.swift`, `Engine.swift`, `Format.swift`). A request names inputs, a target `Format` and a `Quality` (`lossless`, `balanced` or `small`), plus an optional size budget, maximum dimension and output folder. Every input gets a `ConvertResult` with sizes, time, a `Fidelity` label, what was dropped, a verification and a stable error code. The same structs are the CLI's `--json` and the MCP `structuredContent`.
+- **The engine owns the rules.** It routes by source family, refuses `lossless` when the pair can't be (`LOSSLESS_UNAVAILABLE`, with lossless alternatives), writes to a temporary file in the destination, moves it into a free Finder-style name (never overwriting), throws away compressed copies that aren't at least 2 % smaller, and enforces size budgets.
+- **Converters own the craft.** One `FamilyConverter` per family: `ImageConverter` (ImageIO, re-encoding straight from the source, thumbnail decoding for downscales), `PDFConverter` (Quartz filters per quality, parallel page rendering), `DocumentFamilyConverter` (the Cocoa text system and Folio's Markdown renderer), `SheetConverter` (Folio's spreadsheet codecs), `AudioConverter` (AVAudioFile) and `VideoConverter` (passthrough first, then hardware HEVC with decode-time scaling and a frame-rate cap).
+- **Verification.** Lossless results are checked after writing: decoded pixels, audio samples (or a hash of what was written, since AAC decoding isn't deterministic), compressed video samples, cell values and text.
+- **Scheduling.** A small actor limits work per resource: one job per core for CPU codecs, three for the hardware HEIC encoder, one video encode at a time, eight passthrough jobs.
+- **Main thread.** HTML import and PDF printing need the main thread, so the converter hops there. The `folio` binary keeps `RunLoop.main` running for this; `dispatchMain()` would exit the real main thread and AppKit would refuse.
+- **No network.** HTML is sanitized with an allowlist (relative, fragment and `data:` URLs only) and loaded behind a Content-Security-Policy that blocks every request.
+
+## Agents: the `folio` CLI and MCP server
+
+`FolioAgent` is shared by the `folio` binary and the app's *Settings › Agents*. One binary is both the CLI and a stdio MCP server (`folio mcp`); the JSON-RPC layer is hand-written with Foundation, so it adds no dependencies and answers `initialize` in about 12 ms. Every path goes through `PathPolicy` (resolved with `realpath`, compared by component, sensitive folders always denied). See [AGENTS.md](AGENTS.md).
 
 ## Sandboxing
 

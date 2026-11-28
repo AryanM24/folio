@@ -12,6 +12,9 @@
 4. Sign with a Developer ID and notarize, so people can open it without Gatekeeper warnings:
 
    ```sh
+   # The bundled `folio` helper is nested code: sign it first, then the app.
+   codesign --force --options runtime --timestamp \
+     --sign "Developer ID Application: <Name> (<TEAMID>)" build/Folio.app/Contents/Helpers/folio
    codesign --force --options runtime --timestamp \
      --entitlements Resources/Folio.entitlements \
      --sign "Developer ID Application: <Name> (<TEAMID>)" build/Folio.app

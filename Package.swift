@@ -78,7 +78,7 @@ let package = Package(
         editor("FolioSheets", dependencies: [.product(name: "ZIPFoundation", package: "ZIPFoundation")]),
         editor("FolioImage"),
         editor("FolioCode"),
-        editor("FolioMedia"),
+        editor("FolioMedia", dependencies: ["FolioConvert"]),
     ]
         + testTargets
 )

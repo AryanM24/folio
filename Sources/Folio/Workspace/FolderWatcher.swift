@@ -8,10 +8,25 @@ import Foundation
 final class FolderWatcher {
     private var source: (any DispatchSourceFileSystemObject)?
     private var pending: DispatchWorkItem?
+    private var cancelled = false
 
-    init?(_ url: URL, onChange: @escaping @MainActor () -> Void) {
-        let fd = open(url.path(percentEncoded: false), O_EVTONLY)
-        guard fd >= 0 else { return nil }
+    init(_ url: URL, onChange: @escaping @MainActor () -> Void) {
+        let path = url.path(percentEncoded: false)
+        // Opening ~/Documents or ~/Desktop can block until the person answers macOS's
+        // folder-access prompt, so never open on the main thread: the window must draw first.
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let fd = open(path, O_EVTONLY)
+            guard fd >= 0 else { return }
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self, !self.cancelled else { close(fd); return }
+                    self.start(fd, onChange: onChange)
+                }
+            }
+        }
+    }
+
+    private func start(_ fd: Int32, onChange: @escaping @MainActor () -> Void) {
         let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.write, .rename, .delete], queue: .main)
         source.setEventHandler { [weak self] in
             MainActor.assumeIsolated {
@@ -28,6 +43,7 @@ final class FolderWatcher {
     }
 
     func cancel() {
+        cancelled = true
         pending?.cancel()
         source?.cancel()
         source = nil
