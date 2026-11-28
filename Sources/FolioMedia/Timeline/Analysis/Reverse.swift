@@ -177,4 +177,41 @@ nonisolated enum Reverse {
             }
         }
     }
+
+    /// The combined reversed movie, if it has been made.
+    static func cachedMedia(for url: URL, maxDimension: Int = 1920, cache: AnalysisCache = .shared) -> URL? {
+        guard let key = Self.key(url, maxDimension) else { return nil }
+        return cache.existing(key, extension: "mov")
+    }
+
+    private static func key(_ url: URL, _ maxDimension: Int) -> AnalysisCache.Key? {
+        do { return try mediaKey(url, maxDimension: maxDimension) } catch { return nil }
+    }
+
+    static func mediaKey(_ url: URL, maxDimension: Int) throws -> AnalysisCache.Key {
+        try AnalysisCache.Key("reverse", media: url, parameters: [String(maxDimension)])
+    }
+
+    /// Picture and sound back to front in one movie: what the timeline builder swaps in for
+    /// a reversed clip (`RenderAnalysis.reversedMedia`). Both are passed through, not re-encoded.
+    static func media(
+        of url: URL, maxDimension: Int = 1920, cache: AnalysisCache = .shared, progress: AnalysisProgress? = nil
+    ) async throws -> URL {
+        let hasSound = try await !AVURLAsset(url: url).loadTracks(withMediaType: .audio).isEmpty
+        let share = hasSound ? 0.8 : 1
+        let picture = try await video(of: url, maxDimension: maxDimension, cache: cache) { progress?($0 * share) }
+        var sound: URL?
+        if hasSound { sound = try await audio(of: url, cache: cache) { progress?(0.8 + $0 * 0.2) } }
+        return try await cache.file(try mediaKey(url, maxDimension: maxDimension), extension: "mov") { output in
+            // A self-contained movie with the samples copied in, not re-encoded.
+            let movie = AVMutableMovie()
+            movie.defaultMediaDataStorage = AVMediaDataStorage(url: output)
+            for file in [picture] + (sound.map { [$0] } ?? []) {
+                let asset = AVURLAsset(url: file)
+                let duration = try await asset.load(.duration)
+                try movie.insertTimeRange(CMTimeRange(start: .zero, duration: duration), of: asset, at: .zero, copySampleData: true)
+            }
+            try movie.writeHeader(to: output, fileType: .mov, options: .addMovieHeaderToDestination)
+        }
+    }
 }

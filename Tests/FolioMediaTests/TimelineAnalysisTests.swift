@@ -182,9 +182,10 @@ nonisolated struct TranscriberTests {
         #expect(transcript.words.allSatisfy { $0.range.duration >= .zero })
         #expect(stages.withLock { $0.contains("transcribing") })
 
-        // Captions from real output: the first sentence stays its own cue.
+        // Captions from real output: short cues, the last ending on the full stop.
         let cues = CueSplitter.cues(for: transcript)
-        #expect(cues.first.map { CueSplitter.endsSentence($0.words.last!.text) } == true, "\(cues.map(\.text))")
+        #expect(cues.allSatisfy { $0.words.count <= 7 }, "\(cues.map(\.text))")
+        #expect(cues.last.map { CueSplitter.endsSentence($0.words.last!.text) } == true)
 
         // Second run: from the cache, same words.
         let again = try await Transcriber.transcribe(audio, source: source, locale: Locale(identifier: "en-US"), cache: cache)
@@ -439,6 +440,9 @@ nonisolated struct StabilizerTests {
         // The cached registration serves another strength without decoding.
         #expect(Stabilizer.cachedPath(for: url, strength: 0.2, cache: cache)?.offsets.count == 40)
 
+        let hook = PixelCameraPath(path: path, size: CGSize(width: width, height: height))
+        #expect(abs(hook.correction(at: path.times[11]).tx - path.offsets[11].x * Double(width)) < 1e-9)
+
         // The Core Image transform moves the frame by the offset (y up there).
         let t = path.transform(at: path.times[11], size: CGSize(width: width, height: height))
         let centre = CGPoint(x: Double(width) / 2, y: Double(height) / 2).applying(t)
@@ -479,6 +483,13 @@ nonisolated struct SegmentationTests {
         let masks = try await Segmentation.maskMovie(for: url, parameters: parameters, cache: cache)
         print("masks in \(clock.duration(to: .now))")
         #expect(Segmentation.cachedMaskMovie(for: url, parameters: parameters, cache: cache) == masks)
+
+        // The render hook reads the same movie, in order and after a jump back.
+        let movie = MaskMovie(url: masks)
+        for t in [3, 4, 1] {
+            let image = try #require(movie.mask(at: Time(value: Int64(t), timescale: 6)))
+            #expect(image.extent.size == CGSize(width: 256, height: 256))
+        }
 
         var coverages: [Double] = []
         var corners: [UInt8] = []
@@ -566,6 +577,11 @@ nonisolated struct ReverseTests {
         #expect(abs(try await Fixtures.meanLuma(reversed, at: .zero) - sourceLast) < 3)
         #expect(abs(try await Fixtures.meanLuma(reversed, at: duration - frame) - sourceFirst) < 3)
         #expect(Reverse.cachedVideo(for: url, cache: cache) == reversed)
+
+        let media = try await Reverse.media(of: url, cache: cache)
+        #expect(Reverse.cachedMedia(for: url, cache: cache) == media)
+        #expect(try await AVURLAsset(url: media).loadTracks(withMediaType: .video).count == 1)
+        #expect(abs(try await Fixtures.meanLuma(media, at: .zero) - sourceLast) < 3)
     }
 
     @Test func reversedAudioPlaysBackwards() async throws {

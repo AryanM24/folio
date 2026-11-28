@@ -41,8 +41,9 @@ nonisolated struct StabilizationPath: Codable, Equatable, Sendable {
 nonisolated enum Stabilizer {
     /// Registration size: big enough for sub-pixel accuracy at 1080p, small enough to be quick.
     static let analysisDimension = 640
-    /// The most the picture is zoomed in to hide moved edges (20 %).
-    static let maxZoom = 1.2
+    /// The most the picture is zoomed in to hide moved edges: the 10 % the renderer's
+    /// stabilize effect zooms by (EffectGraph), so a clamped correction never shows an edge.
+    static let maxZoom = 1.1
 
     struct Motion: Codable, Equatable, Sendable {
         var times: [Time]

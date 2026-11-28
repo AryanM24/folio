@@ -96,7 +96,7 @@ nonisolated struct AnalysisCache: Sendable {
     private func temporaryURL(beside destination: URL) throws -> URL {
         let folder = destination.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        return folder.appending(path: ".\(UUID().uuidString)-\(destination.lastPathComponent)")
+        return folder.appending(path: "partial-\(UUID().uuidString)-\(destination.lastPathComponent)")
     }
 
     private func moveIntoPlace(_ temp: URL, _ destination: URL) throws {
