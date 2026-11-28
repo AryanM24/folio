@@ -10,9 +10,13 @@ import UniformTypeIdentifiers
 /// an honest picture of the saved file.
 ///
 /// Order matters and mirrors how photographers think:
-/// cut-out → auto-enhance → adjustments → filter → geometry (flip, turn, straighten,
-/// crop) → vignette (framed on the final crop) → resize → markup (drawn on top, not
-/// tinted by filters).
+/// RAW develop → cut-out → auto-enhance → adjustments → tone → filter → layer stack
+/// (source pixels) → geometry (flip, turn, straighten, crop) → vignette (framed on the
+/// final crop) → resize → markup (drawn on top, not tinted by filters) → flatten.
+///
+/// ``composite(_:recipe:assets:scale:cropped:final:flattenFor:)`` builds the Core Image
+/// graph; ``rasterize(_:extent:format:colorSpace:)`` turns it into pixels. The canvas
+/// and HDR saves can use the graph directly.
 nonisolated enum RenderPipeline {
     /// One context for the whole app. Core Image contexts are thread-safe and expensive
     /// to create (they own Metal queues and caches), so they must be reused.
@@ -33,16 +37,38 @@ nonisolated enum RenderPipeline {
     static func render(
         _ source: SourceImage,
         recipe: EditRecipe,
+        assets: any AssetStore = InMemoryAssetStore(),
         scale: Double = 1,
         cropped: Bool = true,
         final: Bool = false,
         flattenFor type: UTType? = nil
     ) throws -> CGImage {
+        let graph = try composite(
+            source, recipe: recipe, assets: assets, scale: scale, cropped: cropped, final: final, flattenFor: type)
+        let format: CIFormat = source.bitsPerComponent > 8 && final ? .RGBA16 : .RGBA8
+        return try rasterize(graph.image, extent: graph.extent, format: format, colorSpace: source.colorSpace)
+    }
+
+    /// The Core Image graph for `recipe` applied to `source` (parameters as in
+    /// ``render(_:recipe:assets:scale:cropped:final:flattenFor:)``), and the pixel-aligned
+    /// rectangle to rasterize. Nothing is rendered yet.
+    static func composite(
+        _ source: SourceImage,
+        recipe: EditRecipe,
+        assets: any AssetStore = InMemoryAssetStore(),
+        scale: Double = 1,
+        cropped: Bool = true,
+        final: Bool = false,
+        flattenFor type: UTType? = nil
+    ) throws -> (image: CIImage, extent: CGRect) {
         let geometry = ImageGeometry(sourceSize: source.pixelSize, recipe: recipe)
         let scale = min(1, max(0.001, scale))
-        let input = try input(for: source, scale: scale)
+        let input = try input(for: source, raw: geometry.recipe.raw, scale: scale)
         let mask = recipe.removeBackground ? try source.subjectMask() : nil
-        var image = filtered(input, recipe: geometry.recipe, scale: scale, mask: mask)
+        var image = filtered(input, recipe: geometry.recipe, assets: assets, scale: scale, mask: mask)
+        if !geometry.recipe.layers.isEmpty {
+            image = LayerCompositor.composite(base: image, layers: geometry.recipe.layers, assets: assets, scale: scale)
+        }
         image = transformed(image, geometry: geometry, scale: scale, cropped: cropped)
 
         var size = (cropped ? geometry.croppedSize : geometry.canvasSize)
@@ -69,8 +95,12 @@ nonisolated enum RenderPipeline {
         if let type, !ImageCodec.supportsAlpha(type) {
             image = image.composited(over: CIImage(color: .white).cropped(to: extent))
         }
-        let format: CIFormat = source.bitsPerComponent > 8 && final ? .RGBA16 : .RGBA8
-        guard let cg = context.createCGImage(image, from: extent, format: format, colorSpace: source.colorSpace) else {
+        return (image, extent)
+    }
+
+    /// Render `extent` of `image` to a bitmap.
+    static func rasterize(_ image: CIImage, extent: CGRect, format: CIFormat, colorSpace: CGColorSpace) throws -> CGImage {
+        guard let cg = context.createCGImage(image, from: extent, format: format, colorSpace: colorSpace) else {
             throw RenderError()
         }
         return cg
@@ -80,8 +110,10 @@ nonisolated enum RenderPipeline {
         var errorDescription: String? { "Folio couldn't render this image. It may be too large for this Mac's graphics memory." }
     }
 
-    /// The oriented original at `scale`, from the proxy when it is big enough.
-    static func input(for source: SourceImage, scale: Double) throws -> CIImage {
+    /// The oriented original at `scale`, from the proxy when it is big enough, or the
+    /// RAW development when `raw` is set and the source supports it.
+    static func input(for source: SourceImage, raw: RAWSettings? = nil, scale: Double) throws -> CIImage {
+        if let raw, let developed = try source.developed(raw, scale: scale) { return developed }
         let useProxy = scale <= source.proxyScale + 0.0001
         let base = useProxy ? source.proxyImage : try source.fullImage()
         // Map the base's own pixel grid to exactly `pixelSize * scale`.
@@ -93,12 +125,15 @@ nonisolated enum RenderPipeline {
 
     // MARK: Stages
 
-    /// Cut-out, auto-enhance, adjustments and filter: everything that changes color.
-    static func filtered(_ input: CIImage, recipe: EditRecipe, scale: Double, mask: CIImage?) -> CIImage {
+    /// Cut-out, auto-enhance, adjustments, tone and filter: everything that changes color.
+    static func filtered(
+        _ input: CIImage, recipe: EditRecipe, assets: any AssetStore = InMemoryAssetStore(), scale: Double, mask: CIImage?
+    ) -> CIImage {
         var image = input
         if recipe.removeBackground, let mask { image = BackgroundRemoval.apply(mask: mask, to: image) }
         if let auto = recipe.autoEnhance { image = apply(auto, to: image) }
         image = adjusted(image, recipe.adjustments, scale: scale)
+        if !recipe.tone.isIdentity { image = ToneRenderer.apply(recipe.tone, to: image, assets: assets) }
         if let preset = recipe.filter { image = apply(preset, strength: recipe.filterStrength, to: image) }
         return image
     }

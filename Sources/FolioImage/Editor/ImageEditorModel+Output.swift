@@ -28,11 +28,12 @@ extension ImageEditorModel {
     func export(_ format: ExportFormat, quality: Double) {
         let source = self.source
         let recipe = document.recipe
+        let assets = document.assets
         let type = format.type
         Task {
             await Exporter.save(suggestedName: baseName, type: type) {
                 try await Task.detached(priority: .userInitiated) {
-                    try ImageSaver.data(for: source, recipe: recipe, as: type, quality: format.isLossy ? quality : nil)
+                    try ImageSaver.data(for: source, recipe: recipe, assets: assets, as: type, quality: format.isLossy ? quality : nil)
                 }.value
             }
         }
@@ -42,10 +43,11 @@ extension ImageEditorModel {
     func copyImage() {
         let source = self.source
         let recipe = document.recipe
+        let assets = document.assets
         runBusy("Copying…") {
             do {
                 let png = try await Task.detached(priority: .userInitiated) {
-                    try ImageSaver.data(for: source, recipe: recipe, as: .png)
+                    try ImageSaver.data(for: source, recipe: recipe, assets: assets, as: .png)
                 }.value
                 let board = NSPasteboard.general
                 board.clearContents()
@@ -62,12 +64,13 @@ extension ImageEditorModel {
     func share(from view: NSView) {
         let source = self.source
         let recipe = document.recipe
+        let assets = document.assets
         let type = ImageCodec.canWrite(source.type) ? source.type : .png
         let name = baseName
         runBusy("Preparing…") {
             do {
                 let url = try await Task.detached(priority: .userInitiated) { () throws -> URL in
-                    let data = try ImageSaver.data(for: source, recipe: recipe, as: type)
+                    let data = try ImageSaver.data(for: source, recipe: recipe, assets: assets, as: type)
                     let folder = URL.temporaryDirectory.appending(path: "Folio Share \(UUID().uuidString)", directoryHint: .isDirectory)
                     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
                     let url = folder.appending(path: "\(name).\(type.preferredFilenameExtension ?? "png")")
