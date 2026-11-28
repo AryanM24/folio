@@ -8,6 +8,9 @@ import Synchronization
 /// for the compiled kernel. Every function needs `[[stitchable]]` and the source needs
 /// `#include <CoreImage/CoreImage.h>` (no `extern "C"`). A source compiles once (about
 /// 0.3 s on an M4), then comes from the cache; warm it up off the main thread.
+///
+/// Keep one kernel per source string. With several kernels compiled from one source,
+/// parallel renders were seen returning another kernel's output (WP3's tone kernels).
 nonisolated enum Kernels {
     private static let cache = Mutex<[String: [CIKernel]]>([:])
 
