@@ -1,3 +1,4 @@
+import FolioConvert
 import FolioKit
 import SwiftUI
 
@@ -227,10 +228,48 @@ struct CommandPalette: View {
                 openSettings()
             },
         ]
+        out += convertEntries
         out += ToolCatalog.all.map { tool in
             Entry(id: "tool:" + tool.id, title: tool.title, subtitle: tool.subtitle, symbol: tool.symbol, section: "Tools") {
                 ToolRunner.shared.start(tool)
             }
+        }
+        return out
+    }
+}
+
+extension CommandPalette {
+    /// Convert the selection (or files you pick), the clipboard, and the shelf's way back.
+    fileprivate var convertEntries: [Entry] {
+        let files = model.selectedItems.filter { !$0.isFolder }.map(\.url)
+        var out: [Entry] = []
+        if !files.isEmpty {
+            out.append(
+                Entry(
+                    id: "convert:selection", title: "Convert selection to…",
+                    subtitle: files.count == 1 ? files[0].lastPathComponent : "\(files.count) files", symbol: "arrow.triangle.2.circlepath",
+                    section: "Actions", shortcut: "⇧⌘C"
+                ) { ConvertFlow.present(files) })
+        }
+        out += [Format.pdf, .png, .mp4].map { format in
+            Entry(
+                id: "convert:\(format.rawValue)", title: "Convert to \(format.chipLabel)…",
+                subtitle: files.isEmpty ? "Choose files" : "Selection", symbol: "arrow.triangle.2.circlepath", section: "Convert"
+            ) { ConvertFlow.present(files, preferring: format) }
+        }
+        let destination = model.displayName(ConvertFlow.clipboardDestination)
+        out += [Format.png, .jpeg, .heic].map { format in
+            Entry(
+                id: "clipboard:\(format.rawValue)", title: "Convert clipboard image to \(format.chipLabel)",
+                subtitle: "Saves to \(destination)", symbol: "doc.on.clipboard", section: "Convert"
+            ) { ConvertFlow.convertClipboard(to: format) }
+        }
+        if !ShelfController.isEnabled {
+            out.append(
+                Entry(
+                    id: "shelf:show", title: "Show Drop Shelf in menu bar", subtitle: "Drop files on the menu bar to convert",
+                    symbol: "menubar.arrow.up.rectangle", section: "Convert"
+                ) { ShelfController.isEnabled = true })
         }
         return out
     }

@@ -20,7 +20,7 @@ enum ToolCatalog {
     /// Each tool becomes a Finder Quick Action / Services item titled
     /// "<Tool title> with Folio" that sends the selected files to `AppDelegate.runTool`.
     static func servicesJSON() -> String {
-        let entries: [[String: Any]] = all.map { tool in
+        let tools: [[String: Any]] = all.map { tool in
             [
                 "NSMenuItem": ["default": "\(tool.title) with Folio"],
                 "NSMessage": "runTool",
@@ -30,6 +30,17 @@ enum ToolCatalog {
                 "NSRequiredContext": [String: String](),
             ]
         }
+        // Convert and Compress take every type Folio reads and go through the engine, not a tool.
+        let convert: [[String: Any]] = [("Convert with Folio…", "convertFiles"), ("Compress with Folio", "compressFiles")].map {
+            [
+                "NSMenuItem": ["default": $0.0],
+                "NSMessage": $0.1,
+                "NSPortName": "Folio",
+                "NSSendFileTypes": ConvertFlow.readableTypes.map(\.identifier),
+                "NSRequiredContext": [String: String](),
+            ]
+        }
+        let entries = convert + tools
         let data = (try? JSONSerialization.data(withJSONObject: entries, options: [.prettyPrinted, .sortedKeys])) ?? Data("[]".utf8)
         return String(decoding: data, as: UTF8.self)
     }

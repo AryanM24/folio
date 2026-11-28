@@ -32,6 +32,9 @@ struct WorkspaceCommands: Commands {
                     .keyboardShortcut("r")
                 Button("Copy Path") { model.copyPath() }
                     .keyboardShortcut("c", modifiers: [.command, .option, .shift])
+                Button("Convert…") { ConvertFlow.present(model.selectedItems.filter { !$0.isFolder }.map(\.url)) }
+                    .keyboardShortcut("c", modifiers: [.command, .shift])
+                    .disabled(model.selectedItems.allSatisfy(\.isFolder))
             }
             .disabled(fileActionsDisabled)
             Section {
